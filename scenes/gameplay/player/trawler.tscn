@@ -1,0 +1,39 @@
+[gd_scene load_steps=7 format=3 uid="uid://dwjxh6hrypua3"]
+
+[ext_resource type="Script" uid="uid://b31epxhbt6duc" path="res://scripts/gameplay/player/trawler.gd" id="1_byw1e"]
+[ext_resource type="Texture2D" uid="uid://d1x04najel8kl" path="res://assets/art/player/trawler.png" id="1_j78xi"]
+[ext_resource type="Script" uid="uid://vggycwaceigl" path="res://scripts/gameplay/player/laser.gd" id="2_patn0"]
+[ext_resource type="Script" uid="uid://cv2f2q1r0sxdk" path="res://scenes/gameplay/camera_2d.gd" id="2_sriag"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_patn0"]
+size = Vector2(319, 416)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_byw1e"]
+size = Vector2(258, 16)
+
+[node name="Trawler" type="CharacterBody2D"]
+visible = false
+script = ExtResource("1_byw1e")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+script = ExtResource("2_sriag")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_j78xi")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(-0.5, 0)
+shape = SubResource("RectangleShape2D_patn0")
+
+[node name="FrontBumper" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="FrontBumper"]
+position = Vector2(0, -216)
+shape = SubResource("RectangleShape2D_byw1e")
+
+[node name="Laser" type="Node2D" parent="."]
+script = ExtResource("2_patn0")
+
+[node name="Beam" type="Line2D" parent="Laser"]
+
+[node name="Particles" type="CPUParticles2D" parent="Laser"]

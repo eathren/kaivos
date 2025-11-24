@@ -31,6 +31,18 @@ window/stretch/mode="viewport"
 version_control/plugin_name="Version control"
 version_control/autoload_on_startup=true
 
+[layer_names]
+
+2d_physics/layer_1="Enemy"
+2d_physics/layer_2="Trawler"
+2d_physics/layer_3="Player"
+2d_physics/layer_4="Wall"
+2d_physics/layer_5="Bullet"
+2d_physics/layer_6="EnemyHitbox"
+2d_physics/layer_7="PlayerHitbox"
+2d_physics/layer_8="Turret"
+2d_physics/layer_9="Pickup"
+
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0
