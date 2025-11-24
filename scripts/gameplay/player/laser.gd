@@ -1,49 +1,120 @@
-extends Node2D
+@tool
+extends RayCast2D
 
-@export var laser_damage_per_second: float = 10.0
-@export var max_distance: float = 2000.0
-@export var tile_step: float = 16.0   # match  tile size
+@export var cast_speed: float = 7000.0
+@export var max_length: float = 1400.0
+@export var growth_time: float = 0.1
 
-var is_active: bool = true
+
+@export var color := Color.WHITE: set = set_color
+
+@onready var line_2d: Line2D = $Line2D
+
+@export var laser_damage_per_second: float = GameState.get_laser_dps()
+
+@onready var casting_particles: GPUParticles2D = $CastingParticles2D
+@onready var collision_particles: GPUParticles2D = $CollisionParticles2D
+@onready var beam_particles: GPUParticles2D = $BeamParticles2D
+@onready var fill: Line2D = $Line2D
 
 @onready var wall: TileMapLayer = get_tree().get_first_node_in_group("wall")
-@onready var beam: Line2D = $Beam   # or whatever your visual node is
 
-func _process(delta: float) -> void:
-	# Hold left mouse to turn the laser off
-	var mouse_down := Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
-	is_active = not mouse_down
+func set_color(new_color: Color) -> void:
+	color = new_color
+	if line_2d == null:
+		return
+	line_2d.modulate = new_color
 
-	beam.visible = is_active
+var tween: Tween
+var line_width: float
 
-	if is_active:
-		_fire_laser(delta)
+var is_casting := false: set = set_is_casting
 
-func _fire_laser(delta: float) -> void:
+
+func _ready() -> void:
+	enabled = true
+	set_color(color)
+	set_physics_process(false)
+
+	if fill.points.size() < 2:
+		fill.points = PackedVector2Array([Vector2.ZERO, Vector2.ZERO])
+
+	fill.points[1] = Vector2.ZERO
+	line_width = fill.width
+
+	# debug: fire immediately so you can see it works
+	set_is_casting(true)
+
+
+func _physics_process(delta: float) -> void:
+	# grow the ray outward in its local direction (here: UP)
+	target_position = (target_position + Vector2.UP * cast_speed * delta).limit_length(max_length)
+	cast_beam(delta)
+
+func set_is_casting(cast: bool) -> void:
+	is_casting = cast
+
+	if is_casting:
+		target_position = Vector2.ZERO
+		fill.points[1] = target_position
+		appear()
+	else:
+		collision_particles.emitting = false
+		disappear()
+
+	set_physics_process(is_casting)
+	beam_particles.emitting = is_casting
+	casting_particles.emitting = is_casting
+
+
+func cast_beam(delta: float) -> void:
+	var cast_point := target_position
+
+	# force raycast collision update before reading its result
+	force_raycast_update()
+
+	if is_colliding():
+		var hit_world := get_collision_point()
+		cast_point = to_local(hit_world)
+
+		# orient collision particles
+		var n := get_collision_normal()
+		collision_particles.process_material.direction = Vector3(n.x, n.y, 0)
+
+		# apply damage to wall tile at hit point
+		_apply_damage_to_wall(hit_world, delta)
+
+	collision_particles.emitting = is_colliding()
+
+	# update visuals
+	fill.points[1] = cast_point
+	collision_particles.position = cast_point
+	beam_particles.position = cast_point * 0.5
+	beam_particles.process_material.emission_box_extents.x = cast_point.length() * 0.5
+
+
+func appear() -> void:
+	if tween and tween.is_running():
+		tween.kill()
+	tween = create_tween()
+	tween.tween_property(fill, "width", line_width, growth_time * 2.0).from(0.0)
+	tween.play()
+
+
+func disappear() -> void:
+	if tween and tween.is_running():
+		tween.kill()
+	tween = create_tween()
+	tween.tween_property(fill, "width", 0.0, growth_time).from(fill.width)
+	tween.play()
+
+
+func _apply_damage_to_wall(hit_world: Vector2, delta: float) -> void:
 	if wall == null:
 		return
 
-	var origin: Vector2 = global_position
-	var dir: Vector2 = Vector2.UP   # adjust if your trawler faces a different way
+	var local_in_wall := wall.to_local(hit_world)
+	var cell := wall.local_to_map(local_in_wall)
 
-	var travelled := 0.0
-	var hit_pos := origin + dir * max_distance
-
-	while travelled < max_distance:
-		var pos := origin + dir * travelled
-		var local := wall.to_local(pos)
-		var cell := wall.local_to_map(local)
-
-		if wall.get_cell_source_id(cell) != -1:
-			# Damage this cell
-			if "damage_cell" in wall:
-				wall.damage_cell(cell, laser_damage_per_second * delta)
-			hit_pos = pos
-			break
-
-		travelled += tile_step
-
-	# Update beam visual from origin to hit_pos
-	beam.clear_points()
-	beam.add_point(to_local(origin))
-	beam.add_point(to_local(hit_pos))
+	if wall.get_cell_source_id(cell) != -1 and "damage_cell" in wall:
+		wall.damage_cell(cell, laser_damage_per_second * delta)

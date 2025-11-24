@@ -27,8 +27,6 @@ func set_spawn_profile(profile: Dictionary) -> void:
 		max_alive_from_this = profile["max_alive"]
 
 func _on_spawn_timeout() -> void:
-	if not GameState.is_night:
-		return
 	if alive_from_this >= max_alive_from_this:
 		return
 	if imp_scene == null:
