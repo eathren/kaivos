@@ -1,64 +1,51 @@
 extends Camera2D
 
-@export var move_speed: float = 600.0
-@export var max_pan_distance: float = 300.0   # how far you can drift from the trawler
-@export var trawler_path: NodePath
+@export var target: Node2D
+@export var follow_lerp_speed: float = 8.0
+@export var enable_smoothing: bool = false
+@export var snap_to_pixels: bool = true
 
-const ZOOM_STEP := 0.1
-const MIN_ZOOM := 0.3
-const MAX_ZOOM := 5.0
-
-var trawler: Node2D
-var pan_offset: Vector2 = Vector2.ZERO
+# Optional zoom controls. Change or remove if you already have your own.
+@export var enable_zoom_input: bool = true
+@export var min_zoom: float = 0.5
+@export var max_zoom: float = 4.0
+@export var zoom_step: float = 0.1
 
 func _ready() -> void:
-	make_current()
-	zoom = Vector2(0.5, 0.5)
 
-	if trawler_path != NodePath():
-		trawler = get_node(trawler_path)
+	if target == null:
+		var t := get_tree().get_first_node_in_group("trawler")
+		if t is Node2D:
+			target = t
 
 func _process(delta: float) -> void:
-	if trawler == null:
-		return
+	var new_pos: Vector2 = global_position
 
-	_update_pan(delta)
-	global_position = trawler.global_position + pan_offset
+	if target != null:
+		if enable_smoothing:
+			new_pos = global_position.lerp(target.global_position, follow_lerp_speed * delta)
+		else:
+			new_pos = target.global_position
 
-func _update_pan(delta: float) -> void:
-	var dir := Vector2.ZERO
+	if snap_to_pixels:
+		new_pos = new_pos.round()
 
-	if Input.is_action_pressed("ui_left"):
-		dir.x -= 1.0
-	if Input.is_action_pressed("ui_right"):
-		dir.x += 1.0
-	if Input.is_action_pressed("ui_up"):
-		dir.y -= 1.0
-	if Input.is_action_pressed("ui_down"):
-		dir.y += 1.0
-
-	if dir != Vector2.ZERO:
-		dir = dir.normalized()
-		pan_offset += dir * move_speed * delta
-		if pan_offset.length() > max_pan_distance:
-			pan_offset = pan_offset.normalized() * max_pan_distance
-	else:
-		# ease back toward the trawler when no input
-		pan_offset = pan_offset.lerp(Vector2.ZERO, 5.0 * delta)
+	global_position = new_pos
 
 func _unhandled_input(event: InputEvent) -> void:
+	if not enable_zoom_input:
+		return
+
+	# Replace this whole block with your own zoom logic if you already had one.
 	if event is InputEventMouseButton and event.pressed:
-		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			_zoom_in()
-		elif event.button_index == MOUSE_BUTTON_WHEEL_UP:
-			_zoom_out()
+		var factor: float = 1.0
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			factor = 1.0 - zoom_step
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			factor = 1.0 + zoom_step
+		else:
+			return
 
-func _zoom_in() -> void:
-	var new_zoom := zoom.x - ZOOM_STEP
-	new_zoom = clamp(new_zoom, MIN_ZOOM, MAX_ZOOM)
-	zoom = Vector2(new_zoom, new_zoom)
-
-func _zoom_out() -> void:
-	var new_zoom := zoom.x + ZOOM_STEP
-	new_zoom = clamp(new_zoom, MIN_ZOOM, MAX_ZOOM)
-	zoom = Vector2(new_zoom, new_zoom)
+		var new_zoom: Vector2 = zoom * factor
+		var z: float = clamp(new_zoom.x, min_zoom, max_zoom)
+		zoom = Vector2(z, z)
