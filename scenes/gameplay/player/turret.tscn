@@ -13,7 +13,6 @@ script = ExtResource("1_3pd2n")
 bullet_scene = ExtResource("2_4kx2t")
 
 [node name="DetectionShape" type="CollisionShape2D" parent="."]
-visible = false
 shape = SubResource("CircleShape2D_4kx2t")
 
 [node name="BaseSprite" type="Sprite2D" parent="."]
