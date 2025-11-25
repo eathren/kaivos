@@ -1,8 +1,8 @@
 extends Node2D
 
-@export var range: float = 400.0
+@export var range: float = 200.0
 @export var turn_speed_deg: float = 360.0
-@export var fire_interval: float = 0.3
+@export var fire_interval: float = 1
 @export var bullet_scene: PackedScene
 @export var bullet_faction: FactionComponent.Faction = FactionComponent.Faction.PLAYER
 

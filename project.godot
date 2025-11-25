@@ -19,6 +19,7 @@ config/icon="res://icon.svg"
 
 GameState="*res://autoload/game_state.gd"
 TechManager="*res://autoload/tech_manager.gd"
+SpawnManager="*res://autoload/spawn_manager.gd"
 
 [display]
 

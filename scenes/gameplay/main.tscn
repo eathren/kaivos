@@ -12,13 +12,53 @@
 position = Vector2(74, -44)
 
 [node name="Imp" parent="." instance=ExtResource("3_kdkr1")]
+visible = true
 position = Vector2(-28, 79)
 
 [node name="Imp2" parent="." instance=ExtResource("3_kdkr1")]
+visible = true
 position = Vector2(31, 87)
 
 [node name="Imp3" parent="." instance=ExtResource("3_kdkr1")]
+visible = true
 position = Vector2(103, 94)
 
 [node name="Imp4" parent="." instance=ExtResource("3_kdkr1")]
+visible = true
 position = Vector2(157, 89)
+
+[node name="Imp5" parent="." instance=ExtResource("3_kdkr1")]
+visible = true
+position = Vector2(-287, 71)
+
+[node name="Imp6" parent="." instance=ExtResource("3_kdkr1")]
+visible = true
+position = Vector2(-130, 160)
+
+[node name="Imp7" parent="." instance=ExtResource("3_kdkr1")]
+visible = true
+position = Vector2(27, 249)
+
+[node name="Imp8" parent="." instance=ExtResource("3_kdkr1")]
+visible = true
+position = Vector2(31, 87)
+
+[node name="Imp9" parent="." instance=ExtResource("3_kdkr1")]
+visible = true
+position = Vector2(103, 94)
+
+[node name="Imp10" parent="." instance=ExtResource("3_kdkr1")]
+visible = true
+position = Vector2(157, 89)
+
+[node name="Imp11" parent="." instance=ExtResource("3_kdkr1")]
+visible = true
+position = Vector2(-287, 71)
+
+[node name="Imp12" parent="." instance=ExtResource("3_kdkr1")]
+visible = true
+position = Vector2(-130, 160)
+
+[node name="Imp13" parent="." instance=ExtResource("3_kdkr1")]
+visible = true
+position = Vector2(27, 249)

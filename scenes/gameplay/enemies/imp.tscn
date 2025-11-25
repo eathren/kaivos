@@ -9,6 +9,7 @@
 radius = 5.0
 
 [node name="Imp" type="CharacterBody2D"]
+visible = false
 collision_mask = 158
 script = ExtResource("1_45r1c")
 
@@ -20,6 +21,7 @@ texture_filter = 1
 texture = ExtResource("1_6nf23")
 
 [node name="HealthComponent" parent="." instance=ExtResource("3_pfgnl")]
+max_health = 20
 
 [node name="FactionComponent" parent="." instance=ExtResource("4_ax5sk")]
 faction = 1
