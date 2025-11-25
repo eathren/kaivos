@@ -5,15 +5,5 @@ extends Node2D
 var depth: float = 0.0
 var dig_multiplier: float = 1.0
 
-@onready var wall: TileMapLayer = $Wall
-
-func _ready() -> void:
-	# Wait for wall to be initialized
-	await get_tree().process_frame
-	
-	# Setup SpawnManager with wall tilemap
-	# Anywhere there isn't a wall is valid for spawning
-	if wall != null:
-		SpawnManager.setup(wall)
-	else:
-		push_error("WorldRoot: Wall TileMapLayer not found")
+# WorldRoot is now just a container for the Wall TileMapLayer
+# Level generation is handled by Level_Mine.gd using MineGenerator

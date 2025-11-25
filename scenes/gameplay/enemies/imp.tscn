@@ -9,7 +9,6 @@
 radius = 5.0
 
 [node name="Imp" type="CharacterBody2D"]
-visible = false
 collision_mask = 158
 script = ExtResource("1_45r1c")
 

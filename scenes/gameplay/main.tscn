@@ -1,64 +1,16 @@
-[gd_scene load_steps=4 format=3 uid="uid://cfal0l6yetd7l"]
+[gd_scene load_steps=2 format=3 uid="uid://c1fqem14ng62h"]
 
-[ext_resource type="PackedScene" uid="uid://bmqm3l87s438b" path="res://scenes/core/world_root.tscn" id="1_xe7y4"]
-[ext_resource type="PackedScene" uid="uid://dfsbjqd8ea5ga" path="res://scenes/gameplay/enemies/imp.tscn" id="3_kdkr1"]
-[ext_resource type="PackedScene" uid="uid://dwjxh6hrypua3" path="res://scenes/gameplay/player/trawler.tscn" id="3_miinw"]
+[ext_resource type="Script" uid="uid://7jwugi1ypiul" path="res://scripts/gameplay/main.gd" id="1_script"]
 
-[node name="Main" type="Node2D"]
+[node name="Main" type="Node"]
+script = ExtResource("1_script")
 
-[node name="WorldRoot" parent="." instance=ExtResource("1_xe7y4")]
+[node name="UI" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="Trawler" parent="." instance=ExtResource("3_miinw")]
-position = Vector2(74, -44)
-
-[node name="Imp" parent="." instance=ExtResource("3_kdkr1")]
-visible = true
-position = Vector2(-28, 79)
-
-[node name="Imp2" parent="." instance=ExtResource("3_kdkr1")]
-visible = true
-position = Vector2(31, 87)
-
-[node name="Imp3" parent="." instance=ExtResource("3_kdkr1")]
-visible = true
-position = Vector2(103, 94)
-
-[node name="Imp4" parent="." instance=ExtResource("3_kdkr1")]
-visible = true
-position = Vector2(157, 89)
-
-[node name="Imp5" parent="." instance=ExtResource("3_kdkr1")]
-visible = true
-position = Vector2(-287, 71)
-
-[node name="Imp6" parent="." instance=ExtResource("3_kdkr1")]
-visible = true
-position = Vector2(-130, 160)
-
-[node name="Imp7" parent="." instance=ExtResource("3_kdkr1")]
-visible = true
-position = Vector2(27, 249)
-
-[node name="Imp8" parent="." instance=ExtResource("3_kdkr1")]
-visible = true
-position = Vector2(31, 87)
-
-[node name="Imp9" parent="." instance=ExtResource("3_kdkr1")]
-visible = true
-position = Vector2(103, 94)
-
-[node name="Imp10" parent="." instance=ExtResource("3_kdkr1")]
-visible = true
-position = Vector2(157, 89)
-
-[node name="Imp11" parent="." instance=ExtResource("3_kdkr1")]
-visible = true
-position = Vector2(-287, 71)
-
-[node name="Imp12" parent="." instance=ExtResource("3_kdkr1")]
-visible = true
-position = Vector2(-130, 160)
-
-[node name="Imp13" parent="." instance=ExtResource("3_kdkr1")]
-visible = true
-position = Vector2(27, 249)
+[node name="CurrentLevel" type="Node" parent="."]

@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Kasvu"
-run/main_scene="uid://cfal0l6yetd7l"
+run/main_scene="uid://c1fqem14ng62h"
 config/features=PackedStringArray("4.5", "Forward Plus")
 config/icon="res://icon.svg"
 
@@ -20,12 +20,12 @@ config/icon="res://icon.svg"
 GameState="*res://autoload/game_state.gd"
 TechManager="*res://autoload/tech_manager.gd"
 SpawnManager="*res://autoload/spawn_manager.gd"
+RunManager="*res://autoload/run_manager.gd"
 
 [display]
 
 window/size/viewport_width=640
 window/size/viewport_height=360
-window/size/mode=2
 window/stretch/mode="viewport"
 
 [editor]
