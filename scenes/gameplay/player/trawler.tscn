@@ -1,32 +1,19 @@
-[gd_scene load_steps=7 format=3 uid="uid://dwjxh6hrypua3"]
+[gd_scene load_steps=8 format=3 uid="uid://dwjxh6hrypua3"]
 
 [ext_resource type="Script" uid="uid://b31epxhbt6duc" path="res://scripts/gameplay/player/trawler.gd" id="1_byw1e"]
 [ext_resource type="Texture2D" uid="uid://rrgcgctl27vc" path="res://assets/art/player/trawler_round.png" id="3_sriag"]
 [ext_resource type="Script" uid="uid://cv2f2q1r0sxdk" path="res://scripts/gameplay/player/camera_2d.gd" id="4_sriag"]
 [ext_resource type="Script" uid="uid://bo3r6mk8egqyx" path="res://scripts/gameplay/player/wall_collider.gd" id="5_lvan5"]
-
-[sub_resource type="CircleShape2D" id="CircleShape2D_lvan5"]
-radius = 56.008926
+[ext_resource type="PackedScene" uid="uid://ccioahkom5fb3" path="res://scenes/gameplay/player/turret.tscn" id="5_t1h18"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_t1h18"]
 radius = 78.05767
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_lvan5"]
+radius = 56.008926
+
 [node name="Trawler" type="CharacterBody2D"]
 script = ExtResource("1_byw1e")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-visible = false
-shape = SubResource("CircleShape2D_lvan5")
-
-[node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("3_sriag")
-
-[node name="Camera2D" type="Camera2D" parent="." node_paths=PackedStringArray("target")]
-position = Vector2(0, -1)
-position_smoothing_enabled = true
-rotation_smoothing_enabled = true
-script = ExtResource("4_sriag")
-target = NodePath("..")
 
 [node name="WallCollider" type="Area2D" parent="."]
 collision_mask = 8
@@ -35,5 +22,33 @@ script = ExtResource("5_lvan5")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="WallCollider"]
 shape = SubResource("CircleShape2D_t1h18")
 
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("3_sriag")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+visible = false
+shape = SubResource("CircleShape2D_lvan5")
+
+[node name="Camera2D" type="Camera2D" parent="." node_paths=PackedStringArray("target")]
+position = Vector2(0, -1)
+position_smoothing_enabled = true
+rotation_smoothing_enabled = true
+script = ExtResource("4_sriag")
+target = NodePath("..")
+
 [node name="DirectionLine" type="Line2D" parent="."]
 width = 6.0
+
+[node name="TurretsRoot" type="Node2D" parent="."]
+
+[node name="Marker2D" type="Marker2D" parent="TurretsRoot"]
+position = Vector2(-39, 33)
+
+[node name="Marker2D2" type="Marker2D" parent="TurretsRoot"]
+position = Vector2(39, 33)
+
+[node name="Turret" parent="TurretsRoot" instance=ExtResource("5_t1h18")]
+position = Vector2(-39, 33)
+
+[node name="Turret2" parent="TurretsRoot" instance=ExtResource("5_t1h18")]
+position = Vector2(39, 33)

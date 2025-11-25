@@ -1,13 +1,16 @@
-[gd_scene load_steps=3 format=3 uid="uid://dfsbjqd8ea5ga"]
+[gd_scene load_steps=6 format=3 uid="uid://dfsbjqd8ea5ga"]
 
 [ext_resource type="Texture2D" uid="uid://b0ijhwuafskac" path="res://assets/art/enemies/imp.png" id="1_6nf23"]
+[ext_resource type="Script" uid="uid://fvtib7eufaft" path="res://scenes/gameplay/enemies/imp.gd" id="1_45r1c"]
+[ext_resource type="PackedScene" uid="uid://hx0v5hqvqkmy" path="res://components/health_component.tscn" id="3_pfgnl"]
+[ext_resource type="PackedScene" uid="uid://qowfj0gbi6t4" path="res://components/faction_component.tscn" id="4_ax5sk"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_45r1c"]
 radius = 5.0
 
 [node name="Imp" type="CharacterBody2D"]
-collision_layer = 30
-collision_mask = 6
+collision_mask = 158
+script = ExtResource("1_45r1c")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_45r1c")
@@ -15,3 +18,8 @@ shape = SubResource("CircleShape2D_45r1c")
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture_filter = 1
 texture = ExtResource("1_6nf23")
+
+[node name="HealthComponent" parent="." instance=ExtResource("3_pfgnl")]
+
+[node name="FactionComponent" parent="." instance=ExtResource("4_ax5sk")]
+faction = 1
