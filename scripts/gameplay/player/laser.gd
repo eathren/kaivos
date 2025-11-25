@@ -74,7 +74,7 @@ func cast_beam(delta: float) -> void:
 		# orient collision particles
 		var n := get_collision_normal()
 		if collision_particles.process_material:
-			collision_particles.process_material.direction = Vector3(n.x, n.y, 0)
+		collision_particles.process_material.direction = Vector3(n.x, n.y, 0)
 
 		# apply damage to wall tile at hit point
 		_apply_damage_to_wall(hit_world, delta)
@@ -86,7 +86,7 @@ func cast_beam(delta: float) -> void:
 	collision_particles.position = cast_point
 	beam_particles.position = cast_point * 0.5
 	if beam_particles.process_material:
-		beam_particles.process_material.emission_box_extents.x = cast_point.length() * 0.5
+	beam_particles.process_material.emission_box_extents.x = cast_point.length() * 0.5
 
 func appear() -> void:
 	if tween and tween.is_running():
@@ -113,8 +113,8 @@ func _apply_damage_to_wall(hit_world: Vector2, delta: float) -> void:
 	for x in range(center_cell.x - dig_half_width_tiles, center_cell.x + dig_half_width_tiles + 1):
 		var cell := Vector2i(x, center_cell.y)
 
-		if wall.get_cell_source_id(cell) != -1 and "damage_cell" in wall:
-			wall.damage_cell(cell, laser_damage_per_second * delta)
+	if wall.get_cell_source_id(cell) != -1 and "damage_cell" in wall:
+		wall.damage_cell(cell, laser_damage_per_second * delta)
 	
 
 

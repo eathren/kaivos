@@ -1,31 +1,54 @@
 extends CharacterBody2D
 
-@export var speed: float = 30.0
+enum MovementState {
+	STOP,
+	GO,
+	BURST
+}
+
+@export var base_speed: float = 10.0
+@export var burst_multiplier: float = 2.0
 @export var max_speed_for_line: float = 600.0
 @export var max_line_length: float = 64.0
 @export var line_lerp_speed: float = 10.0
 
 @onready var direction_line: Line2D = $DirectionLine
 
+var current_state: MovementState = MovementState.GO
 var current_line_length: float = 0.0
+var current_speed: float = 0.0
 
 func _ready() -> void:
 	add_to_group("trawler")
-	speed = GameState.get_trawler_speed()
+	base_speed = GameState.get_trawler_speed()
+	_update_speed_from_state()
 
 func _physics_process(delta: float) -> void:
-	var input_dir := Vector2.ZERO
-	input_dir.x = Input.get_action_strength("move_right") - Input.get_action_strength("move_left")
-	input_dir.y = Input.get_action_strength("move_down") - Input.get_action_strength("move_up")
-
-	if input_dir != Vector2.ZERO:
-		input_dir = input_dir.normalized()
-		velocity = input_dir * speed
-	else:
-		velocity = Vector2.ZERO
+	# Move forward only based on current state
+	match current_state:
+		MovementState.STOP:
+			velocity = Vector2.ZERO
+		MovementState.GO:
+			velocity = Vector2.UP.rotated(rotation) * current_speed
+		MovementState.BURST:
+			velocity = Vector2.UP.rotated(rotation) * current_speed * 4
 
 	move_and_slide()
 	_update_direction_line(delta)
+
+func set_movement_state(new_state: MovementState) -> void:
+	if current_state != new_state:
+		current_state = new_state
+		_update_speed_from_state()
+
+func _update_speed_from_state() -> void:
+	match current_state:
+		MovementState.STOP:
+			current_speed = 0.0
+		MovementState.GO:
+			current_speed = base_speed
+		MovementState.BURST:
+			current_speed = base_speed * burst_multiplier
 
 func _update_direction_line(delta: float) -> void:
 	var v_len := velocity.length()

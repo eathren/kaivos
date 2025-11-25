@@ -1,20 +1,17 @@
 extends Node
 
-var ground_tilemap: TileMapLayer
 var wall_tilemap: TileMapLayer
 
 var _spawn_cells: Array[Vector2i] = []
 var _wall_cells: Dictionary = {}
 
 # Spawn preferences
-@export var prefer_wall_edges: bool = true
-@export var prefer_open_areas: bool = true
-@export var min_distance_from_player: float = 200.0  # pixels
-@export var open_area_radius: int = 3  # tiles - how many tiles should be clear around spawn point
+@export var prefer_wall_edges: bool = false
+@export var min_distance_from_player: float =  50.0  # pixels
+@export var spawn_radius_tiles: int = 50  # How far from trawler to search for spawn cells
 
 
-func setup(ground: TileMapLayer, walls: TileMapLayer) -> void:
-	ground_tilemap = ground
+func setup(walls: TileMapLayer) -> void:
 	wall_tilemap = walls
 	_rebuild_spawn_cells()
 
@@ -23,54 +20,55 @@ func _rebuild_spawn_cells() -> void:
 	_spawn_cells.clear()
 	_wall_cells.clear()
 	
-	if ground_tilemap == null or wall_tilemap == null:
+	if wall_tilemap == null:
 		push_error("SpawnManager.setup was not called correctly")
 		return
 
-	# Build a fast lookup of wall cells
-	# If ground and wall are the same TileMapLayer, check atlas coordinates
-	var is_same_tilemap := (ground_tilemap == wall_tilemap)
+	# Build a fast lookup of wall cells by checking atlas coordinates
+	# Wall tiles are at (1, 1), ground/other tiles are at different coords
+	var wall_atlas_coord := Vector2i(1, 1)  # Based on wall.gd
 	
-	if is_same_tilemap:
-		# Same tilemap - distinguish by atlas coordinates
-		# Wall tiles are typically at (0, 0), ground at (0, 1) based on wall.gd
-		for cell in wall_tilemap.get_used_cells():
-			var atlas_coord := wall_tilemap.get_cell_atlas_coords(cell)
-			# Assume wall_atlas_coord is (0, 0) - adjust if needed
-			if atlas_coord == Vector2i(0, 0):
-				_wall_cells[cell] = true
-	else:
-		# Different tilemaps - all cells in wall_tilemap are walls
-		for cell in wall_tilemap.get_used_cells():
+	for cell in wall_tilemap.get_used_cells():
+		var atlas_coord := wall_tilemap.get_cell_atlas_coords(cell)
+		if atlas_coord == wall_atlas_coord:
 			_wall_cells[cell] = true
 
-	# Get all ground cells (cells that exist but aren't walls)
-	var ground_cells := {}
-	for cell in ground_tilemap.get_used_cells():
-		if not _wall_cells.has(cell):
-			ground_cells[cell] = true
-
-	# Find valid spawn locations
-	var wall_edge_cells: Array[Vector2i] = []
-	var open_area_cells: Array[Vector2i] = []
+	# Find all valid spawn cells - anywhere that isn't a wall
+	# We'll search in a radius around the trawler for efficiency
+	var trawler := get_tree().get_first_node_in_group("trawler") as Node2D
+	if trawler == null:
+		push_warning("SpawnManager: No trawler found, cannot determine spawn area")
+		return
 	
-	for cell in ground_cells.keys():
-		var is_wall_edge := _is_adjacent_to_wall(cell)
-		var is_open_area := _is_open_area(cell, ground_cells)
-		
-		if prefer_wall_edges and is_wall_edge:
-			wall_edge_cells.append(cell)
-		elif prefer_open_areas and is_open_area:
-			open_area_cells.append(cell)
-		elif not prefer_wall_edges and not prefer_open_areas:
-			# Fallback: any ground cell
-			_spawn_cells.append(cell)
+	var trawler_local := wall_tilemap.to_local(trawler.global_position)
+	var trawler_cell := wall_tilemap.local_to_map(trawler_local)
+	
+	# Search in a large radius around trawler
+	var wall_edge_cells: Array[Vector2i] = []
+	var open_cells: Array[Vector2i] = []
+	
+	for x in range(trawler_cell.x - spawn_radius_tiles, trawler_cell.x + spawn_radius_tiles + 1):
+		for y in range(trawler_cell.y - spawn_radius_tiles, trawler_cell.y + spawn_radius_tiles + 1):
+			var cell := Vector2i(x, y)
+			
+			# Skip if it's a wall cell
+			if _wall_cells.has(cell):
+				continue
+			
+			# Check if cell exists in tilemap (has any tile) or is empty
+			# Empty cells are also valid spawn points
+			var source_id := wall_tilemap.get_cell_source_id(cell)
+			if source_id == -1 or not _wall_cells.has(cell):
+				# Valid spawn location - check if it's adjacent to a wall
+				if prefer_wall_edges and _is_adjacent_to_wall(cell):
+					wall_edge_cells.append(cell)
+				else:
+					open_cells.append(cell)
 	
 	# Combine spawn cells, prioritizing wall edges
 	if prefer_wall_edges:
 		_spawn_cells.append_array(wall_edge_cells)
-	if prefer_open_areas:
-		_spawn_cells.append_array(open_area_cells)
+	_spawn_cells.append_array(open_cells)
 	
 	# Remove duplicates
 	var unique_cells := {}
@@ -78,7 +76,7 @@ func _rebuild_spawn_cells() -> void:
 		unique_cells[cell] = true
 	_spawn_cells = unique_cells.keys()
 	
-	print("SpawnManager: Found %d valid spawn cells (%d wall edges, %d open areas)" % [_spawn_cells.size(), wall_edge_cells.size(), open_area_cells.size()])
+	print("SpawnManager: Found %d valid spawn cells (%d wall edges, %d open)" % [_spawn_cells.size(), wall_edge_cells.size(), open_cells.size()])
 
 
 func _is_adjacent_to_wall(cell: Vector2i) -> bool:
@@ -97,23 +95,6 @@ func _is_adjacent_to_wall(cell: Vector2i) -> bool:
 	return false
 
 
-func _is_open_area(cell: Vector2i, ground_cells: Dictionary) -> bool:
-	# Check if there's enough open space around this cell
-	var open_count := 0
-	var total_checked := 0
-	
-	for x in range(-open_area_radius, open_area_radius + 1):
-		for y in range(-open_area_radius, open_area_radius + 1):
-			var check_cell := Vector2i(cell.x + x, cell.y + y)
-			total_checked += 1
-			
-			# Count as open if it's a ground cell (exists in ground and not a wall)
-			if ground_cells.has(check_cell):
-				open_count += 1
-	
-	# Consider it an open area if at least 70% of the area is clear
-	var open_ratio := float(open_count) / float(total_checked)
-	return open_ratio >= 0.7
 
 
 func get_spawn_position() -> Vector2:
@@ -131,8 +112,8 @@ func get_spawn_position() -> Vector2:
 		var cell: Vector2i = _spawn_cells[idx]
 		
 		# Tile coords -> global coordinates
-		var local_pos := ground_tilemap.map_to_local(cell)
-		var global_pos := ground_tilemap.to_global(local_pos)
+		var local_pos := wall_tilemap.map_to_local(cell)
+		var global_pos := wall_tilemap.to_global(local_pos)
 		
 		# Check distance from player if specified
 		if trawler != null and min_distance_from_player > 0.0:
@@ -148,8 +129,8 @@ func get_spawn_position() -> Vector2:
 	# Fallback: return random position even if too close
 	var idx := randi() % _spawn_cells.size()
 	var cell: Vector2i = _spawn_cells[idx]
-	var local_pos := ground_tilemap.map_to_local(cell)
-	return ground_tilemap.to_global(local_pos)
+	var local_pos := wall_tilemap.map_to_local(cell)
+	return wall_tilemap.to_global(local_pos)
 
 
 func spawn(scene: PackedScene, parent: Node = null) -> Node2D:

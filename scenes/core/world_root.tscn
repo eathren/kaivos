@@ -1,18 +1,8 @@
-[gd_scene load_steps=9 format=3 uid="uid://bmqm3l87s438b"]
+[gd_scene load_steps=7 format=3 uid="uid://bmqm3l87s438b"]
 
 [ext_resource type="Texture2D" uid="uid://cbykw6r7yyyou" path="res://assets/art/tilesets/ground_tileset.png" id="1_jv1nx"]
-[ext_resource type="Texture2D" uid="uid://cbnyae5gcv834" path="res://assets/art/wall.png" id="2_78cma"]
-[ext_resource type="Texture2D" uid="uid://ct1rq30tkoefn" path="res://assets/art/ground.png" id="3_w4kyo"]
+[ext_resource type="Texture2D" uid="uid://dl882rsgfv2v4" path="res://assets/art/tilesets/wall_tileset.png" id="2_toecm"]
 [ext_resource type="Script" uid="uid://bxjfrxgmt1sig" path="res://scripts/core/wall.gd" id="5_oew3x"]
-
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_e4mml"]
-texture = ExtResource("2_78cma")
-0:0/0 = 0
-0:0/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-
-[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_lgwaw"]
-texture = ExtResource("3_w4kyo")
-0:0/0 = 0
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_w4kyo"]
 texture = ExtResource("1_jv1nx")
@@ -21,12 +11,16 @@ texture = ExtResource("1_jv1nx")
 0:0/0/physics_layer_0/polygon_1/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 0:1/0 = 0
 
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_toecm"]
+texture = ExtResource("2_toecm")
+1:1/0 = 0
+1:1/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, 6.974022, 8, -8, 8)
+
 [sub_resource type="TileSet" id="TileSet_nml2g"]
 physics_layer_0/collision_layer = 8
 physics_layer_0/collision_mask = 23
-sources/0 = SubResource("TileSetAtlasSource_e4mml")
-sources/1 = SubResource("TileSetAtlasSource_lgwaw")
 sources/2 = SubResource("TileSetAtlasSource_w4kyo")
+sources/5 = SubResource("TileSetAtlasSource_toecm")
 
 [node name="WorldRoot" type="Node2D"]
 

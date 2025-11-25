@@ -4,9 +4,9 @@ var trawler: Node2D
 
 @export var wall_height_cells: int = 200
 @export var nose_gap_tiles: int = 6
-@export var tile_source_id: int = 0
-@export var wall_atlas_coord: Vector2i = Vector2i(0, 0)
-@export var ground_atlas_coord: Vector2i = Vector2i(0, 1)
+@export var tile_source_id: int = 5  # Wall tileset is at source 5 in the TileSet
+@export var wall_atlas_coord: Vector2i = Vector2i(1, 1)  # Wall tile at (1, 1) in source 5
+@export var ground_atlas_coord: Vector2i = Vector2i(0, 1)  # Ground is in source 2
 @export var ground_thickness: int = 3
 
 @export var fill_radius_world: float = 1000.0
@@ -37,9 +37,11 @@ func damage_cell(cell: Vector2i, damage: float) -> void:
 	if get_cell_source_id(cell) == -1:
 		return
 	
+	# Check both source ID and atlas coordinate to ensure it's a wall tile
+	var cell_source_id := get_cell_source_id(cell)
 	var atlas_coord := get_cell_atlas_coords(cell)
-	if atlas_coord != wall_atlas_coord:
-		return  # Don't damage ground tiles
+	if cell_source_id != tile_source_id or atlas_coord != wall_atlas_coord:
+		return  # Don't damage ground tiles or tiles from other sources
 	
 	# Track damage for this cell
 	var cell_key := "%d,%d" % [cell.x, cell.y]

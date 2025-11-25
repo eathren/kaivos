@@ -11,10 +11,9 @@ func _ready() -> void:
 	# Wait for wall to be initialized
 	await get_tree().process_frame
 	
-	# Setup SpawnManager with ground and wall tilemaps
-	# Note: The wall TileMapLayer contains both walls and ground tiles
-	# We'll use it for both since they're in the same TileMapLayer
+	# Setup SpawnManager with wall tilemap
+	# Anywhere there isn't a wall is valid for spawning
 	if wall != null:
-		SpawnManager.setup(wall, wall)
+		SpawnManager.setup(wall)
 	else:
 		push_error("WorldRoot: Wall TileMapLayer not found")
