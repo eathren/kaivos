@@ -1,46 +1,32 @@
-[gd_scene load_steps=17 format=3 uid="uid://dwjxh6hrypua3"]
+[gd_scene load_steps=13 format=3 uid="uid://dwjxh6hrypua3"]
 
 [ext_resource type="Script" uid="uid://b31epxhbt6duc" path="res://scripts/gameplay/player/trawler.gd" id="1_byw1e"]
-[ext_resource type="Texture2D" uid="uid://rrgcgctl27vc" path="res://assets/art/player/trawler_round.png" id="3_sriag"]
+[ext_resource type="Texture2D" uid="uid://d1x04najel8kl" path="res://assets/art/player/trawler.png" id="3_t1h18"]
 [ext_resource type="Script" uid="uid://cv2f2q1r0sxdk" path="res://scripts/gameplay/player/camera_2d.gd" id="4_sriag"]
 [ext_resource type="Script" uid="uid://bo3r6mk8egqyx" path="res://scripts/gameplay/player/wall_collider.gd" id="5_lvan5"]
 [ext_resource type="PackedScene" uid="uid://ccioahkom5fb3" path="res://scenes/gameplay/player/turret.tscn" id="5_t1h18"]
 [ext_resource type="PackedScene" uid="uid://bj53eukoey856" path="res://scenes/gameplay/player/player.tscn" id="6_t1h18"]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_t1h18"]
-radius = 78.05767
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_c0e4k"]
+size = Vector2(94, 290)
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_lvan5"]
-radius = 56.008926
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xl6pg"]
+size = Vector2(140, 182)
 
 [sub_resource type="SegmentShape2D" id="SegmentShape2D_lvan5"]
 a = Vector2(40, 10)
-b = Vector2(-1, 10)
-
-[sub_resource type="SegmentShape2D" id="SegmentShape2D_t1h18"]
-a = Vector2(22, -3)
-b = Vector2(22, 17)
-
-[sub_resource type="SegmentShape2D" id="SegmentShape2D_c0e4k"]
-b = Vector2(-17, 0)
+b = Vector2(-30, 10)
 
 [sub_resource type="SegmentShape2D" id="SegmentShape2D_xl6pg"]
-a = Vector2(5, -2)
-b = Vector2(5, 48)
-
-[sub_resource type="SegmentShape2D" id="SegmentShape2D_fs2wu"]
-a = Vector2(21, 22)
-b = Vector2(4, 22)
-
-[sub_resource type="SegmentShape2D" id="SegmentShape2D_eew0o"]
-a = Vector2(0, -10)
+a = Vector2(4, -80)
+b = Vector2(4, 165)
 
 [sub_resource type="SegmentShape2D" id="SegmentShape2D_5gl07"]
-a = Vector2(40, 10)
+a = Vector2(68, 10)
 
 [sub_resource type="SegmentShape2D" id="SegmentShape2D_3xn0q"]
 a = Vector2(0, -60)
-b = Vector2(0, 29)
+b = Vector2(0, 184)
 
 [node name="Trawler" type="CharacterBody2D"]
 position = Vector2(-2, 4)
@@ -48,20 +34,20 @@ collision_layer = 2
 collision_mask = 265
 script = ExtResource("1_byw1e")
 
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_c0e4k")
+
 [node name="WallCollider" type="Area2D" parent="."]
 collision_layer = 2
 collision_mask = 8
 script = ExtResource("5_lvan5")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="WallCollider"]
-shape = SubResource("CircleShape2D_t1h18")
+position = Vector2(1, -81)
+shape = SubResource("RectangleShape2D_xl6pg")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("3_sriag")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-visible = false
-shape = SubResource("CircleShape2D_lvan5")
+texture = ExtResource("3_t1h18")
 
 [node name="Camera2D" type="Camera2D" parent="." node_paths=PackedStringArray("target")]
 position_smoothing_enabled = true
@@ -75,16 +61,16 @@ width = 6.0
 [node name="TurretsRoot" type="Node2D" parent="."]
 
 [node name="Marker2D" type="Marker2D" parent="TurretsRoot"]
-position = Vector2(-39, 33)
+position = Vector2(-28, 139)
 
 [node name="Marker2D2" type="Marker2D" parent="TurretsRoot"]
-position = Vector2(39, 33)
+position = Vector2(28, 139)
 
 [node name="Turret" parent="TurretsRoot" instance=ExtResource("5_t1h18")]
-position = Vector2(-39, 33)
+position = Vector2(-28, 139)
 
 [node name="Turret2" parent="TurretsRoot" instance=ExtResource("5_t1h18")]
-position = Vector2(39, 33)
+position = Vector2(28, 139)
 
 [node name="InteriorRoot" type="Node2D" parent="."]
 
@@ -100,34 +86,6 @@ position = Vector2(39, 33)
 
 [node name="CrewAvatar" type="Node2D" parent="InteriorRoot/CrewRoot"]
 
-[node name="ColorRect" type="ColorRect" parent="InteriorRoot"]
-offset_left = -16.0
-offset_top = -48.0
-offset_right = 22.0
-offset_bottom = -28.0
-color = Color(0.13682586, 0.13682568, 0.13682571, 1)
-
-[node name="ColorRect2" type="ColorRect" parent="InteriorRoot"]
-offset_left = -45.0
-offset_top = -10.0
-offset_right = -5.0
-offset_bottom = 10.0
-color = Color(0.13682586, 0.13682568, 0.13682571, 1)
-
-[node name="ColorRect3" type="ColorRect" parent="InteriorRoot"]
-offset_left = -19.0
-offset_top = 22.0
-offset_right = 21.0
-offset_bottom = 42.0
-color = Color(0.13682586, 0.13682568, 0.13682571, 1)
-
-[node name="ColorRect4" type="ColorRect" parent="InteriorRoot"]
-offset_left = -16.0
-offset_top = -44.0
-offset_right = 4.0
-offset_bottom = 26.0
-color = Color(0.13682586, 0.13682568, 0.13682571, 1)
-
 [node name="Walls" type="Node2D" parent="InteriorRoot"]
 
 [node name="Wall8" type="StaticBody2D" parent="InteriorRoot/Walls"]
@@ -135,54 +93,39 @@ collision_layer = 512
 collision_mask = 5
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="InteriorRoot/Walls/Wall8"]
-position = Vector2(-18, -57)
+position = Vector2(-5, -140)
 shape = SubResource("SegmentShape2D_lvan5")
 
 [node name="Wall7" type="StaticBody2D" parent="InteriorRoot/Walls"]
 collision_layer = 512
 collision_mask = 5
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="InteriorRoot/Walls/Wall7"]
-position = Vector2(-1, -45)
-shape = SubResource("SegmentShape2D_t1h18")
-
 [node name="Wall" type="StaticBody2D" parent="InteriorRoot/Walls"]
 collision_layer = 512
 collision_mask = 5
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="InteriorRoot/Walls/Wall"]
-position = Vector2(21, -28)
-shape = SubResource("SegmentShape2D_c0e4k")
 
 [node name="Wall2" type="StaticBody2D" parent="InteriorRoot/Walls"]
 collision_layer = 512
 collision_mask = 5
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="InteriorRoot/Walls/Wall2"]
-position = Vector2(0, -27)
+position = Vector2(30, -52)
 shape = SubResource("SegmentShape2D_xl6pg")
 
 [node name="Wall3" type="StaticBody2D" parent="InteriorRoot/Walls"]
 collision_layer = 512
 collision_mask = 5
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="InteriorRoot/Walls/Wall3"]
-shape = SubResource("SegmentShape2D_fs2wu")
-
 [node name="Wall4" type="StaticBody2D" parent="InteriorRoot/Walls"]
 collision_layer = 512
 collision_mask = 5
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="InteriorRoot/Walls/Wall4"]
-position = Vector2(21, 32)
-shape = SubResource("SegmentShape2D_eew0o")
 
 [node name="Wall5" type="StaticBody2D" parent="InteriorRoot/Walls"]
 collision_layer = 512
 collision_mask = 5
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="InteriorRoot/Walls/Wall5"]
-position = Vector2(-19, 32)
+position = Vector2(-34, 102)
 shape = SubResource("SegmentShape2D_5gl07")
 
 [node name="Wall6" type="StaticBody2D" parent="InteriorRoot/Walls"]
@@ -190,7 +133,7 @@ collision_layer = 512
 collision_mask = 5
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="InteriorRoot/Walls/Wall6"]
-position = Vector2(-17, 13)
+position = Vector2(-34, -72)
 shape = SubResource("SegmentShape2D_3xn0q")
 
 [node name="Player" parent="InteriorRoot" instance=ExtResource("6_t1h18")]
