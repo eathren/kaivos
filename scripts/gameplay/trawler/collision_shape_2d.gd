@@ -1,16 +1,33 @@
 extends Node2D
 
-@export var ship_scene: PackedScene      # assign PlayerShip scene in the inspector
+enum DockSide {
+	LEFT,
+	RIGHT
+}
 
-@onready var area: Area2D = $Area2D
-@onready var dock_marker: Marker2D = $DockMarker
+@export var ship_scene: PackedScene      # assign PlayerShip scene in the inspector
+@export var side: DockSide = DockSide.LEFT
+
+var area: Area2D
+var dock_marker: Marker2D
+var sprite: Sprite2D
 
 var player_in_zone: CharacterBody2D = null
 
 func _ready() -> void:
+	# Get nodes manually to ensure they're found
+	area = get_node_or_null("Area2D")
+	dock_marker = get_node_or_null("DockerMarker")
+	sprite = get_node_or_null("Sprite2D")
+	
+	if area == null:
+		push_error("LadderDock: Area2D not found")
+		return
+	
 	area.body_entered.connect(_on_body_entered)
 	area.body_exited.connect(_on_body_exited)
 	set_process_input(true)
+	_update_sprite_flip()
 
 func _on_body_entered(body: Node) -> void:
 	if body.is_in_group("player"):
@@ -45,3 +62,8 @@ func _board_ship() -> void:
 
 	# 3. Give control to the ship (depends on your ship script)
 	ship.call_deferred("take_control_from_player", player_in_zone)
+
+func _update_sprite_flip() -> void:
+	if sprite:
+		# Flip horizontally for right side
+		sprite.flip_h = (side == DockSide.RIGHT)

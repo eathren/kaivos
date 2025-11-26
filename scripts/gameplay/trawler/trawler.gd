@@ -13,6 +13,7 @@ enum MovementState {
 @export var line_lerp_speed: float = 10.0
 
 @onready var direction_line: Line2D = $DirectionLine
+@onready var front_laser: Laser = $FrontLaser
 
 var current_state: MovementState = MovementState.GO
 var current_line_length: float = 0.0
@@ -22,6 +23,10 @@ func _ready() -> void:
 	add_to_group("trawler")
 	base_speed = GameState.get_trawler_speed()
 	_update_speed_from_state()
+	
+	# Trawler laser is always on
+	if front_laser:
+		front_laser.set_is_casting(true)
 
 func _physics_process(delta: float) -> void:
 	# Move forward only based on current state
@@ -35,6 +40,7 @@ func _physics_process(delta: float) -> void:
 
 	move_and_slide()
 	_update_direction_line(delta)
+	# Trawler laser is always on, no input needed
 
 func set_movement_state(new_state: MovementState) -> void:
 	if current_state != new_state:

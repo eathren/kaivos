@@ -1,25 +1,27 @@
-extends CharacterBody2D
+extends Node2D
 
+## Player ship with two small lasers
+## Lasers toggle on/off with interact button
 
-const SPEED = 300.0
-const JUMP_VELOCITY = -400.0
+signal lasers_toggled(is_on: bool)
 
+@onready var left_laser: Laser = $LeftLaser
+@onready var right_laser: Laser = $RightLaser
 
-func _physics_process(delta: float) -> void:
-	# Add the gravity.
-	if not is_on_floor():
-		velocity += get_gravity() * delta
+var lasers_enabled: bool = false
 
-	# Handle jump.
-	if Input.is_action_just_pressed("ui_accept") and is_on_floor():
-		velocity.y = JUMP_VELOCITY
+func _ready() -> void:
+	# Start with lasers off
+	_update_lasers()
 
-	# Get the input direction and handle the movement/deceleration.
-	# As good practice, you should replace UI actions with custom gameplay actions.
-	var direction := Input.get_axis("ui_left", "ui_right")
-	if direction:
-		velocity.x = direction * SPEED
-	else:
-		velocity.x = move_toward(velocity.x, 0, SPEED)
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("interact"):
+		lasers_enabled = not lasers_enabled
+		_update_lasers()
+		lasers_toggled.emit(lasers_enabled)
 
-	move_and_slide()
+func _update_lasers() -> void:
+	if left_laser:
+		left_laser.set_is_casting(lasers_enabled)
+	if right_laser:
+		right_laser.set_is_casting(lasers_enabled)

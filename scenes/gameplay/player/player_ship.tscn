@@ -1,3 +1,21 @@
-[gd_scene format=3 uid="uid://dvdwdt6vbluqh"]
+[gd_scene load_steps=4 format=3 uid="uid://dvdwdt6vbluqh"]
+
+[ext_resource type="Script" path="res://scripts/gameplay/player/player_ship.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://bqe8adk2boluh" path="res://scenes/core/laser.tscn" id="1_laser"]
 
 [node name="PlayerShip" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="LeftLaser" parent="." instance=ExtResource("1_laser")]
+position = Vector2(-20, 0)
+max_range = 200.0
+width = 5.0
+damage_per_second = 15.0
+direction = Vector2(0, -1)
+
+[node name="RightLaser" parent="." instance=ExtResource("1_laser")]
+position = Vector2(20, 0)
+max_range = 200.0
+width = 5.0
+damage_per_second = 15.0
+direction = Vector2(0, -1)

@@ -48,9 +48,9 @@ func _load_level(path: String) -> void:
 		return
 	
 	# Optional: Show loading screen
-	var ui := main.get_node_or_null("UI")
-	if ui != null and ui.has_method("show_loading"):
-		ui.show_loading()
+	var loading_screen := main.get_node_or_null("UI/LoadingScreen")
+	if loading_screen != null and loading_screen.has_method("show_loading"):
+		loading_screen.show_loading()
 	
 	# Clear old level
 	for child in level_slot.get_children():
@@ -69,8 +69,8 @@ func _load_level(path: String) -> void:
 	current_level = level
 	
 	# Hide loading screen
-	if ui != null and ui.has_method("hide_loading"):
-		ui.hide_loading()
+	if loading_screen != null and loading_screen.has_method("hide_loading"):
+		loading_screen.hide_loading()
 	
 	level_loaded.emit()
 	print("RunManager: Loaded level from ", path)
