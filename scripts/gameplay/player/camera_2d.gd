@@ -12,40 +12,14 @@ extends Camera2D
 @export var zoom_step: float = 0.1
 
 func _ready() -> void:
-	# Always disable built-in smoothing - we handle it manually for better control
-	position_smoothing_enabled = false
+	# Camera is a child of the player, so it automatically follows
+	# Enable built-in smoothing for smooth camera movement
+	position_smoothing_enabled = true
 	rotation_smoothing_enabled = false
-
-	if target == null:
-		var t := get_tree().get_first_node_in_group("trawler")
-		if t is Node2D:
-			target = t
-
-func _process(delta: float) -> void:
-	if target == null:
-		return
+	position_smoothing_speed = 5.0
 	
-	# Use _process for camera updates - this runs at render framerate for smooth visuals
-	# Physics runs at fixed timestep, but camera should update smoothly at display rate
-	
-	# Since camera is a child of target, we want to keep it at a relative position
-	# But if we want it to follow smoothly, we need to work in global space
-	var target_global_pos: Vector2 = target.global_position
-	var current_global_pos: Vector2 = global_position
-	var new_global_pos: Vector2
-
-	if enable_smoothing:
-		# Use exponential smoothing for frame-rate independent smooth following
-		# This creates a smooth interpolation that works consistently regardless of framerate
-		var weight: float = 1.0 - exp(-follow_lerp_speed * delta)
-		new_global_pos = current_global_pos.lerp(target_global_pos, weight)
-	else:
-		new_global_pos = target_global_pos
-
-	if snap_to_pixels:
-		new_global_pos = new_global_pos.round()
-
-	global_position = new_global_pos
+	# Make this the active camera
+	make_current()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not enable_zoom_input:
