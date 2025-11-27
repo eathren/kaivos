@@ -14,3 +14,4 @@ func show_interaction_prompt(text: String) -> void:
 func hide_interaction_prompt() -> void:
 	hide()
 
+

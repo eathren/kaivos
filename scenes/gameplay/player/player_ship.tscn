@@ -1,16 +1,20 @@
-[gd_scene load_steps=5 format=3 uid="uid://dvdwdt6vbluqh"]
+[gd_scene load_steps=6 format=3 uid="uid://dvdwdt6vbluqh"]
 
 [ext_resource type="PackedScene" uid="uid://bqe8adk2boluh" path="res://scenes/core/laser.tscn" id="1_laser"]
 [ext_resource type="Script" uid="uid://cdwve1ivpvgr2" path="res://scripts/gameplay/player/player_ship.gd" id="1_script"]
-[ext_resource type="Texture2D" uid="uid://cpqfilvxs0ux4" path="res://assets/art/player/player_ship.png" id="2_fh1t3"]
+[ext_resource type="Texture2D" uid="uid://btyw6bsgsr1vg" path="res://assets/art/player/player.png" id="2_1vmog"]
+[ext_resource type="Texture2D" uid="uid://cvffw0qauk3gu" path="res://assets/art/player/player_ship_frame.png" id="3_lpqif"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_ship"]
-radius = 8.0
+radius = 12.0
 
 [node name="PlayerShip" type="CharacterBody2D"]
 collision_layer = 4
 collision_mask = 521
 script = ExtResource("1_script")
+
+[node name="Sprite2D2" type="Sprite2D" parent="."]
+texture = ExtResource("2_1vmog")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_ship")
@@ -18,7 +22,7 @@ shape = SubResource("CircleShape2D_ship")
 [node name="Sprite2D" type="Sprite2D" parent="."]
 modulate = Color(0.5, 0.8, 1, 1)
 scale = Vector2(2, 2)
-texture = ExtResource("2_fh1t3")
+texture = ExtResource("3_lpqif")
 
 [node name="LeftLaser" parent="." instance=ExtResource("1_laser")]
 position = Vector2(-20, 0)
