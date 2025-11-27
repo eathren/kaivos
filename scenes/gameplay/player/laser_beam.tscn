@@ -1,0 +1,15 @@
+[gd_scene load_steps=2 format=3 uid="uid://bgadq5f7nesnq"]
+
+[ext_resource type="Script" uid="uid://qpv6g6llgox5" path="res://scenes/gameplay/player/laser_beam.gd" id="1_cy6er"]
+
+[node name="LaserBeam" type="RayCast2D"]
+target_position = Vector2(64, 0)
+script = ExtResource("1_cy6er")
+
+[node name="Line2D" type="Line2D" parent="."]
+
+[node name="GPUParticles2D" type="GPUParticles2D" parent="."]
+
+[node name="GPUParticles2D2" type="GPUParticles2D" parent="."]
+
+[node name="GPUParticles2D3" type="GPUParticles2D" parent="."]

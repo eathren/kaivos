@@ -30,10 +30,24 @@ b = Vector2(0, 184)
 
 [node name="Trawler" type="CharacterBody2D"]
 collision_layer = 2
-collision_mask = 265
+collision_mask = 8
 script = ExtResource("1_byw1e")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_c0e4k")
+
+[node name="EnemyHull" type="StaticBody2D" parent="."]
+collision_layer = 2
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyHull"]
+shape = SubResource("RectangleShape2D_c0e4k")
+
+[node name="EnemyDetector" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="EnemyDetector"]
 shape = SubResource("RectangleShape2D_c0e4k")
 
 [node name="WallCollider" type="Area2D" parent="."]

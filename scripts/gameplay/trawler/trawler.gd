@@ -14,6 +14,7 @@ enum MovementState {
 
 @onready var direction_line: Line2D = $DirectionLine
 @onready var front_laser: Laser = $FrontLaser
+@onready var enemy_detector: Area2D = $EnemyDetector
 
 var current_state: MovementState = MovementState.GO
 var current_line_length: float = 0.0
@@ -27,6 +28,16 @@ func _ready() -> void:
 	# Trawler laser is always on
 	if front_laser:
 		front_laser.set_is_casting(true)
+	
+	# Connect enemy damage detection
+	if enemy_detector:
+		enemy_detector.body_entered.connect(_on_enemy_entered)
+
+func _on_enemy_entered(body: Node) -> void:
+	"""Handle damage when enemy touches trawler"""
+	if body.is_in_group("enemy"):
+		print("Trawler: Enemy collision detected - ", body.name)
+		# TODO: Apply damage to trawler health system
 
 func _physics_process(delta: float) -> void:
 	# Move forward only based on current state

@@ -13,6 +13,7 @@ var dock_marker: Marker2D
 var sprite: Sprite2D
 
 var player_in_zone: CharacterBody2D = null
+var is_spawning: bool = false  # Prevent multiple ship spawns
 
 func _ready() -> void:
 	# Get nodes manually to ensure they're found
@@ -56,18 +57,26 @@ func _hide_prompt() -> void:
 		ui.hide_interaction_prompt()
 
 func _input(event: InputEvent) -> void:
-	if player_in_zone == null:
+	if player_in_zone == null or is_spawning:
 		return
 	if event.is_action_pressed("interact"):
+		# Check if a player ship already exists
+		var existing_ship = get_tree().get_first_node_in_group("player_ship")
+		if existing_ship != null:
+			print("LadderDock: Ship already exists, cannot spawn another")
+			return
 		_board_ship()
 
 func _board_ship() -> void:
-	if player_in_zone == null:
+	if player_in_zone == null or is_spawning:
 		return
 	
 	if ship_scene == null:
 		push_warning("LadderDock: No ship scene assigned")
 		return
+
+	is_spawning = true
+	_hide_prompt()
 
 	# 1. Deactivate player on foot
 	player_in_zone.deactivate()
@@ -79,6 +88,9 @@ func _board_ship() -> void:
 	
 	var ship := ship_scene.instantiate()
 	level.add_child(ship)
+	
+	# Connect to ship's tree_exiting signal to reset spawning flag when it's deleted
+	ship.tree_exiting.connect(_on_ship_deleted)
 
 	# Position ship outside the trawler, offset to the side
 	var spawn_offset := Vector2.ZERO
@@ -95,7 +107,12 @@ func _board_ship() -> void:
 	# 3. Give control to the ship
 	ship.call_deferred("take_control_from_player", player_in_zone)
 	
-	print("Player boarded ship at ", ship.global_position)
+	print("LadderDock: Player boarded ship at ", ship.global_position)
+
+func _on_ship_deleted() -> void:
+	"""Called when the ship is deleted, allowing new ships to spawn"""
+	is_spawning = false
+	print("LadderDock: Ship deleted, can spawn new ship")
 
 func _update_sprite_flip() -> void:
 	if sprite:

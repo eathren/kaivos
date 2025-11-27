@@ -94,10 +94,11 @@ func take_control_from_player(player: CharacterBody2D) -> void:
 		camera.make_current()
 		print("Ship: Camera transferred to ship")
 	
-	# Enable docking after cooldown
+	# Enable docking after cooldown (check if still valid)
 	await get_tree().create_timer(dock_cooldown).timeout
-	can_dock = true
-	print("Ship: Can now dock back at trawler")
+	if is_instance_valid(self) and is_active:
+		can_dock = true
+		print("Ship: Can now dock back at trawler")
 
 func _process(delta: float) -> void:
 	if not is_active:
@@ -128,9 +129,12 @@ func return_to_trawler() -> void:
 		print("Ship: No player reference, cannot return to trawler")
 		return
 	
-	print("Ship: Returning to trawler")
+	print("Ship: Starting docking sequence - ", get_path())
 	
-	# Disable ship immediately to prevent double-docking
+	# Immediately disable all processing to prevent race conditions
+	set_physics_process(false)
+	set_process(false)
+	set_process_input(false)
 	is_active = false
 	can_dock = false
 	
@@ -139,19 +143,22 @@ func return_to_trawler() -> void:
 	if ui and ui.has_method("hide_interaction_prompt"):
 		ui.hide_interaction_prompt()
 	
-	# Move camera back to player
+	# Move camera back to player FIRST before we start destroying things
+	var camera_transferred := false
 	if has_node("Camera2D"):
 		var camera = get_node("Camera2D")
-		remove_child(camera)  # Remove from ship (self)
+		remove_child(camera)
 		player_reference.add_child(camera)
 		camera.position = Vector2.ZERO
 		camera.make_current()
+		camera_transferred = true
 		print("Ship: Camera transferred back to player")
 	
 	# Reactivate the crew member
 	player_reference.activate()
 	print("Ship: Player reactivated")
 	
-	# Remove this ship immediately
-	print("Ship: Freeing ship node")
+	# NOW delete the ship immediately
+	print("Ship: About to delete - parent is: ", get_parent().name if get_parent() else "NO PARENT")
 	queue_free()
+	print("Ship: queue_free() called - ship should be deleted next frame")
