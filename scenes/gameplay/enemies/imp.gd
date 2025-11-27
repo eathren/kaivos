@@ -3,7 +3,7 @@ extends CharacterBody2D
 @export var speed: float = 20.0
 
 @onready var health: HealthComponent = $HealthComponent
-
+@onready var exp_crystal: PackedScene 
 var target: Node2D
 
 func _ready() -> void:
@@ -29,3 +29,4 @@ func _physics_process(delta: float) -> void:
 
 func _on_died() -> void:
 	queue_free()
+	exp_crystal.instantiate()

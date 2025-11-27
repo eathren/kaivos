@@ -16,7 +16,7 @@ script = ExtResource("1_script")
 
 [node name="RayCast2D" type="RayCast2D" parent="."]
 target_position = Vector2(0, -1000)
-collision_mask = 16
+collision_mask = 8
 
 [node name="Line2D" type="Line2D" parent="."]
 default_color = Color(1, 0.35, 0.35, 1)

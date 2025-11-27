@@ -15,3 +15,4 @@ func hide_interaction_prompt() -> void:
 	hide()
 
 
+

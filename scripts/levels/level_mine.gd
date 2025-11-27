@@ -7,7 +7,7 @@ extends Node2D
 @onready var trawler: CharacterBody2D = $Trawler
 @onready var enemy_root: Node2D = $WorldRoot/EnemyRoot
 @export var enemy_scene: PackedScene = preload("res://scenes/gameplay/enemies/imp.tscn")
-@export var spawns_per_second: float = 5.0
+@export var spawns_per_second: float = 1.0
 
 var _spawn_timer: float = 0.0
 

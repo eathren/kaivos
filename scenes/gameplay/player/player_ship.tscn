@@ -13,6 +13,24 @@ collision_layer = 4
 collision_mask = 521
 script = ExtResource("1_script")
 
+[node name="RightLaser" parent="." instance=ExtResource("1_laser")]
+position = Vector2(6, 0)
+max_range = 200.0
+width = 5.0
+color = Color(0.4, 0.9, 1, 1)
+damage_per_second = 15.0
+direction = Vector2(0, -1)
+mining_delay = 1.0
+
+[node name="LeftLaser" parent="." instance=ExtResource("1_laser")]
+position = Vector2(-6, 0)
+max_range = 200.0
+width = 5.0
+color = Color(0.4, 0.9, 1, 1)
+damage_per_second = 15.0
+direction = Vector2(0, -1)
+mining_delay = 1.0
+
 [node name="Sprite2D2" type="Sprite2D" parent="."]
 texture = ExtResource("2_1vmog")
 
@@ -23,23 +41,3 @@ shape = SubResource("CircleShape2D_ship")
 modulate = Color(0.5, 0.8, 1, 1)
 scale = Vector2(2, 2)
 texture = ExtResource("3_lpqif")
-
-[node name="LeftLaser" parent="." instance=ExtResource("1_laser")]
-position = Vector2(-6, 0)
-max_range = 200.0
-width = 5.0
-color = Color(0.4, 0.9, 1, 1)
-damage_per_second = 15.0
-collision_mask = 8
-direction = Vector2(0, -1)
-mining_delay = 1.0
-
-[node name="RightLaser" parent="." instance=ExtResource("1_laser")]
-position = Vector2(6, 0)
-max_range = 200.0
-width = 5.0
-color = Color(0.4, 0.9, 1, 1)
-damage_per_second = 15.0
-collision_mask = 8
-direction = Vector2(0, -1)
-mining_delay = 1.0

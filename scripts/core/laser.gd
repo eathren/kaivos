@@ -1,14 +1,12 @@
 extends Node2D
 class_name Laser
 
-## Refined laser system using RayCast2D and Line2D
-## Based on Godot 4 laser 2D patterns
 
 @export var max_range: float = 1000.0
 @export var width: float = 10.0
 @export var color: Color = Color(1.0, 0.35, 0.35, 1.0)
 @export var damage_per_second: float = 20.0
-@export var collision_mask: int = 16  # Wall layer by default
+@export var collision_mask: int = 8  # Wall layer by default
 @export var direction: Vector2 = Vector2.DOWN  # Direction the laser points (DOWN for trawler, UP for ships)
 @export var mining_delay: float = 0.0  # Set to 0 for instant deletion (trawler), 1.0 for mining delay (player ships)
 
@@ -18,8 +16,6 @@ class_name Laser
 @onready var particles_end: GPUParticles2D = $ParticlesEnd
 
 var is_casting: bool = false
-var _damage_timer: float = 0.0
-var _damage_interval: float = 0.1  # Apply damage every 0.1 seconds
 
 # Mining state
 var _mining_timer: float = 0.0
@@ -59,10 +55,7 @@ func _update_laser(delta: float) -> void:
 		end_point = to_local(collision_point)
 		
 		# Apply damage to walls (with mining delay)
-		_damage_timer += delta
-		if _damage_timer >= _damage_interval:
-			_damage_timer = 0.0
-			_apply_damage(collision_point, delta)
+		_apply_damage(collision_point, delta)
 		
 		# Update end particles
 		if particles_end:

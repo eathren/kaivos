@@ -19,7 +19,8 @@ var dock_cooldown: float = 2.0  # Seconds before you can dock again
 func _ready() -> void:
 	# Start with lasers off
 	_update_lasers()
-	add_to_group("player_ship")
+	
+	add_to_group("player")
 
 func _physics_process(delta: float) -> void:
 	if not is_active:
