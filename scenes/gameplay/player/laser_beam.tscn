@@ -1,15 +1,46 @@
-[gd_scene load_steps=2 format=3 uid="uid://bgadq5f7nesnq"]
+[gd_scene load_steps=6 format=3 uid="uid://bgadq5f7nesnq"]
 
 [ext_resource type="Script" uid="uid://qpv6g6llgox5" path="res://scenes/gameplay/player/laser_beam.gd" id="1_cy6er"]
+[ext_resource type="Texture2D" uid="uid://clomwy0a0s5gf" path="res://assets/art/player/player_ship/glowing_circle.png" id="2_ohog7"]
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_cy6er"]
+particle_flag_disable_z = true
+gravity = Vector3(0, 98, 0)
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_ohog7"]
+particle_flag_disable_z = true
+gravity = Vector3(0, 98, 0)
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_ccytr"]
+particle_flag_disable_z = true
+gravity = Vector3(0, 98, 0)
 
 [node name="LaserBeam" type="RayCast2D"]
-target_position = Vector2(64, 0)
+target_position = Vector2(1400, 0)
+collision_mask = 8
 script = ExtResource("1_cy6er")
 
 [node name="Line2D" type="Line2D" parent="."]
+unique_name_in_owner = true
+points = PackedVector2Array(40, 0, 1400, 0)
+default_color = Color(0.4, 0.9, 1, 1)
 
-[node name="GPUParticles2D" type="GPUParticles2D" parent="."]
+[node name="CastingParticles2D" type="GPUParticles2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(40, 0)
+emitting = false
+texture = ExtResource("2_ohog7")
+process_material = SubResource("ParticleProcessMaterial_cy6er")
 
-[node name="GPUParticles2D2" type="GPUParticles2D" parent="."]
+[node name="CollisionParticles2D" type="GPUParticles2D" parent="."]
+unique_name_in_owner = true
+emitting = false
+texture = ExtResource("2_ohog7")
+process_material = SubResource("ParticleProcessMaterial_ohog7")
 
-[node name="GPUParticles2D3" type="GPUParticles2D" parent="."]
+[node name="BeamParticles2D" type="GPUParticles2D" parent="."]
+unique_name_in_owner = true
+position = Vector2(720, 0)
+emitting = false
+texture = ExtResource("2_ohog7")
+process_material = SubResource("ParticleProcessMaterial_ccytr")

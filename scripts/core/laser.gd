@@ -10,6 +10,7 @@ class_name Laser
 @export var damage_per_second: float = 20.0
 @export var collision_mask: int = 16  # Wall layer by default
 @export var direction: Vector2 = Vector2.DOWN  # Direction the laser points (DOWN for trawler, UP for ships)
+@export var mining_delay: float = 0.0  # Set to 0 for instant deletion (trawler), 1.0 for mining delay (player ships)
 
 @onready var raycast: RayCast2D = $RayCast2D
 @onready var line: Line2D = $Line2D
@@ -19,6 +20,10 @@ class_name Laser
 var is_casting: bool = false
 var _damage_timer: float = 0.0
 var _damage_interval: float = 0.1  # Apply damage every 0.1 seconds
+
+# Mining state
+var _mining_timer: float = 0.0
+var _current_mining_cell: Vector2i = Vector2i(-99999, -99999)
 
 func _ready() -> void:
 	if raycast:
@@ -53,17 +58,20 @@ func _update_laser(delta: float) -> void:
 		var collision_point := raycast.get_collision_point()
 		end_point = to_local(collision_point)
 		
-		# Apply damage to walls
+		# Apply damage to walls (with mining delay)
 		_damage_timer += delta
 		if _damage_timer >= _damage_interval:
 			_damage_timer = 0.0
-			_apply_damage(collision_point)
+			_apply_damage(collision_point, delta)
 		
 		# Update end particles
 		if particles_end:
 			particles_end.global_position = collision_point
-			particles_end.direction = -raycast.get_collision_normal()
+			particles_end.rotation = raycast.get_collision_normal().angle()
 	else:
+		# No collision - reset mining timer
+		_mining_timer = 0.0
+		_current_mining_cell = Vector2i(-99999, -99999)
 		# No collision - draw to max range
 		end_point = raycast.target_position
 	
@@ -71,7 +79,7 @@ func _update_laser(delta: float) -> void:
 	line.points = PackedVector2Array([Vector2.ZERO, end_point])
 	line.visible = true
 
-func _apply_damage(hit_point: Vector2) -> void:
+func _apply_damage(hit_point: Vector2, delta: float) -> void:
 	# Find wall tilemap and erase walls along the laser path
 	var wall := get_tree().get_first_node_in_group("wall") as TileMapLayer
 	if wall == null:
@@ -79,6 +87,18 @@ func _apply_damage(hit_point: Vector2) -> void:
 	
 	var local_in_wall := wall.to_local(hit_point)
 	var center_cell := wall.local_to_map(local_in_wall)
+	
+	# Check if we're mining a new cell
+	if center_cell != _current_mining_cell:
+		_current_mining_cell = center_cell
+		_mining_timer = 0.0
+	
+	# Accumulate mining time
+	_mining_timer += delta
+	
+	# Only delete after mining delay (if any)
+	if _mining_timer < mining_delay:
+		return
 	
 	# Calculate how many tiles wide the laser is (convert pixels to tiles, assuming 16x16 tiles)
 	var tile_size := 16.0
@@ -105,6 +125,9 @@ func _apply_damage(hit_point: Vector2) -> void:
 			# Only erase wall tiles, not ground
 			if source_id == wall_source_id and atlas_coord == wall_atlas_coord:
 				wall.erase_cell(cell)
+	
+	# Reset mining timer after deleting
+	_mining_timer = 0.0
 
 func set_is_casting(cast: bool) -> void:
 	is_casting = cast
@@ -118,6 +141,9 @@ func set_is_casting(cast: bool) -> void:
 	_set_particles_enabled(cast)
 	
 	if not cast:
+		# Reset mining state
+		_mining_timer = 0.0
+		_current_mining_cell = Vector2i(-99999, -99999)
 		# Clear line when not casting
 		if line:
 			line.points = PackedVector2Array()

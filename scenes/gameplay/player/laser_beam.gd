@@ -28,6 +28,11 @@ var tween: Tween = null
 
 @onready var line_width := line_2d.width
 
+# Mining state
+var mining_timer: float = 0.0
+var mining_delay: float = 1.0  # 1 second delay before deleting walls
+var current_mining_cell: Vector2i = Vector2i(-99999, -99999)  # Invalid cell by default
+
 
 func _ready() -> void:
 	set_color(color)
@@ -47,10 +52,22 @@ func _physics_process(delta: float) -> void:
 	var laser_end_position := target_position
 	force_raycast_update()
 
+	var is_hitting_wall := false
 	if is_colliding():
 		laser_end_position = to_local(get_collision_point())
 		collision_particles.global_rotation = get_collision_normal().angle()
 		collision_particles.position = laser_end_position
+		
+		# Check if we're hitting a wall tilemap
+		var collider = get_collider()
+		if collider is TileMapLayer:
+			is_hitting_wall = true
+			_handle_wall_mining(collider, delta)
+
+	# Reset mining if not hitting a wall
+	if not is_hitting_wall:
+		mining_timer = 0.0
+		current_mining_cell = Vector2i(-99999, -99999)
 
 	line_2d.points[1] = laser_end_position
 
@@ -59,6 +76,38 @@ func _physics_process(delta: float) -> void:
 	beam_particles.process_material.emission_box_extents.x = laser_end_position.distance_to(laser_start_position) * 0.5
 
 	collision_particles.emitting = is_colliding()
+
+func _handle_wall_mining(tilemap: TileMapLayer, delta: float) -> void:
+	"""Mine walls after a delay"""
+	var collision_point := get_collision_point()
+	var tile_pos := tilemap.local_to_map(tilemap.to_local(collision_point))
+	
+	# Check if it's a wall tile (source_id 5, atlas_coord (1,1))
+	var tile_data := tilemap.get_cell_source_id(tile_pos)
+	if tile_data != 5:  # Not a wall tile
+		mining_timer = 0.0
+		current_mining_cell = Vector2i(-99999, -99999)
+		return
+	
+	var atlas_coord := tilemap.get_cell_atlas_coords(tile_pos)
+	if atlas_coord != Vector2i(1, 1):  # Not the correct wall type
+		mining_timer = 0.0
+		current_mining_cell = Vector2i(-99999, -99999)
+		return
+	
+	# Check if we're mining a new cell
+	if tile_pos != current_mining_cell:
+		current_mining_cell = tile_pos
+		mining_timer = 0.0
+	
+	# Accumulate mining time
+	mining_timer += delta
+	
+	# Delete wall after delay
+	if mining_timer >= mining_delay:
+		tilemap.erase_cell(tile_pos)
+		mining_timer = 0.0
+		current_mining_cell = Vector2i(-99999, -99999)
 
 
 func set_is_casting(new_value: bool) -> void:
