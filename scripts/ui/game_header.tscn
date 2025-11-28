@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://d2qcgodgtbx21"]
+
+[node name="GameHeader" type="CanvasLayer"]
+
+[node name="Control" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 28.0
+offset_top = 4.0
+offset_right = 28.0
+offset_bottom = 4.0
+grow_horizontal = 2

@@ -13,6 +13,7 @@ signal lasers_toggled(is_on: bool)
 @onready var right_laser: Laser = $RightLaser
 @onready var player_sprite: Sprite2D = $PlayerSprite
 @onready var frame_sprite: Sprite2D = $Sprite2D
+@onready var weapon_component: Node = $WeaponComponent
 
 var lasers_enabled: bool = false
 var is_active: bool = false
@@ -31,6 +32,14 @@ func _ready() -> void:
 	
 	add_to_group("player")
 	add_to_group("player_ship")
+	
+	# Apply speed multiplier from GameState
+	if GameState and GameState.has_method("get_ship_speed_multiplier"):
+		speed *= GameState.get_ship_speed_multiplier()
+	
+	# Update weapon component with GameState data
+	if weapon_component and weapon_component.has_method("_load_weapon_state"):
+		weapon_component._load_weapon_state()
 
 func _physics_process(delta: float) -> void:
 	if is_turret_mode:
@@ -177,9 +186,17 @@ func _handle_turret_mode(delta: float) -> void:
 		var target_rotation := target_dir.angle() + PI / 2.0
 		rotation = lerp_angle(rotation, target_rotation, 10.0 * delta)
 		
-		# Turn on lasers only when actively firing
-		if _turret_fire_timer >= turret_fire_rate:
+		# Use weapon component to determine fire rate
+		var can_fire := true
+		if weapon_component and weapon_component.has_method("can_fire"):
+			can_fire = weapon_component.can_fire()
+		
+		# Turn on lasers when weapon component says we can fire
+		if can_fire:
 			_turret_fire_timer = 0.0
+			# Fire weapons
+			if weapon_component and weapon_component.has_method("fire_at_target"):
+				weapon_component.fire_at_target(_turret_target, self)
 			# Brief laser burst
 			lasers_enabled = true
 			_update_lasers()

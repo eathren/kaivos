@@ -66,9 +66,10 @@ func _process(_delta: float) -> void:
 		docked_ship.global_position = global_position
 		docked_ship.global_rotation = global_rotation
 	
-	# Handle player interaction to undock (only if this dock has a ship)
+	# Handle player interaction to undock (only if this is the NEAREST dock)
 	if player_in_range and docked_ship != null and Input.is_action_just_pressed("interact"):
-		_undock_ship()
+		if _is_nearest_dock_to_player():
+			_undock_ship()
 
 func _on_body_entered(body: Node2D) -> void:
 	if body.is_in_group("player"):
@@ -145,4 +146,28 @@ func _hide_prompt() -> void:
 
 func is_occupied() -> bool:
 	return docked_ship != null and is_instance_valid(docked_ship)
+
+func _is_nearest_dock_to_player() -> bool:
+	"""Check if this dock is the nearest occupied dock to the player"""
+	var player := get_tree().get_first_node_in_group("player")
+	if not player:
+		return false
+	
+	var my_distance: float = global_position.distance_to(player.global_position)
+	
+	# Check all other docks
+	for dock in get_tree().get_nodes_in_group("ship_dock"):
+		if dock == self or not is_instance_valid(dock):
+			continue
+		
+		# Only consider occupied docks
+		if not dock.has_method("is_occupied") or not dock.is_occupied():
+			continue
+		
+		# If another dock is closer, we're not the nearest
+		var other_distance: float = dock.global_position.distance_to(player.global_position)
+		if other_distance < my_distance:
+			return false
+	
+	return true
 

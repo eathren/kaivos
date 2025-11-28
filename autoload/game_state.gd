@@ -23,6 +23,13 @@ var current_level: int = 1
 var current_xp: int = 0
 var xp_to_next_level: int = 30  # Level 1 requires 30 XP
 
+# Weapon and Upgrade system
+var unlocked_weapons: Array[int] = [0]  # Start with LASER (0)
+var weapon_levels: Dictionary = {0: 1}  # Weapon type -> level
+var fire_rate_multiplier: float = 1.0
+var weapon_damage_multiplier: float = 1.0
+var ship_speed_multiplier: float = 1.0
+
 # Save/load system
 var save_data: Dictionary = {}
 const SAVE_FILE_PATH: String = "user://savegame.save"  
@@ -78,6 +85,45 @@ func get_xp_progress() -> float:
 		return 0.0
 	return float(current_xp) / float(xp_to_next_level)
 
+## Weapon and upgrade system
+func get_unlocked_weapons() -> Array[int]:
+	return unlocked_weapons
+
+func unlock_weapon(weapon_type: int) -> void:
+	if weapon_type not in unlocked_weapons:
+		unlocked_weapons.append(weapon_type)
+		weapon_levels[weapon_type] = 1
+		print("GameState: Unlocked weapon type ", weapon_type)
+
+func upgrade_weapon(weapon_type: int) -> void:
+	if weapon_type in weapon_levels:
+		weapon_levels[weapon_type] += 1
+		print("GameState: Upgraded weapon ", weapon_type, " to level ", weapon_levels[weapon_type])
+
+func get_weapon_level(weapon_type: int) -> int:
+	return weapon_levels.get(weapon_type, 0)
+
+func get_fire_rate_multiplier() -> float:
+	return fire_rate_multiplier
+
+func set_fire_rate_multiplier(value: float) -> void:
+	fire_rate_multiplier = value
+	print("GameState: Fire rate multiplier set to ", value)
+
+func get_weapon_damage_multiplier() -> float:
+	return weapon_damage_multiplier
+
+func set_weapon_damage_multiplier(value: float) -> void:
+	weapon_damage_multiplier = value
+	print("GameState: Weapon damage multiplier set to ", value)
+
+func get_ship_speed_multiplier() -> float:
+	return ship_speed_multiplier
+
+func set_ship_speed_multiplier(value: float) -> void:
+	ship_speed_multiplier = value
+	print("GameState: Ship speed multiplier set to ", value)
+
 ## Save game state to file
 func save_game() -> bool:
 	if RunManager == null:
@@ -102,7 +148,12 @@ func save_game() -> bool:
 			"spawn_rate_multiplier": spawn_rate_multiplier,
 			"current_level": current_level,
 			"current_xp": current_xp,
-			"xp_to_next_level": xp_to_next_level
+			"xp_to_next_level": xp_to_next_level,
+			"unlocked_weapons": unlocked_weapons,
+			"weapon_levels": weapon_levels,
+			"fire_rate_multiplier": fire_rate_multiplier,
+			"weapon_damage_multiplier": weapon_damage_multiplier,
+			"ship_speed_multiplier": ship_speed_multiplier
 		}
 	}
 	
@@ -153,6 +204,11 @@ func load_game() -> bool:
 		current_level = gs.get("current_level", 1)
 		current_xp = gs.get("current_xp", 0)
 		xp_to_next_level = gs.get("xp_to_next_level", 30)
+		unlocked_weapons = gs.get("unlocked_weapons", [0])
+		weapon_levels = gs.get("weapon_levels", {0: 1})
+		fire_rate_multiplier = gs.get("fire_rate_multiplier", 1.0)
+		weapon_damage_multiplier = gs.get("weapon_damage_multiplier", 1.0)
+		ship_speed_multiplier = gs.get("ship_speed_multiplier", 1.0)
 	
 	# Restore level state
 	if RunManager != null and save_data.has("level"):
