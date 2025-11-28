@@ -6,15 +6,24 @@ extends CharacterBody2D
 signal lasers_toggled(is_on: bool)
 
 @export var speed: float = 150.0
+@export var turret_range: float = 300.0
+@export var turret_fire_rate: float = 0.2  # Seconds between shots
 
 @onready var left_laser: Laser = $LeftLaser
 @onready var right_laser: Laser = $RightLaser
+@onready var player_sprite: Sprite2D = $PlayerSprite
+@onready var frame_sprite: Sprite2D = $Sprite2D
 
 var lasers_enabled: bool = false
 var is_active: bool = false
+var is_turret_mode: bool = false  # True when docked as turret
 var player_reference: CharacterBody2D = null  # Reference to the crew member inside trawler
 var can_dock: bool = false  # Prevent immediate re-docking
 var dock_cooldown: float = 2.0  # Seconds before you can dock again
+
+# Turret mode variables
+var _turret_target: Node2D = null
+var _turret_fire_timer: float = 0.0
 
 func _ready() -> void:
 	# Start with lasers off
@@ -24,6 +33,10 @@ func _ready() -> void:
 	add_to_group("player_ship")
 
 func _physics_process(delta: float) -> void:
+	if is_turret_mode:
+		_handle_turret_mode(delta)
+		return
+	
 	if not is_active:
 		return
 	
@@ -106,32 +119,121 @@ func _process(delta: float) -> void:
 	if not is_active:
 		return
 	
-	# Check for docking back at trawler (only after cooldown)
+	# Check for docking back at ship dock (only after cooldown)
 	if can_dock:
-		var trawler := get_tree().get_first_node_in_group("trawler")
-		if trawler:
-			var distance := global_position.distance_to(trawler.global_position)
+		var nearest_dock := _find_nearest_available_dock()
+		if nearest_dock:
+			var distance := global_position.distance_to(nearest_dock.global_position)
 			if distance < 100.0:
 				# Show UI prompt for docking
 				var ui := get_tree().root.get_node_or_null("Main/UI/InteractionPrompt")
 				if ui and ui.has_method("show_interaction_prompt"):
-					ui.show_interaction_prompt("Press E to dock")
+					ui.show_interaction_prompt("Press E to dock ship")
 				
 				if Input.is_action_just_pressed("interact"):
-					return_to_trawler()
+					return_to_dock(nearest_dock)
 			else:
 				# Hide prompt when too far
 				var ui := get_tree().root.get_node_or_null("Main/UI/InteractionPrompt")
 				if ui and ui.has_method("hide_interaction_prompt"):
 					ui.hide_interaction_prompt()
+		else:
+			# No available docks - hide prompt
+			var ui := get_tree().root.get_node_or_null("Main/UI/InteractionPrompt")
+			if ui and ui.has_method("hide_interaction_prompt"):
+				ui.hide_interaction_prompt()
 
-func return_to_trawler() -> void:
-	"""Called when ship docks back at trawler"""
+func set_turret_mode(enabled: bool) -> void:
+	"""Enable/disable turret mode - auto-targeting and shooting"""
+	is_turret_mode = enabled
+	is_active = not enabled  # Turret mode means not player-controlled
+	
+	if enabled:
+		# Turret mode: hide player sprite, disable lasers initially
+		if player_sprite:
+			player_sprite.visible = false
+		lasers_enabled = false
+		_update_lasers()
+		print("Ship: Turret mode ENABLED")
+	else:
+		# Manual control: show player sprite, disable lasers
+		if player_sprite:
+			player_sprite.visible = true
+		lasers_enabled = false
+		_update_lasers()
+		_turret_target = null
+		print("Ship: Turret mode DISABLED")
+
+func _handle_turret_mode(delta: float) -> void:
+	"""Auto-target and shoot at enemies when in turret mode"""
+	_turret_fire_timer += delta
+	
+	# Find nearest enemy
+	_turret_target = _find_nearest_enemy()
+	
+	if _turret_target and is_instance_valid(_turret_target):
+		# Rotate to face target
+		var target_dir := global_position.direction_to(_turret_target.global_position)
+		var target_rotation := target_dir.angle() + PI / 2.0
+		rotation = lerp_angle(rotation, target_rotation, 10.0 * delta)
+		
+		# Turn on lasers only when actively firing
+		if _turret_fire_timer >= turret_fire_rate:
+			_turret_fire_timer = 0.0
+			# Brief laser burst
+			lasers_enabled = true
+			_update_lasers()
+	else:
+		# No target - turn off lasers
+		if lasers_enabled:
+			lasers_enabled = false
+			_update_lasers()
+
+func _find_nearest_enemy() -> Node2D:
+	"""Find the nearest enemy within turret range"""
+	var enemies := get_tree().get_nodes_in_group("enemy")
+	var nearest: Node2D = null
+	var nearest_dist := turret_range
+	
+	for enemy in enemies:
+		if not is_instance_valid(enemy):
+			continue
+		
+		var dist := global_position.distance_to(enemy.global_position)
+		if dist < nearest_dist:
+			nearest = enemy
+			nearest_dist = dist
+	
+	return nearest
+
+func _find_nearest_available_dock() -> Node2D:
+	"""Find the nearest ship dock that is available"""
+	var ship_docks := get_tree().get_nodes_in_group("ship_dock")
+	var nearest: Node2D = null
+	var nearest_dist := INF
+	
+	for dock in ship_docks:
+		if not is_instance_valid(dock):
+			continue
+		
+		# Check if dock is available
+		if dock.has_method("is_occupied") and dock.is_occupied():
+			continue
+		
+		var dist := global_position.distance_to(dock.global_position)
+		if dist < nearest_dist:
+			nearest = dock
+			nearest_dist = dist
+	
+	return nearest
+
+func return_to_dock(dock: Node2D) -> void:
+	"""Called when ship docks back at a ship dock"""
 	if player_reference == null:
-		print("Ship: No player reference, cannot return to trawler")
+		print("Ship: No player reference, cannot dock")
 		return
 	
-	print("Ship: Starting docking sequence - ", get_path())
+	print("Ship: Starting docking sequence at dock - ", dock.name)
 	
 	# Immediately disable all processing to prevent race conditions
 	set_physics_process(false)
@@ -145,22 +247,21 @@ func return_to_trawler() -> void:
 	if ui and ui.has_method("hide_interaction_prompt"):
 		ui.hide_interaction_prompt()
 	
-	# Move camera back to player FIRST before we start destroying things
-	var camera_transferred := false
+	# Move camera back to player FIRST
 	if has_node("Camera2D"):
 		var camera = get_node("Camera2D")
 		remove_child(camera)
 		player_reference.add_child(camera)
 		camera.position = Vector2.ZERO
 		camera.make_current()
-		camera_transferred = true
 		print("Ship: Camera transferred back to player")
 	
 	# Reactivate the crew member
 	player_reference.activate()
 	print("Ship: Player reactivated")
 	
-	# NOW delete the ship immediately
-	print("Ship: About to delete - parent is: ", get_parent().name if get_parent() else "NO PARENT")
-	queue_free()
-	print("Ship: queue_free() called - ship should be deleted next frame")
+	# Dock the ship at the dock
+	if dock.has_method("dock_ship"):
+		dock.dock_ship(self)
+	
+	print("Ship: Docked successfully")

@@ -25,7 +25,6 @@ width = 5.0
 color = Color(0.4, 0.9, 1, 1)
 damage_per_second = 15.0
 direction = Vector2(0, -1)
-mining_delay = 0.0
 
 [node name="LeftLaser" parent="." instance=ExtResource("1_laser")]
 position = Vector2(-6, 0)
@@ -34,9 +33,8 @@ width = 5.0
 color = Color(0.4, 0.9, 1, 1)
 damage_per_second = 15.0
 direction = Vector2(0, -1)
-mining_delay = 0.0
 
-[node name="Sprite2D2" type="Sprite2D" parent="."]
+[node name="PlayerSprite" type="Sprite2D" parent="."]
 texture = ExtResource("2_1vmog")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
@@ -48,7 +46,6 @@ scale = Vector2(2, 2)
 texture = ExtResource("3_lpqif")
 
 [node name="HealthComponent" parent="." instance=ExtResource("4_health")]
-max_health = 100
 
 [node name="SpeedComponent" parent="." instance=ExtResource("5_speed")]
 base_speed = 150.0
