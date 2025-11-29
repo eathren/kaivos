@@ -9,7 +9,6 @@ signal lasers_toggled(is_on: bool)
 @export var turret_range: float = 300.0
 @export var turret_fire_rate: float = 0.2  # Seconds between shots
 
-var ship_id: int = -1  # Which ship this is (0-3), -1 means unassigned
 var speed: float = 150.0  # Set from ship_stats in _ready()
 
 @onready var left_laser: Laser = $LeftLaser
@@ -231,14 +230,9 @@ func _find_nearest_enemy() -> Node2D:
 	
 	return nearest
 
-func set_ship_id(id: int) -> void:
-	"""Assign this ship an ID (0-3) for dock assignment"""
-	ship_id = id
-
 func _find_nearest_available_dock() -> Node2D:
-	"""Find the nearest ship dock that is available. Prefers home dock if available."""
+	"""Find the nearest ship dock that is available"""
 	var ship_docks := get_tree().get_nodes_in_group("ship_dock")
-	var home_dock: Node2D = null
 	var nearest: Node2D = null
 	var nearest_dist := INF
 	
@@ -250,19 +244,12 @@ func _find_nearest_available_dock() -> Node2D:
 		if dock.has_method("is_occupied") and dock.is_occupied():
 			continue
 		
-		# Check if this is our home dock
-		if ship_id >= 0 and "home_ship_id" in dock and dock.home_ship_id == ship_id:
-			home_dock = dock
-			break  # Always prefer home dock
-		
-		# Track nearest as fallback
 		var dist := global_position.distance_to(dock.global_position)
 		if dist < nearest_dist:
 			nearest = dock
 			nearest_dist = dist
 	
-	# Prefer home dock, fallback to nearest
-	return home_dock if home_dock != null else nearest
+	return nearest
 
 func return_to_dock(dock: Node2D) -> void:
 	"""Called when ship docks back at a ship dock"""

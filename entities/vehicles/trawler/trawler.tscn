@@ -126,13 +126,13 @@ shape = SubResource("SegmentShape2D_3xn0q")
 position = Vector2(-24, 28)
 
 [node name="LadderDock2" parent="InteriorRoot" instance=ExtResource("8_fg2qg")]
-position = Vector2(-24, 64)
+position = Vector2(-24, 86)
 
 [node name="LadderDock3" parent="InteriorRoot" instance=ExtResource("8_fg2qg")]
 position = Vector2(24, 28)
 
 [node name="LadderDock4" parent="InteriorRoot" instance=ExtResource("8_fg2qg")]
-position = Vector2(24, 64)
+position = Vector2(24, 86)
 
 [node name="FrontLaser" parent="." instance=ExtResource("1_laser")]
 position = Vector2(0, -145)
@@ -143,13 +143,21 @@ damage_per_second = 10.0
 direction = Vector2(0, -1)
 
 [node name="ShipDock1" parent="." instance=ExtResource("11_ship_dock")]
-position = Vector2(-35, 145)
+position = Vector2(-50, 28)
+dock_position = 0
+home_ship_id = 0
 
 [node name="ShipDock2" parent="." instance=ExtResource("11_ship_dock")]
-position = Vector2(-12, 145)
+position = Vector2(-28, 133)
+dock_position = 2
+home_ship_id = 1
 
 [node name="ShipDock3" parent="." instance=ExtResource("11_ship_dock")]
-position = Vector2(12, 145)
+position = Vector2(50, 28)
+dock_position = 1
+home_ship_id = 2
 
 [node name="ShipDock4" parent="." instance=ExtResource("11_ship_dock")]
-position = Vector2(35, 145)
+position = Vector2(28, 132)
+dock_position = 3
+home_ship_id = 3

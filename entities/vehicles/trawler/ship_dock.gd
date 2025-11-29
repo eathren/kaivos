@@ -3,12 +3,19 @@ class_name ShipDock
 
 ## Ship dock that spawns a ship and acts as turret when docked
 
+enum DockPosition {
+	LEFT,
+	RIGHT,
+	BOTTOM_LEFT,
+	BOTTOM_RIGHT
+}
+
 signal ship_undocked(dock: ShipDock)
 signal ship_docked(dock: ShipDock)
 
 @export var ship_scene: PackedScene = preload("res://entities/player/ships/player_ship/player_ship.tscn")
-@export var dock_side: String = "left"  # "left" or "right" for sprite flipping
-
+@export var dock_position: DockPosition = DockPosition.LEFT
+@export var home_ship_id: int = 0  # Which ship ID this dock is assigned to (0-3)
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var dock_marker: Marker2D = $DockMarker
 @onready var interaction_area: Area2D = $InteractionArea
@@ -20,9 +27,9 @@ var is_spawning: bool = false
 func _ready() -> void:
 	add_to_group("ship_dock")
 	
-	# Flip sprite based on side
+	# Flip sprite based on position
 	if sprite:
-		sprite.flip_h = (dock_side == "right")
+		sprite.flip_h = (dock_position == DockPosition.RIGHT or dock_position == DockPosition.BOTTOM_RIGHT)
 	
 	# Spawn initial ship and dock it
 	_spawn_docked_ship()
@@ -47,6 +54,11 @@ func _spawn_docked_ship() -> void:
 	var ship := ship_scene.instantiate()
 	get_tree().root.get_node("Main/CurrentLevel").add_child(ship)
 	ship.global_position = global_position
+	
+	# Assign ship ID
+	if ship.has_method("set_ship_id"):
+		ship.set_ship_id(home_ship_id)
+	
 	ship.add_to_group("docked_turret")
 	
 	docked_ship = ship
@@ -109,8 +121,13 @@ func _undock_ship() -> void:
 		player.deactivate()
 		docked_ship.take_control_from_player(player)
 		
-		# Apply spawn offset based on dock side
-		var offset := Vector2(80, 0) if dock_side == "right" else Vector2(-80, 0)
+		# Apply spawn offset based on dock position
+		var offset := Vector2.ZERO
+		match dock_position:
+			DockPosition.LEFT, DockPosition.BOTTOM_LEFT:
+				offset = Vector2(-80, 0)
+			DockPosition.RIGHT, DockPosition.BOTTOM_RIGHT:
+				offset = Vector2(80, 0)
 		offset = offset.rotated(get_parent().global_rotation)  # Rotate by trawler rotation
 		docked_ship.global_position = global_position + offset
 	
@@ -170,4 +187,3 @@ func _is_nearest_dock_to_player() -> bool:
 			return false
 	
 	return true
-
