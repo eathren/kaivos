@@ -92,10 +92,10 @@ func _fire_weapon(weapon_type: int, target: Node2D, origin: Node2D) -> void:
 			_fire_laser(target, origin)
 		WeaponType.BULLET:
 			_fire_bullet(target, origin)
-		WeaponType.MISSILE:
-			_fire_missile(target, origin)
-		WeaponType.BEAM:
-			_fire_beam(target, origin)
+		#WeaponType.MISSILE:
+			#_fire_missile(target, origin)
+		#WeaponType.BEAM:
+			#_fire_beam(target, origin)
 	
 	weapon_fired.emit(str(weapon_type))
 
@@ -155,16 +155,16 @@ func _fire_bullet(target: Node2D, origin: Node2D) -> void:
 			var faction_component := _owner_body.get_node_or_null("FactionComponent")
 			if faction_component:
 				bullet.faction = faction_component.faction
-
-func _fire_missile(target: Node2D, origin: Node2D) -> void:
-	"""Fire a homing missile"""
-	# TODO: Implement missile spawning when missile scene exists
-	pass
-
-func _fire_beam(target: Node2D, origin: Node2D) -> void:
-	"""Fire a continuous beam weapon"""
-	# TODO: Implement beam weapon
-	pass
+#
+#func _fire_missile(target: Node2D, origin: Node2D) -> void:
+	#"""Fire a homing missile"""
+	## TODO: Implement missile spawning when missile scene exists
+	#pass
+#
+#func _fire_beam(target: Node2D, origin: Node2D) -> void:
+	#"""Fire a continuous beam weapon"""
+	## TODO: Implement beam weapon
+	#pass
 
 func get_weapon_damage() -> float:
 	"""Get total weapon damage from GameState"""

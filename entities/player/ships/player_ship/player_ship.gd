@@ -1,16 +1,19 @@
 extends CharacterBody2D
 
-## Player ship with two small lasers and movement
-## Lasers toggle on/off with interact button
+## Player ship - movement and shooting only
+## Docking is handled by PlayerController
 
 signal lasers_toggled(is_on: bool)
 
 @export var ship_stats: ShipStats = preload("res://resources/config/ships/player_ship_base.tres")
-@export var turret_range: float = 300.0
-@export var turret_fire_rate: float = 0.2  # Seconds between shots
 
-var ship_id: int = -1  # Which ship this is (0-3), -1 means unassigned
-var speed: float = 150.0  # Set from ship_stats in _ready()
+var ship_id: int = -1
+var speed: float = 150.0
+var is_active: bool = false
+var dock_radius: float = 80.0
+
+var owner_controller: Node = null
+var current_dock: Node2D = null
 
 @onready var left_laser: Laser = $LeftLaser
 @onready var right_laser: Laser = $RightLaser
@@ -19,68 +22,33 @@ var speed: float = 150.0  # Set from ship_stats in _ready()
 @onready var weapon_component: Node = $WeaponComponent
 
 var lasers_enabled: bool = false
-var is_active: bool = false
-var is_turret_mode: bool = false  # True when docked as turret
-var player_reference: CharacterBody2D = null  # Reference to the crew member inside trawler
-var can_dock: bool = false  # Prevent immediate re-docking
-var dock_cooldown: float = 2.0  # Seconds before you can dock again
-
-# Turret mode variables
-var _turret_target: Node2D = null
-var _turret_fire_timer: float = 0.0
 
 func _ready() -> void:
-	# Start with lasers off
-	_update_lasers()
-	
-	add_to_group("player")
 	add_to_group("player_ship")
+	_update_lasers()
 	
 	# Apply stats from ship_stats resource
 	if ship_stats:
 		speed = ship_stats.base_speed
 		
-		# Apply to HealthComponent
-		var health_component := get_node_or_null("HealthComponent") as HealthComponent
+		var health_component := get_node_or_null("HealthComponent")
 		if health_component:
 			health_component.max_health = ship_stats.max_health
 			health_component.current_health = ship_stats.max_health
 		
-		# Apply to SpeedComponent
-		var speed_component := get_node_or_null("SpeedComponent") as SpeedComponent
+		var speed_component := get_node_or_null("SpeedComponent")
 		if speed_component:
 			speed_component.base_speed = ship_stats.base_speed
 		
-		# Apply laser colors/width
 		if left_laser:
 			left_laser.color = ship_stats.laser_color
 			left_laser.width = ship_stats.laser_width
 		if right_laser:
 			right_laser.color = ship_stats.laser_color
 			right_laser.width = ship_stats.laser_width
-		
-		# Apply pickup range to PickupArea
-		var pickup_area := get_node_or_null("PickupArea") as Area2D
-		if pickup_area:
-			var collision_shape := pickup_area.get_node_or_null("CollisionShape2D") as CollisionShape2D
-			if collision_shape and collision_shape.shape is CircleShape2D:
-				var circle := collision_shape.shape as CircleShape2D
-				circle.radius = ship_stats.pickup_range * GameState.get_pickup_range_multiplier()
-	
-	# Apply speed multiplier from GameState
-	if GameState and GameState.has_method("get_ship_speed_multiplier"):
-		speed *= GameState.get_ship_speed_multiplier()
-	
-	# Update weapon component with GameState data
-	if weapon_component and weapon_component.has_method("_load_weapon_state"):
-		weapon_component._load_weapon_state()
 
 func _physics_process(delta: float) -> void:
-	if is_turret_mode:
-		_handle_turret_mode(delta)
-		return
-	
-	if not is_active:
+	if not is_active or not owner_controller:
 		return
 	
 	# Handle movement (WASD)
@@ -93,212 +61,68 @@ func _physics_process(delta: float) -> void:
 		velocity = input_dir * speed
 		
 		# Rotate to face movement direction
-		var target_rotation := input_dir.angle() + PI / 2.0  # +90 degrees because sprite faces up by default
-		rotation = lerp_angle(rotation, target_rotation, 10.0 * delta)  # Smooth rotation
+		var target_rotation := input_dir.angle() + PI / 2.0
+		rotation = lerp_angle(rotation, target_rotation, 10.0 * delta)
 	else:
 		velocity = Vector2.ZERO
 	
 	move_and_slide()
 
-# Rotation is now handled inline in _physics_process based on movement direction
-
 func _input(event: InputEvent) -> void:
-	if not is_active:
+	if not is_active or not owner_controller:
 		return
 	
+	# Toggle lasers
 	if event.is_action_pressed("interact"):
 		lasers_enabled = not lasers_enabled
 		_update_lasers()
 		lasers_toggled.emit(lasers_enabled)
 	
-	# Fire bullets in the direction ship is facing
+	# Try to dock
+	if event.is_action_pressed("interact"):
+		try_dock()
+	
+	# Fire weapons
 	if event.is_action_pressed("shoot") or event.is_action_pressed("ui_accept"):
-		if weapon_component and weapon_component.has_method("fire_in_direction"):
-			weapon_component.fire_in_direction(self)
+		_fire_weapons()
+
+func try_dock() -> void:
+	"""Request docking if near current dock"""
+	if not current_dock or not owner_controller:
+		return
+	
+	var dist := global_position.distance_to(current_dock.global_position)
+	if dist > dock_radius:
+		return
+	
+	if owner_controller.has_method("request_dock"):
+		owner_controller.request_dock(self, current_dock)
+
+func _fire_weapons() -> void:
+	"""Fire bullets in the direction we're facing"""
+	if weapon_component and weapon_component.has_method("fire_in_direction"):
+		var fire_dir := Vector2.UP.rotated(rotation)
+		weapon_component.fire_in_direction(fire_dir, self)
 
 func _update_lasers() -> void:
+	"""Update laser visibility"""
 	if left_laser:
 		left_laser.set_is_casting(lasers_enabled)
 	if right_laser:
 		right_laser.set_is_casting(lasers_enabled)
 
-func take_control_from_player(player: CharacterBody2D) -> void:
-	"""Called when player boards this ship from the trawler"""
-	player_reference = player
+func activate() -> void:
 	is_active = true
-	can_dock = false  # Start with docking disabled
-	
-	print("Ship: Taking control from player")
-	
-	# Move camera from player to ship
-	if player.has_node("Camera2D"):
-		var camera = player.get_node("Camera2D")
-		player.remove_child(camera)
-		add_child(camera)
-		camera.position = Vector2.ZERO
-		camera.make_current()
-		print("Ship: Camera transferred to ship")
-	
-	# Enable docking after cooldown (check if still valid)
-	await get_tree().create_timer(dock_cooldown).timeout
-	if is_instance_valid(self) and is_active:
-		can_dock = true
-		print("Ship: Can now dock back at trawler")
+	visible = true
 
-func _process(delta: float) -> void:
-	if not is_active:
-		return
-	
-	# Check for docking back at ship dock (only after cooldown)
-	if can_dock:
-		var nearest_dock := _find_nearest_available_dock()
-		if nearest_dock:
-			var distance := global_position.distance_to(nearest_dock.global_position)
-			if distance < 100.0:
-				# Show UI prompt for docking
-				var ui := get_tree().root.get_node_or_null("Main/UI/InteractionPrompt")
-				if ui and ui.has_method("show_interaction_prompt"):
-					ui.show_interaction_prompt("Press E to dock ship")
-				
-				if Input.is_action_just_pressed("interact"):
-					return_to_dock(nearest_dock)
-			else:
-				# Hide prompt when too far
-				var ui := get_tree().root.get_node_or_null("Main/UI/InteractionPrompt")
-				if ui and ui.has_method("hide_interaction_prompt"):
-					ui.hide_interaction_prompt()
-		else:
-			# No available docks - hide prompt
-			var ui := get_tree().root.get_node_or_null("Main/UI/InteractionPrompt")
-			if ui and ui.has_method("hide_interaction_prompt"):
-				ui.hide_interaction_prompt()
-
-func set_turret_mode(enabled: bool) -> void:
-	"""Enable/disable turret mode - auto-targeting and shooting"""
-	is_turret_mode = enabled
-	is_active = not enabled  # Turret mode means not player-controlled
-	
-	if enabled:
-		# Turret mode: hide player sprite, disable lasers initially
-		if player_sprite:
-			player_sprite.visible = false
-		_disable_lasers()
-		print("Ship: Turret mode ENABLED")
-	else:
-		# Manual control: show player sprite, disable lasers
-		if player_sprite:
-			player_sprite.visible = true
-		_disable_lasers()
-		_turret_target = null
-		print("Ship: Turret mode DISABLED")
-
-func _handle_turret_mode(delta: float) -> void:
-	"""Auto-target and shoot at enemies when in turret mode"""
-	_turret_fire_timer += delta
-	
-	# Find nearest enemy
-	_turret_target = _find_nearest_enemy()
-	
-	if _turret_target and is_instance_valid(_turret_target):
-		# Rotate to face target
-		var target_dir := global_position.direction_to(_turret_target.global_position)
-		var target_rotation := target_dir.angle() + PI / 2.0
-		rotation = lerp_angle(rotation, target_rotation, 10.0 * delta)
-		
-		if weapon_component and weapon_component.has_method("fire_at_target"):
-			weapon_component.fire_at_target(_turret_target, self)
-	else:
-		_disable_lasers()
-
-func _disable_lasers() -> void:
-	lasers_enabled = false
-	_update_lasers()
-
-func _find_nearest_enemy() -> Node2D:
-	"""Find the nearest enemy within turret range"""
-	var enemies := get_tree().get_nodes_in_group("enemy")
-	var nearest: Node2D = null
-	var nearest_dist := turret_range
-	
-	for enemy in enemies:
-		if not is_instance_valid(enemy):
-			continue
-		
-		var dist := global_position.distance_to(enemy.global_position)
-		if dist < nearest_dist:
-			nearest = enemy
-			nearest_dist = dist
-	
-	return nearest
+func deactivate() -> void:
+	is_active = false
 
 func set_ship_id(id: int) -> void:
-	"""Assign this ship an ID (0-3) for dock assignment"""
 	ship_id = id
 
-func _find_nearest_available_dock() -> Node2D:
-	"""Find the nearest ship dock that is available. Prefers home dock if available."""
-	var ship_docks := get_tree().get_nodes_in_group("ship_dock")
-	var home_dock: Node2D = null
-	var nearest: Node2D = null
-	var nearest_dist := INF
-	
-	for dock in ship_docks:
-		if not is_instance_valid(dock):
-			continue
-		
-		# Check if dock is available
-		if dock.has_method("is_occupied") and dock.is_occupied():
-			continue
-		
-		# Check if this is our home dock
-		if ship_id >= 0 and "home_ship_id" in dock and dock.home_ship_id == ship_id:
-			home_dock = dock
-			break  # Always prefer home dock
-		
-		# Track nearest as fallback
-		var dist := global_position.distance_to(dock.global_position)
-		if dist < nearest_dist:
-			nearest = dock
-			nearest_dist = dist
-	
-	# Prefer home dock, fallback to nearest
-	return home_dock if home_dock != null else nearest
+func set_owner_controller(controller: Node) -> void:
+	owner_controller = controller
 
-func return_to_dock(dock: Node2D) -> void:
-	"""Called when ship docks back at a ship dock"""
-	if player_reference == null:
-		print("Ship: No player reference, cannot dock")
-		return
-	
-	print("Ship: Starting docking sequence at dock - ", dock.name)
-	
-	# Immediately disable all processing to prevent race conditions
-	set_physics_process(false)
-	set_process(false)
-	set_process_input(false)
-	is_active = false
-	can_dock = false
-	
-	# Hide dock prompt
-	var ui := get_tree().root.get_node_or_null("Main/UI/InteractionPrompt")
-	if ui and ui.has_method("hide_interaction_prompt"):
-		ui.hide_interaction_prompt()
-	
-	# Move camera back to player FIRST
-	if has_node("Camera2D"):
-		var camera = get_node("Camera2D")
-		remove_child(camera)
-		player_reference.add_child(camera)
-		camera.position = Vector2.ZERO
-		camera.make_current()
-		print("Ship: Camera transferred back to player")
-	
-	# Reactivate the crew member
-	player_reference.activate()
-	print("Ship: Player reactivated")
-	
-	# Dock the ship at the dock
-	if dock.has_method("dock_ship"):
-		dock.dock_ship(self)
-	
-	print("Ship: Docked successfully")
+func set_current_dock(dock: Node2D) -> void:
+	current_dock = dock
