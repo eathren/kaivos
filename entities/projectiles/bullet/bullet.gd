@@ -3,9 +3,11 @@ extends Area2D
 @export var speed: float = 600.0
 @export var damage: int = 10
 @export var lifetime: float = 2.0
+@export var pierce: int = 0  # How many enemies it can go through
 @export var faction: FactionComponent.Faction = FactionComponent.Faction.PLAYER
 
 var _age: float = 0.0
+var _pierce_count: int = 0  # How many enemies we've hit so far
 
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
@@ -37,7 +39,10 @@ func _on_body_entered(body: Node) -> void:
 	if health != null:
 		print("  Applying damage: ", damage)
 		health.apply_damage(damage)
+		_pierce_count += 1
+		
+		# Check if we've pierced enough enemies
+		if _pierce_count > pierce:
+			queue_free()
 	else:
 		print("  No HealthComponent found")
-
-	queue_free()

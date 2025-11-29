@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3 uid="uid://j37jh3fkp0m3"]
+
+[ext_resource type="Script" uid="uid://j7y4014ogrdd" path="res://resources/data/weapons/weapon_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+weapon_name = "Sawblade"
+weapon_type = 2
+fire_pattern = 4
+base_damage = 25.0
+base_fire_rate = 0.5
+base_projectile_speed = 300.0
+base_pierce = 999
+base_range = 800.0
+damage_per_level = 10.0
+fire_rate_per_level = 0.05
+projectile_count_per_level = 1
+projectile_color = Color(0.8, 0.8, 0.8, 1)
+projectile_scale = 1.5
+can_pierce = true

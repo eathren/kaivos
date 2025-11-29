@@ -19,9 +19,10 @@ var current_dock: Node2D = null
 @onready var right_laser: Laser = $RightLaser
 @onready var player_sprite: Sprite2D = $PlayerSprite
 @onready var frame_sprite: Sprite2D = $Sprite2D
-@onready var weapon_component: Node = $WeaponComponent
+@onready var weapon_manager: WeaponManager = $WeaponManager
 
 var lasers_enabled: bool = false
+var starting_weapon: WeaponData = preload("res://resources/config/weapons/basic_gun.tres")
 
 func _ready() -> void:
 	add_to_group("player_ship")
@@ -29,6 +30,13 @@ func _ready() -> void:
 	# Lasers always on for mining
 	lasers_enabled = true
 	_update_lasers()
+	
+	# Setup weapon manager
+	if weapon_manager:
+		weapon_manager.owner_ship = self
+		# Add starting weapon
+		if starting_weapon:
+			weapon_manager.add_weapon(starting_weapon)
 	
 	# Apply stats from ship_stats resource
 	if ship_stats:
@@ -83,9 +91,7 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("interact"):
 		try_dock()
 	
-	# Fire weapons (Shoot or Space)
-	if event.is_action_pressed("shoot") or event.is_action_pressed("ui_accept"):
-		_fire_weapons()
+	# Note: Weapons auto-fire via WeaponManager, no manual firing needed
 
 func try_dock() -> void:
 	"""Request docking if near current dock"""
@@ -99,11 +105,7 @@ func try_dock() -> void:
 	if owner_controller.has_method("request_dock"):
 		owner_controller.request_dock(self, current_dock)
 
-func _fire_weapons() -> void:
-	"""Fire bullets in the direction we're facing"""
-	if weapon_component and weapon_component.has_method("fire_in_direction"):
-		var fire_dir := Vector2.UP.rotated(rotation)
-		weapon_component.fire_in_direction(fire_dir, self)
+# Weapon firing is now automatic via WeaponManager
 
 func _update_lasers() -> void:
 	"""Update laser visibility"""

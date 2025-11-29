@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ModifierData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/data/weapons/modifier_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+modifier_name = "Damage Boost"
+modifier_type = 0
+value = 0.15
+stack_additively = true
+max_stacks = 10
+affects_all_weapons = true
+description = "+15% Damage to all weapons"
+

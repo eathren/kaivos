@@ -6,7 +6,7 @@
 [ext_resource type="Texture2D" uid="uid://cvffw0qauk3gu" path="res://assets/art/player/player_ship_frame.png" id="3_lpqif"]
 [ext_resource type="PackedScene" uid="uid://hx0v5hqvqkmy" path="res://components/health_component/health_component.tscn" id="4_health"]
 [ext_resource type="PackedScene" uid="uid://c5k8x6v4pbwi" path="res://components/speed_component/speed_component.tscn" id="5_speed"]
-[ext_resource type="PackedScene" path="res://components/weapon_component/weapon_component.tscn" id="6_weapon"]
+[ext_resource type="PackedScene" path="res://components/weapon_manager/weapon_manager.tscn" id="6_weapon"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_ship"]
 radius = 12.0
@@ -58,7 +58,7 @@ texture = ExtResource("3_lpqif")
 [node name="SpeedComponent" parent="." instance=ExtResource("5_speed")]
 base_speed = 150.0
 
-[node name="WeaponComponent" parent="." instance=ExtResource("6_weapon")]
+[node name="WeaponManager" parent="." instance=ExtResource("6_weapon")]
 
 [node name="PickupArea" type="Area2D" parent="."]
 collision_layer = 0
