@@ -2,11 +2,10 @@ extends CharacterBody2D
 
 ## Base enemy script with component-based systems
 
-@export var damage_per_second: float = 10.0
-@export var exp_crystal_scene: PackedScene = preload("res://scenes/gameplay/items/exp_crystal.tscn")
-@export var gold_drop_chance: float = 0.3  # 30% chance to drop gold
-@export var scrap_drop_chance: float = 0.2  # 20% chance to drop scrap
+@export var enemy_stats: EnemyStats = preload("res://resources/config/enemies/imp_tier1.tres")
+@export var loot_table: LootTable = preload("res://resources/config/loot/basic_loot.tres")
 
+var exp_crystal_scene: PackedScene = preload("res://scenes/gameplay/items/exp_crystal.tscn")
 var gold_pickup_scene: PackedScene = preload("res://scenes/gameplay/items/gold_pickup.tscn")
 var scrap_pickup_scene: PackedScene = preload("res://scenes/gameplay/items/scrap_pickup.tscn")
 
@@ -20,6 +19,14 @@ func _ready() -> void:
 	# Get components
 	_health_component = get_node_or_null("HealthComponent")
 	_speed_component = get_node_or_null("SpeedComponent")
+	
+	# Apply stats from resource
+	if enemy_stats:
+		if _health_component:
+			_health_component.max_health = enemy_stats.max_health
+			_health_component.current_health = enemy_stats.max_health
+		if _speed_component:
+			_speed_component.base_speed = enemy_stats.move_speed
 	
 	# Connect health component if it exists
 	if _health_component:
@@ -65,35 +72,61 @@ func _deal_damage_to(target: Node, delta: float) -> void:
 	# Look for HealthComponent on target
 	var health_comp = target.get_node_or_null("HealthComponent")
 	if health_comp and health_comp.has_method("take_damage"):
-		health_comp.take_damage(damage_per_second * delta)
+		var dps := enemy_stats.damage_per_second if enemy_stats else 10.0
+		health_comp.take_damage(dps * delta)
 
 func _on_death() -> void:
 	# Increment kill counter
 	if GameState:
 		GameState.add_kill()
 	
-	# Spawn exp crystal
-	if exp_crystal_scene:
-		var crystal := exp_crystal_scene.instantiate() as Node2D
-		if crystal:
-			get_parent().add_child(crystal)
-			crystal.global_position = global_position
+	# Use loot table for drops
+	if loot_table:
+		_spawn_loot_from_table()
+	else:
+		# Fallback: spawn basic exp
+		_spawn_exp_crystal()
 	
-	# Random chance to drop gold
-	if randf() < gold_drop_chance and gold_pickup_scene:
+	queue_free()
+
+func _spawn_loot_from_table() -> void:
+	"""Spawn loot based on loot table configuration"""
+	if not loot_table:
+		return
+	
+	# Always spawn EXP
+	var exp_amount := randi_range(loot_table.exp_min, loot_table.exp_max)
+	_spawn_exp_crystal(exp_amount)
+	
+	# Random chance for gold
+	if randf() < loot_table.gold_drop_chance and gold_pickup_scene:
+		var gold_amount := randi_range(loot_table.gold_amount_min, loot_table.gold_amount_max)
 		var gold := gold_pickup_scene.instantiate() as Node2D
-		if gold:
+		if gold and "amount" in gold:
+			gold.amount = gold_amount
 			get_parent().add_child(gold)
 			gold.global_position = global_position + Vector2(randf_range(-10, 10), randf_range(-10, 10))
 	
-	# Random chance to drop scrap
-	if randf() < scrap_drop_chance and scrap_pickup_scene:
+	# Random chance for scrap
+	if randf() < loot_table.scrap_drop_chance and scrap_pickup_scene:
+		var scrap_amount := randi_range(loot_table.scrap_amount_min, loot_table.scrap_amount_max)
 		var scrap := scrap_pickup_scene.instantiate() as Node2D
-		if scrap:
+		if scrap and "amount" in scrap:
+			scrap.amount = scrap_amount
 			get_parent().add_child(scrap)
 			scrap.global_position = global_position + Vector2(randf_range(-10, 10), randf_range(-10, 10))
+
+func _spawn_exp_crystal(amount: int = 10) -> void:
+	"""Spawn an exp crystal"""
+	if not exp_crystal_scene:
+		return
 	
-	queue_free()
+	var crystal := exp_crystal_scene.instantiate() as Node2D
+	if crystal:
+		if "xp_value" in crystal:
+			crystal.xp_value = amount
+		get_parent().add_child(crystal)
+		crystal.global_position = global_position
 
 func take_damage(amount: float) -> void:
 	if _health_component:

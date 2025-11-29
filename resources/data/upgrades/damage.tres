@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="UpgradeData" load_steps=2 format=3 uid="uid://damage_upgrade"]
+
+[ext_resource type="Script" path="res://resources/data/upgrade_data.gd" id="1_upgrade"]
+
+[resource]
+script = ExtResource("1_upgrade")
+upgrade_name = "Weapon Damage"
+upgrade_type = 1
+description = "Increase weapon damage by 15%"
+gold_cost = 150
+scrap_cost = 15
+max_level = 10
+value_per_level = 0.15
+

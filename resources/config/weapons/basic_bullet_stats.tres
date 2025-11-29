@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="WeaponStats" load_steps=2 format=3 uid="uid://bbmwc424uxhfd"]
+
+[ext_resource type="Script" uid="uid://bkikaoqj5fgqj" path="res://resources/data/weapon_stats.gd" id="1_stats"]
+
+[resource]
+script = ExtResource("1_stats")
+weapon_id = 1
+weapon_name = "Basic Bullets"

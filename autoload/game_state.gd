@@ -41,6 +41,9 @@ signal kills_changed(new_count: int)
 signal gold_changed(new_count: int)
 signal scrap_changed(new_count: int)
 
+# Ship spawning lock (prevent multiple spawns)
+var is_spawning_player_ship: bool = false
+
 # Save/load system
 var save_data: Dictionary = {}
 const SAVE_FILE_PATH: String = "user://savegame.save"  

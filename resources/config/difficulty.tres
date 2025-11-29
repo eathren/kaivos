@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="DifficultySettings" load_steps=2 format=3 uid="uid://difficulty_settings"]
+
+[ext_resource type="Script" path="res://resources/data/difficulty_settings.gd" id="1_difficulty"]
+
+[resource]
+script = ExtResource("1_difficulty")
+base_enemy_health_per_level = 5.0
+base_enemy_damage_per_level = 2.0
+base_enemy_speed_per_level = 5.0
+spawn_rate_per_level = 1.1
+elite_spawn_chance_per_level = 0.05
+boss_spawn_depth = 500
+

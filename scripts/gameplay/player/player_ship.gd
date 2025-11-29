@@ -5,9 +5,11 @@ extends CharacterBody2D
 
 signal lasers_toggled(is_on: bool)
 
-@export var speed: float = 150.0
+@export var ship_stats: ShipStats = preload("res://resources/config/ships/player_ship_base.tres")
 @export var turret_range: float = 300.0
 @export var turret_fire_rate: float = 0.2  # Seconds between shots
+
+var speed: float = 150.0  # Set from ship_stats in _ready()
 
 @onready var left_laser: Laser = $LeftLaser
 @onready var right_laser: Laser = $RightLaser
@@ -33,6 +35,37 @@ func _ready() -> void:
 	add_to_group("player")
 	add_to_group("player_ship")
 	
+	# Apply stats from ship_stats resource
+	if ship_stats:
+		speed = ship_stats.base_speed
+		
+		# Apply to HealthComponent
+		var health_component := get_node_or_null("HealthComponent") as HealthComponent
+		if health_component:
+			health_component.max_health = ship_stats.max_health
+			health_component.current_health = ship_stats.max_health
+		
+		# Apply to SpeedComponent
+		var speed_component := get_node_or_null("SpeedComponent") as SpeedComponent
+		if speed_component:
+			speed_component.base_speed = ship_stats.base_speed
+		
+		# Apply laser colors/width
+		if left_laser:
+			left_laser.color = ship_stats.laser_color
+			left_laser.width = ship_stats.laser_width
+		if right_laser:
+			right_laser.color = ship_stats.laser_color
+			right_laser.width = ship_stats.laser_width
+		
+		# Apply pickup range to PickupArea
+		var pickup_area := get_node_or_null("PickupArea") as Area2D
+		if pickup_area:
+			var collision_shape := pickup_area.get_node_or_null("CollisionShape2D") as CollisionShape2D
+			if collision_shape and collision_shape.shape is CircleShape2D:
+				var circle := collision_shape.shape as CircleShape2D
+				circle.radius = ship_stats.pickup_range * GameState.get_pickup_range_multiplier()
+	
 	# Apply speed multiplier from GameState
 	if GameState and GameState.has_method("get_ship_speed_multiplier"):
 		speed *= GameState.get_ship_speed_multiplier()
@@ -49,10 +82,7 @@ func _physics_process(delta: float) -> void:
 	if not is_active:
 		return
 	
-	# Handle rotation (face mouse or gamepad right stick)
-	_handle_rotation(delta)
-	
-	# Handle movement (WASD - independent of rotation)
+	# Handle movement (WASD)
 	var input_dir := Vector2.ZERO
 	input_dir.x = Input.get_action_strength("move_right") - Input.get_action_strength("move_left")
 	input_dir.y = Input.get_action_strength("move_down") - Input.get_action_strength("move_up")
@@ -60,31 +90,16 @@ func _physics_process(delta: float) -> void:
 	if input_dir != Vector2.ZERO:
 		input_dir = input_dir.normalized()
 		velocity = input_dir * speed
+		
+		# Rotate to face movement direction
+		var target_rotation := input_dir.angle() + PI / 2.0  # +90 degrees because sprite faces up by default
+		rotation = lerp_angle(rotation, target_rotation, 10.0 * delta)  # Smooth rotation
 	else:
 		velocity = Vector2.ZERO
 	
 	move_and_slide()
 
-func _handle_rotation(delta: float) -> void:
-	# Rotate to face mouse (or gamepad right stick)
-	var aim_dir := Vector2.ZERO
-	
-	# Mouse aiming (primary)
-	var mouse_pos := get_global_mouse_position()
-	aim_dir = (mouse_pos - global_position).normalized()
-	
-	# Gamepad right stick override (if being used)
-	var gamepad_aim := Vector2.ZERO
-	gamepad_aim.x = Input.get_action_strength("ui_right") - Input.get_action_strength("ui_left")
-	gamepad_aim.y = Input.get_action_strength("ui_down") - Input.get_action_strength("ui_up")
-	
-	if gamepad_aim.length() > 0.2:  # Deadzone
-		aim_dir = gamepad_aim.normalized()
-	
-	# Rotate to face aim direction
-	if aim_dir != Vector2.ZERO:
-		var target_rotation := aim_dir.angle() + PI / 2.0  # +90 degrees because sprite faces up by default
-		rotation = lerp_angle(rotation, target_rotation, 15.0 * delta)  # Smooth rotation
+# Rotation is now handled inline in _physics_process based on movement direction
 
 func _input(event: InputEvent) -> void:
 	if not is_active:
@@ -94,6 +109,11 @@ func _input(event: InputEvent) -> void:
 		lasers_enabled = not lasers_enabled
 		_update_lasers()
 		lasers_toggled.emit(lasers_enabled)
+	
+	# Fire bullets in the direction ship is facing
+	if event.is_action_pressed("shoot") or event.is_action_pressed("ui_accept"):
+		if weapon_component and weapon_component.has_method("fire_in_direction"):
+			weapon_component.fire_in_direction(self)
 
 func _update_lasers() -> void:
 	if left_laser:
@@ -161,15 +181,13 @@ func set_turret_mode(enabled: bool) -> void:
 		# Turret mode: hide player sprite, disable lasers initially
 		if player_sprite:
 			player_sprite.visible = false
-		lasers_enabled = false
-		_update_lasers()
+		_disable_lasers()
 		print("Ship: Turret mode ENABLED")
 	else:
 		# Manual control: show player sprite, disable lasers
 		if player_sprite:
 			player_sprite.visible = true
-		lasers_enabled = false
-		_update_lasers()
+		_disable_lasers()
 		_turret_target = null
 		print("Ship: Turret mode DISABLED")
 
@@ -186,25 +204,14 @@ func _handle_turret_mode(delta: float) -> void:
 		var target_rotation := target_dir.angle() + PI / 2.0
 		rotation = lerp_angle(rotation, target_rotation, 10.0 * delta)
 		
-		# Use weapon component to determine fire rate
-		var can_fire := true
-		if weapon_component and weapon_component.has_method("can_fire"):
-			can_fire = weapon_component.can_fire()
-		
-		# Turn on lasers when weapon component says we can fire
-		if can_fire:
-			_turret_fire_timer = 0.0
-			# Fire weapons
-			if weapon_component and weapon_component.has_method("fire_at_target"):
-				weapon_component.fire_at_target(_turret_target, self)
-			# Brief laser burst
-			lasers_enabled = true
-			_update_lasers()
+		if weapon_component and weapon_component.has_method("fire_at_target"):
+			weapon_component.fire_at_target(_turret_target, self)
 	else:
-		# No target - turn off lasers
-		if lasers_enabled:
-			lasers_enabled = false
-			_update_lasers()
+		_disable_lasers()
+
+func _disable_lasers() -> void:
+	lasers_enabled = false
+	_update_lasers()
 
 func _find_nearest_enemy() -> Node2D:
 	"""Find the nearest enemy within turret range"""

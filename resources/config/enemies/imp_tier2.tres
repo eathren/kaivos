@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="EnemyStats" load_steps=2 format=3 uid="uid://imp_tier2_stats"]
+
+[ext_resource type="Script" path="res://resources/data/enemy_stats.gd" id="1_stats"]
+
+[resource]
+script = ExtResource("1_stats")
+tier = 2
+max_health = 40
+damage_per_second = 15.0
+move_speed = 70.0
+exp_drop = 20
+gold_drop_chance = 0.4
+scrap_drop_chance = 0.3
+

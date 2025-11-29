@@ -6,11 +6,13 @@ enum MovementState {
 	BURST
 }
 
-@export var base_speed: float = 10.0
+@export var ship_stats: ShipStats = preload("res://resources/config/ships/trawler_base.tres")
 @export var burst_multiplier: float = 2.0
 @export var max_speed_for_line: float = 600.0
 @export var max_line_length: float = 64.0
 @export var line_lerp_speed: float = 10.0
+
+var base_speed: float = 10.0  # Set from ship_stats in _ready()
 
 @onready var direction_line: Line2D = $DirectionLine
 @onready var front_laser: Laser = $FrontLaser
@@ -22,7 +24,37 @@ var current_speed: float = 0.0
 
 func _ready() -> void:
 	add_to_group("trawler")
-	base_speed = GameState.get_trawler_speed()
+	
+	# Apply stats from ship_stats resource
+	if ship_stats:
+		base_speed = ship_stats.base_speed
+		
+		# Apply to HealthComponent
+		var health_component := get_node_or_null("HealthComponent") as HealthComponent
+		if health_component:
+			health_component.max_health = ship_stats.max_health
+			health_component.current_health = ship_stats.max_health
+		
+		# Apply to SpeedComponent
+		var speed_component := get_node_or_null("SpeedComponent") as SpeedComponent
+		if speed_component:
+			speed_component.base_speed = ship_stats.base_speed
+		
+		# Apply laser color/width
+		if front_laser:
+			front_laser.color = ship_stats.laser_color
+			front_laser.width = ship_stats.laser_width
+		
+		# Apply pickup range to PickupArea
+		var pickup_area := get_node_or_null("PickupArea") as Area2D
+		if pickup_area:
+			var collision_shape := pickup_area.get_node_or_null("CollisionShape2D") as CollisionShape2D
+			if collision_shape and collision_shape.shape is CircleShape2D:
+				var circle := collision_shape.shape as CircleShape2D
+				circle.radius = ship_stats.pickup_range * GameState.get_pickup_range_multiplier()
+	
+	# Apply GameState speed multiplier
+	base_speed *= GameState.get_ship_speed_multiplier()
 	_update_speed_from_state()
 	
 	# Trawler laser is always on

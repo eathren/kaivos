@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="EnemyStats" load_steps=2 format=3 uid="uid://lieutenant_tier1_stats"]
+
+[ext_resource type="Script" path="res://resources/data/enemy_stats.gd" id="1_stats"]
+
+[resource]
+script = ExtResource("1_stats")
+tier = 1
+max_health = 50
+damage_per_second = 20.0
+move_speed = 40.0
+exp_drop = 25
+gold_drop_chance = 0.5
+scrap_drop_chance = 0.4
+

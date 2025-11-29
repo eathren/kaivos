@@ -16,6 +16,8 @@ var player_in_zone: CharacterBody2D = null
 var is_spawning: bool = false  # Prevent multiple ship spawns
 
 func _ready() -> void:
+	add_to_group("ladder_dock")
+	
 	# Get nodes manually to ensure they're found
 	area = get_node_or_null("Area2D")
 	dock_marker = get_node_or_null("DockerMarker")
@@ -27,7 +29,6 @@ func _ready() -> void:
 	
 	area.body_entered.connect(_on_body_entered)
 	area.body_exited.connect(_on_body_exited)
-	set_process_input(true)
 	_update_sprite_flip()
 
 func _on_body_entered(body: Node) -> void:
@@ -56,19 +57,35 @@ func _hide_prompt() -> void:
 	if ui and ui.has_method("hide_interaction_prompt"):
 		ui.hide_interaction_prompt()
 
-func _input(event: InputEvent) -> void:
+func _process(_delta: float) -> void:
+	# Only check input if player is in zone and we're not already spawning
 	if player_in_zone == null or is_spawning:
 		return
-	if event.is_action_pressed("interact"):
-		# Check if a player ship already exists
-		var existing_ship = get_tree().get_first_node_in_group("player_ship")
-		if existing_ship != null:
+	
+	# Global check: prevent any dock from spawning if another is already spawning
+	if GameState and GameState.is_spawning_player_ship:
+		return
+	
+	# Only the nearest dock should respond
+	if not _is_nearest_ladder_dock():
+		return
+	
+	# Check for interact input
+	if Input.is_action_just_pressed("interact"):
+		# Double-check no ship exists
+		var existing_ships := get_tree().get_nodes_in_group("player_ship")
+		if not existing_ships.is_empty():
 			print("LadderDock: Ship already exists, cannot spawn another")
 			return
+		
 		_board_ship()
 
 func _board_ship() -> void:
 	if player_in_zone == null or is_spawning:
+		return
+	
+	# Global lock
+	if GameState and GameState.is_spawning_player_ship:
 		return
 	
 	if ship_scene == null:
@@ -76,6 +93,8 @@ func _board_ship() -> void:
 		return
 
 	is_spawning = true
+	if GameState:
+		GameState.is_spawning_player_ship = true
 	_hide_prompt()
 
 	# 1. Deactivate player on foot
@@ -112,9 +131,32 @@ func _board_ship() -> void:
 func _on_ship_deleted() -> void:
 	"""Called when the ship is deleted, allowing new ships to spawn"""
 	is_spawning = false
+	if GameState:
+		GameState.is_spawning_player_ship = false
 	print("LadderDock: Ship deleted, can spawn new ship")
 
 func _update_sprite_flip() -> void:
 	if sprite:
 		# Flip horizontally for right side
 		sprite.flip_h = (side == DockSide.RIGHT)
+
+func _is_nearest_ladder_dock() -> bool:
+	"""Check if this is the nearest ladder dock to the player"""
+	if player_in_zone == null:
+		return false
+	
+	var my_distance: float = global_position.distance_to(player_in_zone.global_position)
+	
+	# Check all other ladder docks
+	var all_ladder_docks := get_tree().get_nodes_in_group("ladder_dock")
+	for dock in all_ladder_docks:
+		if dock == self or not is_instance_valid(dock):
+			continue
+		
+		# Check if dock has a player in range
+		if "player_in_zone" in dock and dock.player_in_zone != null:
+			var other_distance: float = dock.global_position.distance_to(player_in_zone.global_position)
+			if other_distance < my_distance:
+				return false
+	
+	return true
