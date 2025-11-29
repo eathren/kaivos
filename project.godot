@@ -17,11 +17,11 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-GameState="*res://autoload/game_state.gd"
-TechManager="*res://autoload/tech_manager.gd"
-SpawnManager="*res://autoload/spawn_manager.gd"
-RunManager="*res://autoload/run_manager.gd"
-SceneTransition="*res://scenes/ui/scene_transition.tscn"
+GameState="*res://autoloads/game_state.gd"
+TechManager="*res://autoloads/tech_manager.gd"
+SpawnManager="*res://autoloads/spawn_manager.gd"
+RunManager="*res://autoloads/run_manager.gd"
+SceneTransition="*res://ui/transitions/scene_transition.tscn"
 
 [display]
 

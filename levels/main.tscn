@@ -1,0 +1,16 @@
+[gd_scene load_steps=4 format=3 uid="uid://c1fqem14ng62h"]
+
+[ext_resource type="Script" uid="uid://7jwugi1ypiul" path="res://levels/main.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://interactionprompt" path="res://ui/hud/interaction_prompt.tscn" id="2_prompt"]
+[ext_resource type="PackedScene" uid="uid://game_hud_uid" path="res://ui/hud/game_hud.tscn" id="3_hud"]
+
+[node name="Main" type="Node"]
+script = ExtResource("1_script")
+
+[node name="GameHUD" parent="." instance=ExtResource("3_hud")]
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="InteractionPrompt" parent="UI" instance=ExtResource("2_prompt")]
+
+[node name="CurrentLevel" type="Node" parent="."]

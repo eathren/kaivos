@@ -1,0 +1,21 @@
+[gd_scene load_steps=5 format=3 uid="uid://dd5r5epihmsyr"]
+
+[ext_resource type="Script" uid="uid://dah8p55o0wy57" path="res://entities/items/pickups/exp_crystal/exp_crystal.gd" id="1_5sxqp"]
+[ext_resource type="Texture2D" uid="uid://g1txoet126t0" path="res://assets/art/player/items/exp_crystal.png" id="2_18vy7"]
+[ext_resource type="PackedScene" uid="uid://tmfco4kro07s" path="res://components/pickup_component/pickup_component.tscn" id="3_pickup"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_1uk4i"]
+radius = 8.0
+
+[node name="ExpCrystal" type="Area2D"]
+collision_layer = 256
+collision_mask = 4
+script = ExtResource("1_5sxqp")
+
+[node name="PickupComponent" parent="." instance=ExtResource("3_pickup")]
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_18vy7")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_1uk4i")

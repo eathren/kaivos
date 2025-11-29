@@ -1,0 +1,25 @@
+[gd_scene load_steps=5 format=3 uid="uid://bjsas1kty8730"]
+
+[ext_resource type="Script" uid="uid://dtjrce11a7dyj" path="res://entities/projectiles/bullet/bullet.gd" id="1_3sk38"]
+[ext_resource type="Texture2D" uid="uid://cvho1xiwfoufy" path="res://assets/art/player/bullet.png" id="1_t1kx3"]
+[ext_resource type="PackedScene" uid="uid://qowfj0gbi6t4" path="res://components/faction_component/faction_component.tscn" id="3_75jld"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_3sk38"]
+size = Vector2(4, 6)
+
+[node name="Bullet" type="Area2D"]
+collision_layer = 16
+script = ExtResource("1_3sk38")
+speed = null
+damage = null
+lifetime = null
+faction = null
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_t1kx3")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_3sk38")
+
+[node name="FactionComponent" parent="." instance=ExtResource("3_75jld")]
+faction = 0

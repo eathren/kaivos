@@ -1,0 +1,25 @@
+[gd_scene load_steps=5 format=3 uid="uid://ov1wf3squcqg"]
+
+[ext_resource type="Texture2D" uid="uid://bnkcek1oi5lao" path="res://assets/art/player/trawler/ladder.png" id="1_255q0"]
+[ext_resource type="Script" uid="uid://clmrcoofr1gr" path="res://entities/vehicles/trawler/collision_shape_2d.gd" id="2_2irtc"]
+[ext_resource type="PackedScene" uid="uid://dvdwdt6vbluqh" path="res://entities/player/ships/player_ship/player_ship.tscn" id="2_7atsh"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_2irtc"]
+size = Vector2(16, 32)
+
+[node name="LadderDock" type="Node2D"]
+script = ExtResource("2_2irtc")
+ship_scene = ExtResource("2_7atsh")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_255q0")
+
+[node name="Area2D" type="Area2D" parent="."]
+collision_layer = 1024
+collision_mask = 4
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("RectangleShape2D_2irtc")
+
+[node name="DockerMarker" type="Marker2D" parent="."]

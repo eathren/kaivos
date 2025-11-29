@@ -1,8 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://tmfco4kro07s"]
-
-[ext_resource type="Script" uid="uid://htorstyf6one" path="res://scripts/core/pickup_component.gd" id="1_pickup"]
-
-[node name="PickupComponent" type="Node"]
-script = ExtResource("1_pickup")
-
-[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="."]

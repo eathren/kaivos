@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cbs7tb2talunw" path="res://resources/data/weapon_data.gd" id="1_weapon"]
 [ext_resource type="Resource" path="res://resources/config/weapons/basic_bullet_stats.tres" id="2_stats"]
-[ext_resource type="PackedScene" uid="uid://bjsas1kty8730" path="res://scenes/gameplay/player/bullet.tscn" id="3_bullet"]
+[ext_resource type="PackedScene" uid="uid://bjsas1kty8730" path="res://entities/projectiles/bullet/bullet.tscn" id="3_bullet"]
 
 [resource]
 script = ExtResource("1_weapon")
