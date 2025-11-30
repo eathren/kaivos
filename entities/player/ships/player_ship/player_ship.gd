@@ -10,6 +10,7 @@ extends CharacterBody2D
 var ship_id: int = -1
 var speed: float = 150.0
 var is_active: bool = false
+var is_docked: bool = false
 var dock_radius: float = 80.0
 
 var owner_controller: Node = null
@@ -66,6 +67,16 @@ func _physics_process(delta: float) -> void:
 	if not is_active or not owner_controller:
 		return
 	
+	if is_docked:
+		# Turret mode: No movement, but can rotate
+		velocity = Vector2.ZERO
+		
+		# Rotate towards mouse/aim
+		var mouse_pos := get_global_mouse_position()
+		look_at(mouse_pos)
+		rotation += PI / 2.0 # Adjust for sprite orientation
+		return
+	
 	# Handle movement (WASD)
 	var input_dir := Vector2.ZERO
 	input_dir.x = Input.get_action_strength("move_right") - Input.get_action_strength("move_left")
@@ -87,9 +98,12 @@ func _input(event: InputEvent) -> void:
 	if not is_active or not owner_controller:
 		return
 	
-	# Try to dock (E key)
+	# Try to dock/undock (E key)
 	if event.is_action_pressed("interact"):
-		try_dock()
+		if is_docked:
+			request_undock()
+		else:
+			try_dock()
 	
 	# Note: Weapons auto-fire via WeaponManager, no manual firing needed
 
@@ -135,3 +149,18 @@ func set_owner_controller(controller: Node) -> void:
 
 func set_current_dock(dock: Node2D) -> void:
 	current_dock = dock
+
+func set_docked(docked: bool) -> void:
+	is_docked = docked
+	if is_docked:
+		velocity = Vector2.ZERO
+		# Ensure lasers stay on
+		lasers_enabled = true
+		_update_lasers()
+
+func request_undock() -> void:
+	if not is_docked or not current_dock:
+		return
+	
+	if current_dock.has_method("undock_ship"):
+		current_dock.undock_ship(self)

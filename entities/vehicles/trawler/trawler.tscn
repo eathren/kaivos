@@ -47,7 +47,7 @@ polygon = PackedVector2Array(-47, -144, 47, -144, 47, 145, -48, 145)
 [sub_resource type="OccluderPolygon2D" id="OccluderPolygon2D_08py4"]
 polygon = PackedVector2Array(-33, 110, 33, 110, 33, -129, -32, -129)
 
-[node name="Trawler" type="CharacterBody2D"]
+[node name="Borer" type="CharacterBody2D"]
 collision_layer = 2
 collision_mask = 8
 script = ExtResource("1_byw1e")

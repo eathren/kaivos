@@ -88,24 +88,9 @@ func request_dock(ship: Node2D, dock: Node2D) -> void:
 		print("PlayerController: Ship is not owned by this controller")
 		return
 	
-	# Deactivate ship
-	ship.set_process(false)
-	ship.set_physics_process(false)
-	ship.set_process_input(false)
-	
-	if ship.has_method("deactivate"):
-		ship.deactivate()
-	
-	# Dock receives ship
+	# Dock receives ship (Turret Mode)
 	if dock and dock.has_method("receive_ship"):
 		dock.receive_ship(ship)
-	
-	# Spawn crew near dock
-	if crew_avatar and dock and dock.has_method("get_crew_spawn_position"):
-		crew_avatar.global_position = dock.get_crew_spawn_position()
-	
-	# Switch back to crew control
-	control_crew()
 	
 	print("PlayerController: Ship docked at ", dock.name)
 
