@@ -103,7 +103,7 @@ func _fire_forward(weapon: WeaponInstance) -> void:
 		get_tree().current_scene.add_child(projectile)
 		
 		projectile.global_position = owner_ship.global_position
-		projectile.global_rotation = direction.angle() + PI / 2.0
+		projectile.global_rotation = direction.angle()
 		
 		# Set projectile properties
 		if "damage" in projectile:
@@ -162,7 +162,7 @@ func _fire_spread(weapon: WeaponInstance) -> void:
 		get_tree().current_scene.add_child(projectile)
 		
 		projectile.global_position = owner_ship.global_position
-		projectile.global_rotation = direction.angle() + PI / 2.0
+		projectile.global_rotation = direction.angle()
 		
 		if "damage" in projectile:
 			projectile.damage = weapon.current_damage

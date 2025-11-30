@@ -24,9 +24,11 @@ lifetime = null
 faction = null
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
+rotation = 1.5708
 texture = ExtResource("1_t1kx3")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+rotation = 1.5708
 shape = SubResource("RectangleShape2D_3sk38")
 
 [node name="FactionComponent" parent="." instance=ExtResource("3_75jld")]

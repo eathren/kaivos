@@ -1,11 +1,8 @@
-[gd_scene load_steps=3 format=3 uid="uid://flashlight_component"]
+[gd_scene load_steps=3 format=3 uid="uid://cktow4fougwxd"]
 
-[ext_resource type="Script" path="res://components/lighting/flashlight.gd" id="1_flashlight"]
-[ext_resource type="Texture2D" uid="uid://ctj01b5tt5qtv" path="res://assets/art/lights/light.webp" id="2_light_texture"]
+[ext_resource type="Script" uid="uid://d4it5a783i6g7" path="res://components/lighting/flashlight.gd" id="1_flashlight"]
+[ext_resource type="Texture2D" uid="uid://b2ihvqn00raa6" path="res://assets/art/lights/flashlight.png" id="1_lv2jd"]
 
 [node name="Flashlight" type="PointLight2D"]
-enabled = true
-texture = ExtResource("2_light_texture")
-blend_mode = 0
+texture = ExtResource("1_lv2jd")
 script = ExtResource("1_flashlight")
-
