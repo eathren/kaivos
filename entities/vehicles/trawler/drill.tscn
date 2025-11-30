@@ -1,0 +1,123 @@
+[gd_scene load_steps=18 format=3 uid="uid://yenc6seu8kjb"]
+
+[ext_resource type="Script" uid="uid://2c74xonkjpjq" path="res://entities/vehicles/trawler/drill.gd" id="1_l3xh6"]
+[ext_resource type="Texture2D" uid="uid://ca2ye4262iv2e" path="res://assets/art/player/trawler/drill.png" id="2_grt6w"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_o8yh1"]
+atlas = ExtResource("2_grt6w")
+region = Rect2(0, 0, 96, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_giom4"]
+atlas = ExtResource("2_grt6w")
+region = Rect2(96, 0, 96, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1rkey"]
+atlas = ExtResource("2_grt6w")
+region = Rect2(192, 0, 96, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_mx30k"]
+atlas = ExtResource("2_grt6w")
+region = Rect2(288, 0, 96, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fnwr4"]
+atlas = ExtResource("2_grt6w")
+region = Rect2(384, 0, 96, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_6knm7"]
+atlas = ExtResource("2_grt6w")
+region = Rect2(480, 0, 96, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wx8y0"]
+atlas = ExtResource("2_grt6w")
+region = Rect2(576, 0, 96, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_x7hls"]
+atlas = ExtResource("2_grt6w")
+region = Rect2(672, 0, 96, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ofj6x"]
+atlas = ExtResource("2_grt6w")
+region = Rect2(768, 0, 96, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_4odp5"]
+atlas = ExtResource("2_grt6w")
+region = Rect2(864, 0, 96, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_amoyx"]
+atlas = ExtResource("2_grt6w")
+region = Rect2(960, 0, 96, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_gnjlv"]
+atlas = ExtResource("2_grt6w")
+region = Rect2(1056, 0, 96, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lmkjp"]
+atlas = ExtResource("2_grt6w")
+region = Rect2(1152, 0, 96, 32)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_u5y6c"]
+atlas = ExtResource("2_grt6w")
+region = Rect2(1248, 0, 96, 32)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_3oi4g"]
+animations = [{
+"frames": [],
+"loop": true,
+"name": &"default",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_o8yh1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_giom4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_1rkey")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_mx30k")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fnwr4")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_6knm7")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wx8y0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_x7hls")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ofj6x")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_4odp5")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_amoyx")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_gnjlv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lmkjp")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_u5y6c")
+}],
+"loop": true,
+"name": &"drilling",
+"speed": 5.0
+}]
+
+[node name="Drill" type="Node2D"]
+script = ExtResource("1_l3xh6")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_3oi4g")
+animation = &"drilling"
+frame_progress = 0.9378369
