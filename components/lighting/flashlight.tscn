@@ -1,8 +1,13 @@
 [gd_scene load_steps=3 format=3 uid="uid://cktow4fougwxd"]
 
 [ext_resource type="Script" uid="uid://d4it5a783i6g7" path="res://components/lighting/flashlight.gd" id="1_flashlight"]
-[ext_resource type="Texture2D" uid="uid://b2ihvqn00raa6" path="res://assets/art/lights/flashlight.png" id="1_lv2jd"]
+[ext_resource type="Texture2D" uid="uid://b7amuvneubnl" path="res://assets/art/lights/flashlight_nd.png" id="1_lv2jd"]
 
 [node name="Flashlight" type="PointLight2D"]
+color = Color(1, 0.96, 0.88, 1)
+energy = 1.2
+shadow_enabled = true
+shadow_filter = 1
 texture = ExtResource("1_lv2jd")
+texture_scale = 0.625
 script = ExtResource("1_flashlight")

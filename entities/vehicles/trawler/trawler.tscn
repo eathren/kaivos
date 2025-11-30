@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://dwjxh6hrypua3"]
+[gd_scene load_steps=20 format=3 uid="uid://dwjxh6hrypua3"]
 
 [ext_resource type="Script" uid="uid://b31epxhbt6duc" path="res://entities/vehicles/trawler/trawler.gd" id="1_byw1e"]
 [ext_resource type="PackedScene" uid="uid://bqe8adk2boluh" path="res://systems/combat/laser.tscn" id="1_laser"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" uid="uid://ov1wf3squcqg" path="res://entities/vehicles/trawler/ladder_dock.tscn" id="8_fg2qg"]
 [ext_resource type="PackedScene" uid="uid://boh8omfxids3v" path="res://components/lighting/ship_light_internal.tscn" id="8_npx26"]
 [ext_resource type="PackedScene" uid="uid://hx0v5hqvqkmy" path="res://components/health_component/health_component.tscn" id="9_health"]
+[ext_resource type="PackedScene" uid="uid://cktow4fougwxd" path="res://components/lighting/flashlight.tscn" id="10_i8mar"]
 [ext_resource type="PackedScene" uid="uid://c5k8x6v4pbwi" path="res://components/speed_component/speed_component.tscn" id="10_speed"]
 [ext_resource type="PackedScene" uid="uid://bblf61bcy8jv3" path="res://entities/vehicles/trawler/ship_dock.tscn" id="11_ship_dock"]
 
@@ -195,16 +196,13 @@ color = Color(1, 0.65, 0, 1)
 damage_per_second = 10.0
 direction = Vector2(0, -1)
 
-[node name="FrontFloodlight" type="PointLight2D" parent="."]
-position = Vector2(0, -145)
-color = Color(1, 0.9, 0.7, 1)
-energy = 2.5
-range_z_min = -100
-range_z_max = 100
+[node name="Flashlight" parent="." instance=ExtResource("10_i8mar")]
+position = Vector2(0, -307)
+color = Color(1, 0.96, 0.88, 1)
+energy = 1.2
 shadow_enabled = true
 shadow_filter = 1
-texture = ExtResource("7_08py4")
-texture_scale = 5.0
+texture_scale = 0.625
 
 [node name="ShipDock1" parent="." instance=ExtResource("11_ship_dock")]
 position = Vector2(-50, 28)
