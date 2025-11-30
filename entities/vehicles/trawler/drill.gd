@@ -28,13 +28,17 @@ func _ready() -> void:
 	# Initialize from GameState
 	is_active = GameState.is_drilling if GameState.has_method("is_drilling") else true
 	_update_animation()
+	_update_audio()
 	
-	print("Drill: Initialized, is_active=", is_active, " trawler=", trawler)
+func _process(delta: float) -> void:
+	_update_audio()
 
 func _on_movement_state_changed(new_state) -> void:
 	# Auto-enable drill when moving
 	var was_active = is_active
 	is_active = (new_state != trawler.MovementState.STOP)
+	
+	print("Drill: Movement state changed to ", new_state, " is_active=", is_active)
 	
 	if was_active != is_active:
 		_update_animation()
@@ -48,7 +52,6 @@ func _on_drill_toggled(enabled: bool) -> void:
 func _update_animation() -> void:
 	if not animated_sprite:
 		return
-	
 	if is_active:
 		animated_sprite.play("drilling")
 	else:
@@ -56,14 +59,14 @@ func _update_animation() -> void:
 		animated_sprite.frame = 0
 
 func _update_audio() -> void:
-
-	
 	# Ambient rumble plays continuously when active
 	if ambient_rumble:
 		if is_active and not ambient_rumble.playing:
 			ambient_rumble.play()
 		elif not is_active and ambient_rumble.playing:
 			ambient_rumble.stop()
+
+
 
 func _physics_process(delta: float) -> void:
 	if not is_active:
@@ -126,6 +129,6 @@ func _damage_overlapping_tiles(damage: float) -> void:
 					wall_layer.damage_cell(tile_coord, damage)
 					tiles_damaged += 1
 	
-	if tiles_damaged > 0:
-		print("Drill: Damaged ", tiles_damaged, " tiles with ", damage, " damage each")
+	#if tiles_damaged > 0:
+		#print("Drill: Damaged ", tiles_damaged, " tiles with ", damage, " damage each")
 		

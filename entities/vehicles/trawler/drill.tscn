@@ -142,8 +142,7 @@ shape = SubResource("RectangleShape2D_l3xh6")
 
 [node name="DrillSound" type="AudioStreamPlayer2D" parent="."]
 stream = ExtResource("3_o8yh1")
-volume_db = 10.0
 pitch_scale = 0.97
 max_distance = 800.0
-attenuation = 1.2745609
+attenuation = 0.9659368
 bus = &"Ambient"
