@@ -19,7 +19,7 @@ texture = ExtResource("2_toecm")
 [sub_resource type="TileSet" id="TileSet_nml2g"]
 occlusion_layer_0/light_mask = 1
 physics_layer_0/collision_layer = 8
-physics_layer_0/collision_mask = 23
+physics_layer_0/collision_mask = 2071
 sources/2 = SubResource("TileSetAtlasSource_w4kyo")
 sources/5 = SubResource("TileSetAtlasSource_toecm")
 

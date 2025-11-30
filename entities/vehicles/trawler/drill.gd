@@ -1,11 +1,9 @@
-extends Node2D
+extends Area2D
 
 ## Drill component for the Borer
-## Damages wall tiles in front when active
+## Uses Area2D collision to detect and damage wall tiles
 
-@export var damage_per_second: float = 50.0
-@export var drill_width: float = 80.0  # Width of drill area
-@export var drill_reach: float = 20.0  # How far ahead to check
+@export var damage_per_second: float = 1000.0  # Very high to instantly clear tiles
 
 var is_active: bool = false
 var trawler: Node = null
@@ -28,6 +26,8 @@ func _ready() -> void:
 	# Initialize from GameState
 	is_active = GameState.is_drilling if GameState.has_method("is_drilling") else true
 	_update_animation()
+	
+	print("Drill: Initialized, is_active=", is_active, " trawler=", trawler)
 
 func _on_movement_state_changed(new_state) -> void:
 	# Auto-enable drill when moving
@@ -52,7 +52,10 @@ func _update_animation() -> void:
 		animated_sprite.frame = 0
 
 func _physics_process(delta: float) -> void:
-	if not is_active or not trawler:
+	if not is_active:
+		return
+		
+	if not trawler:
 		return
 	
 	# Get mining speed multiplier from GameState
@@ -62,39 +65,52 @@ func _physics_process(delta: float) -> void:
 	
 	var damage = damage_per_second * mining_speed * delta
 	
-	# Damage tiles in front of the Borer
-	_damage_tiles_in_front(damage)
+	# Use Area2D collision to find wall tiles
+	_damage_overlapping_tiles(damage)
 
-func _damage_tiles_in_front(damage: float) -> void:
+func _damage_overlapping_tiles(damage: float) -> void:
 	# Find the Wall TileMapLayer in the scene
 	var wall_layer = get_tree().get_first_node_in_group("wall") as TileMapLayer
 	if not wall_layer:
 		return
 	
-	# Calculate drill area in front of Borer
-	# Borer faces UP (negative Y in Godot)
-	var borer_pos = trawler.global_position
-	var borer_forward = Vector2.UP.rotated(trawler.global_rotation)
+	# Get all overlapping bodies (should include the wall TileMapLayer)
+	var overlapping = get_overlapping_bodies()
 	
-	# Check tiles in a rectangular area ahead
-	var check_distance = drill_reach
-	var check_width = drill_width
+	# Check if we're overlapping with the wall layer
+	if not wall_layer in overlapping:
+		return
 	
-	# Convert to tile coordinates
+	# Get the drill's collision shape to determine area
+	var collision_shape = $CollisionShape2D
+	if not collision_shape or not collision_shape.shape:
+		return
+	
+	var shape = collision_shape.shape as RectangleShape2D
+	if not shape:
+		return
+	
+	# Get the area covered by the drill
+	var drill_rect = Rect2(
+		global_position - shape.size / 2,
+		shape.size
+	)
+	
+	# Convert to tile coordinates and damage all tiles in the drill area
 	var tile_size = 16  # Assuming 16x16 tiles
-	var center_ahead = borer_pos + borer_forward * check_distance
+	var min_tile = wall_layer.local_to_map(wall_layer.to_local(drill_rect.position))
+	var max_tile = wall_layer.local_to_map(wall_layer.to_local(drill_rect.end))
 	
-	# Check tiles in a grid
-	var tiles_to_check = []
-	for x_offset in range(-int(check_width / tile_size / 2), int(check_width / tile_size / 2) + 1):
-		for y_offset in range(-2, 2):  # Check a few tiles ahead
-			var check_pos = center_ahead + Vector2(x_offset * tile_size, y_offset * tile_size)
-			var tile_coord = wall_layer.local_to_map(wall_layer.to_local(check_pos))
+	var tiles_damaged = 0
+	for x in range(min_tile.x, max_tile.x + 1):
+		for y in range(min_tile.y, max_tile.y + 1):
+			var tile_coord = Vector2i(x, y)
+			var source_id = wall_layer.get_cell_source_id(tile_coord)
 			
-			if not tile_coord in tiles_to_check:
-				tiles_to_check.append(tile_coord)
+			if source_id != -1:
+				if wall_layer.has_method("damage_cell"):
+					wall_layer.damage_cell(tile_coord, damage)
+					tiles_damaged += 1
 	
-	# Damage each tile
-	for tile_coord in tiles_to_check:
-		if wall_layer.has_method("damage_cell"):
-			wall_layer.damage_cell(tile_coord, damage)
+	if tiles_damaged > 0:
+		print("Drill: Damaged ", tiles_damaged, " tiles with ", damage, " damage each")
