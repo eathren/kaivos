@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://q2rn4i5gtojj"
-path="res://.godot/imported/hell_portal.png-a2edf4d03fae9d2e6a4c959c8ad58ecf.ctex"
+uid="uid://dfkcghtbsh43h"
+path="res://.godot/imported/apollo-8x.png-00e6edd2033e9da70c93a1b97e376253.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/hell_portal.png"
-dest_files=["res://.godot/imported/hell_portal.png-a2edf4d03fae9d2e6a4c959c8ad58ecf.ctex"]
+source_file="res://assets/art/misc/apollo-8x.png"
+dest_files=["res://.godot/imported/apollo-8x.png-00e6edd2033e9da70c93a1b97e376253.ctex"]
 
 [params]
 
