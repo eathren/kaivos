@@ -98,36 +98,38 @@ func _spawn_player_controller(peer_id: int) -> void:
 	var dock_index = (peer_id - 1) % docks.size()
 	var dock = docks[dock_index]
 	
-	# Create camera
-	var camera := Camera2D.new()
-	# camera.zoom = Vector2(2, 2)  # Removed zoom for twin-stick style
-	camera.position = Vector2.ZERO
-	camera.enabled = true
+	# Get or spawn ship at dock
+	# Note: ShipDock spawns a ship automatically on ready, but we ensure it's there
+	var ship = dock.docked_ship
+	if not ship:
+		# Force spawn if missing (shouldn't happen with current logic but safe to have)
+		var ship_scene = preload("res://entities/player/ships/player_ship/player_ship.tscn")
+		ship = dock.get_or_spawn_ship(ship_scene)
+		dock.receive_ship(ship)
 	
-	# Create PlayerController
-	var controller_script := load("res://entities/player/player_controller.gd")
-	var controller := Node.new()
-	controller.set_script(controller_script)
-	controller.name = "PlayerController_%d" % peer_id
-	
-	add_child(controller)
-	
-	# Set multiplayer authority
-	controller.set_multiplayer_authority(peer_id)
+	if not ship:
+		push_error("Level_Mine: Failed to get ship for player spawn")
+		return
+		
+	# Get controller from ship
+	var controller = ship.get_node_or_null("PlayerController")
+	if not controller:
+		push_error("Level_Mine: Ship missing PlayerController node")
+		return
 	
 	# Configure controller
-	controller.set("camera", camera)
-	controller.set("player_id", peer_id)
+	controller.name = "PlayerController_%d" % peer_id
+	controller.set_multiplayer_authority(peer_id)
+	controller.player_id = peer_id
 	
 	# Store reference
 	_player_controllers[peer_id] = controller
 	
-	# Spawn player in ship at dock
-	await get_tree().process_frame
-	if controller.has_method("control_ship"):
-		controller.control_ship(dock)
+	# Ensure ship is active and owned by this controller
+	if ship.has_method("set_ship_id"):
+		ship.set_ship_id(peer_id)
 	
-	print("Level_Mine: Spawned PlayerController for peer ", peer_id, " at dock ", dock.name)
+	print("Level_Mine: Configured PlayerController for peer ", peer_id, " at dock ", dock.name)
 
 func _on_player_connected(peer_id: int) -> void:
 	"""Called when a new player joins mid-game"""

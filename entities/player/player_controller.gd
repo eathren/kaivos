@@ -12,8 +12,15 @@ var current_ship: Node2D = null
 
 func _ready() -> void:
 	add_to_group("player_controller")
-	# Start controlling crew
-	control_crew()
+	
+	# Check if we are a child of a ship
+	var parent = get_parent()
+	if parent and parent.is_in_group("player_ship"):
+		print("PlayerController: Attached to ship ", parent.name)
+		_control_parent_ship(parent)
+	else:
+		# Start controlling crew (legacy/fallback)
+		control_crew()
 
 func control_crew() -> void:
 	"""Switch control to crew avatar"""
@@ -114,6 +121,29 @@ func _update_camera() -> void:
 	# Make this camera current
 	camera.enabled = true
 	camera.make_current()
+
+func _control_parent_ship(ship: Node2D) -> void:
+	"""Take control of the parent ship"""
+	current_ship = ship
+	
+	# Set ship references
+	if ship.has_method("set_owner_controller"):
+		ship.set_owner_controller(self)
+	
+	# Activate ship
+	ship.set_process(true)
+	ship.set_physics_process(true)
+	ship.set_process_input(true)
+	ship.visible = true
+	
+	if ship.has_method("activate"):
+		ship.activate()
+	
+	# Setup camera if we have one locally
+	if not camera:
+		camera = ship.get_node_or_null("Camera2D")
+	
+	_update_camera()
 
 func is_controlling_ship() -> bool:
 	return current_ship != null

@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" path="res://components/weapon_manager/weapon_manager.tscn" id="6_weapon"]
 [ext_resource type="Texture2D" uid="uid://ctj01b5tt5qtv" path="res://assets/art/lights/light.webp" id="8_3soja"]
 [ext_resource type="PackedScene" uid="uid://cktow4fougwxd" path="res://components/lighting/flashlight.tscn" id="9_pm10k"]
+[ext_resource type="Script" uid="uid://b5q8q8q8q8q8q" path="res://entities/player/player_controller.gd" id="10_controller"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_ship"]
 radius = 12.0
@@ -96,3 +97,9 @@ energy = 1.2
 shadow_enabled = true
 shadow_filter = 1
 texture_scale = 0.625
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(1.5, 1.5)
+
+[node name="PlayerController" type="Node" parent="."]
+script = ExtResource("10_controller")
