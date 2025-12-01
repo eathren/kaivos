@@ -88,37 +88,21 @@ func _spawn_player_controller(peer_id: int) -> void:
 		print("Level_Mine: PlayerController already exists for peer ", peer_id)
 		return
 	
-	# Clean up any existing crew avatars in trawler (prevents duplicates on reload)
-	var interior := trawler.get_node_or_null("InteriorRoot")
-	if interior:
-		for child in interior.get_children():
-			if child.is_in_group("player"):
-				child.queue_free()
-	
-	# Spawn crew avatar
-	var crew := crew_scene.instantiate() as CharacterBody2D
-	if not crew:
-		push_error("Level_Mine: Failed to instantiate crew scene")
+	# Find an available ShipDock
+	var docks = get_tree().get_nodes_in_group("ship_dock")
+	if docks.is_empty():
+		push_error("Level_Mine: No ShipDocks found for player spawn")
 		return
 	
-	# Add crew to trawler interior
-	if not interior:
-		push_error("Level_Mine: Trawler InteriorRoot not found")
-		return
-	
-	interior.add_child(crew)
-	crew.position = Vector2(0, 30)  # Starting position in trawler
+	# Assign dock based on peer_id (round-robin)
+	var dock_index = (peer_id - 1) % docks.size()
+	var dock = docks[dock_index]
 	
 	# Create camera
 	var camera := Camera2D.new()
-	camera.zoom = Vector2(2, 2)
+	# camera.zoom = Vector2(2, 2)  # Removed zoom for twin-stick style
 	camera.position = Vector2.ZERO
 	camera.enabled = true
-	crew.add_child(camera)
-	
-	# Make it current after adding to tree
-	await get_tree().process_frame
-	camera.make_current()
 	
 	# Create PlayerController
 	var controller_script := load("res://entities/player/player_controller.gd")
@@ -130,21 +114,20 @@ func _spawn_player_controller(peer_id: int) -> void:
 	
 	# Set multiplayer authority
 	controller.set_multiplayer_authority(peer_id)
-	crew.set_multiplayer_authority(peer_id)
 	
 	# Configure controller
-	controller.set("crew_avatar", crew)
 	controller.set("camera", camera)
 	controller.set("player_id", peer_id)
 	
 	# Store reference
 	_player_controllers[peer_id] = controller
 	
-	# Call ready manually
-	if controller.has_method("control_crew"):
-		controller.call("control_crew")
+	# Spawn player in ship at dock
+	await get_tree().process_frame
+	if controller.has_method("control_ship"):
+		controller.control_ship(dock)
 	
-	print("Level_Mine: Spawned PlayerController for peer ", peer_id)
+	print("Level_Mine: Spawned PlayerController for peer ", peer_id, " at dock ", dock.name)
 
 func _on_player_connected(peer_id: int) -> void:
 	"""Called when a new player joins mid-game"""

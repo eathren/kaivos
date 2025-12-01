@@ -8,7 +8,7 @@ signal collected(collector: Node2D)
 @export var can_be_picked_by_trawler: bool = true
 @export var can_be_picked_by_player: bool = true
 @export var can_be_picked_by_ship: bool = true
-@export var pickup_sound: AudioStream = preload("res://assets/audio/pickup.wav")
+@export var pickup_sound: AudioStream = preload("res://assets/audio/sfx/gameplay/pickup.wav")
 
 var _target: Node2D = null
 var _is_being_collected: bool = false

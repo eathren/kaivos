@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://d1x04najel8kl"
-path="res://.godot/imported/trawler.png-643ffb270fb4b13baf4d6f61253ad30c.ctex"
+path="res://.godot/imported/trawler.png-9f10bd5483a284960a6a9c05842a23ba.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/player/trawler.png"
-dest_files=["res://.godot/imported/trawler.png-643ffb270fb4b13baf4d6f61253ad30c.ctex"]
+source_file="res://assets/art/player/trawler/trawler.png"
+dest_files=["res://.godot/imported/trawler.png-9f10bd5483a284960a6a9c05842a23ba.ctex"]
 
 [params]
 

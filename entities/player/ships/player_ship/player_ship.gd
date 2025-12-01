@@ -13,6 +13,19 @@ var is_active: bool = false
 var is_docked: bool = false
 var dock_radius: float = 80.0
 
+# Dash state
+var is_dashing: bool = false
+var dash_timer: float = 0.0
+var dash_cooldown_timer: float = 0.0
+var dash_velocity: Vector2 = Vector2.ZERO
+
+const DASH_SPEED: float = 600.0
+const DASH_DURATION: float = 0.2
+const DASH_COOLDOWN: float = 1.0
+
+# Collision layers for i-frames
+var _original_collision_mask: int = 0
+
 var owner_controller: Node = null
 var current_dock: Node2D = null
 
@@ -67,6 +80,26 @@ func _physics_process(delta: float) -> void:
 	if not is_active or not owner_controller:
 		return
 	
+	# Handle Dash Cooldown
+	if dash_cooldown_timer > 0.0:
+		dash_cooldown_timer -= delta
+	
+	# Handle Dash State
+	if is_dashing:
+		dash_timer -= delta
+		velocity = dash_velocity
+		
+		# Rotate towards mouse even while dashing
+		var mouse_pos := get_global_mouse_position()
+		look_at(mouse_pos)
+		rotation += PI / 2.0
+		
+		move_and_slide()
+		
+		if dash_timer <= 0.0:
+			_end_dash()
+		return
+
 	if is_docked:
 		# Turret mode: No movement, but can rotate
 		velocity = Vector2.ZERO
@@ -77,6 +110,11 @@ func _physics_process(delta: float) -> void:
 		rotation += PI / 2.0 # Adjust for sprite orientation
 		return
 	
+	# Twin-Stick Rotation: Always look at mouse
+	var mouse_pos := get_global_mouse_position()
+	look_at(mouse_pos)
+	rotation += PI / 2.0 # Adjust for sprite orientation
+	
 	# Handle movement (WASD)
 	var input_dir := Vector2.ZERO
 	input_dir.x = Input.get_action_strength("move_right") - Input.get_action_strength("move_left")
@@ -85,10 +123,6 @@ func _physics_process(delta: float) -> void:
 	if input_dir != Vector2.ZERO:
 		input_dir = input_dir.normalized()
 		velocity = input_dir * speed
-		
-		# Rotate to face movement direction
-		var target_rotation := input_dir.angle() + PI / 2.0
-		rotation = lerp_angle(rotation, target_rotation, 10.0 * delta)
 	else:
 		velocity = Vector2.ZERO
 	
@@ -104,6 +138,11 @@ func _input(event: InputEvent) -> void:
 			request_undock()
 		else:
 			try_dock()
+			
+	# Dash (Right Click)
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
+			_try_dash()
 	
 	# Note: Weapons auto-fire via WeaponManager, no manual firing needed
 
@@ -164,3 +203,44 @@ func request_undock() -> void:
 	
 	if current_dock.has_method("undock_ship"):
 		current_dock.undock_ship(self)
+
+func _try_dash() -> void:
+	if is_dashing or dash_cooldown_timer > 0.0 or is_docked:
+		return
+	
+	# Determine dash direction
+	var input_dir := Vector2.ZERO
+	input_dir.x = Input.get_action_strength("move_right") - Input.get_action_strength("move_left")
+	input_dir.y = Input.get_action_strength("move_down") - Input.get_action_strength("move_up")
+	
+	if input_dir == Vector2.ZERO:
+		# Dash towards mouse if no movement input
+		var mouse_pos := get_global_mouse_position()
+		input_dir = (mouse_pos - global_position).normalized()
+	else:
+		input_dir = input_dir.normalized()
+	
+	_start_dash(input_dir)
+
+func _start_dash(dir: Vector2) -> void:
+	is_dashing = true
+	dash_timer = DASH_DURATION
+	dash_velocity = dir * DASH_SPEED
+	
+	# Enable I-Frames (disable collision with enemies/projectiles)
+	_original_collision_mask = collision_mask
+	collision_mask = 8 # Only collide with walls (layer 4 = 8)
+	
+	# Visual feedback (optional: modulate or particles)
+	modulate.a = 0.5
+
+func _end_dash() -> void:
+	is_dashing = false
+	dash_cooldown_timer = DASH_COOLDOWN
+	velocity = Vector2.ZERO
+	
+	# Disable I-Frames
+	collision_mask = _original_collision_mask
+	
+	# Reset visuals
+	modulate.a = 1.0

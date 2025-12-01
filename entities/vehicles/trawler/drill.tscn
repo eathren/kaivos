@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://2c74xonkjpjq" path="res://entities/vehicles/trawler/drill.gd" id="1_l3xh6"]
 [ext_resource type="Texture2D" uid="uid://ca2ye4262iv2e" path="res://assets/art/player/trawler/drill.png" id="2_grt6w"]
-[ext_resource type="AudioStream" uid="uid://cukya17180ck" path="res://assets/audio/earth_rumble.mp3" id="3_o8yh1"]
+[ext_resource type="AudioStream" uid="uid://cukya17180ck" path="res://assets/audio/sfx/ambient/earth_rumble.mp3" id="3_o8yh1"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_o8yh1"]
 atlas = ExtResource("2_grt6w")

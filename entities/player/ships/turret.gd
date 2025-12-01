@@ -39,17 +39,22 @@ func _update_target() -> void:
 			best = e
 
 	_target = best
+	# if _target:
+	# 	print("Turret target found: ", _target.name, " dist: ", sqrt(best_dist_sq))
+	# else:
+	# 	if enemies.size() > 0:
+	# 		print("Turret found ", enemies.size(), " enemies but none in range (", range, ")")
 
 func _aim(delta: float) -> void:
 	if _target == null:
 		return
 
 	var desired: float = ( _target.global_position - global_position ).angle()
-	var current: float = rotation
+	var current: float = global_rotation
 	var diff: float = wrapf(desired - current, -PI, PI)
 	var max_step: float = deg_to_rad(turn_speed_deg) * delta
 	diff = clamp(diff, -max_step, max_step)
-	rotation = current + diff
+	rotation += diff
 
 func _shoot_if_ready(delta: float) -> void:
 	_cooldown -= delta

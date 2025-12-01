@@ -36,7 +36,7 @@ enum FlashlightType { SMALL, MEDIUM, LARGE, SPOTLIGHT }
 var _radius_by_type := {
 	FlashlightType.SMALL: 96.0,
 	FlashlightType.MEDIUM: 160.0,
-	FlashlightType.LARGE: 256.0,
+	FlashlightType.LARGE: 512.0,
 	FlashlightType.SPOTLIGHT: 192.0,
 }
 

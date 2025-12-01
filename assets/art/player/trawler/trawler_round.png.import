@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://rrgcgctl27vc"
-path="res://.godot/imported/trawler_round.png-9d342728c63a78a8403d1f37f61f4f0e.ctex"
+path="res://.godot/imported/trawler_round.png-e0f8da44507b2a5df5ec522077ac1037.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/player/trawler_round.png"
-dest_files=["res://.godot/imported/trawler_round.png-9d342728c63a78a8403d1f37f61f4f0e.ctex"]
+source_file="res://assets/art/player/trawler/trawler_round.png"
+dest_files=["res://.godot/imported/trawler_round.png-e0f8da44507b2a5df5ec522077ac1037.ctex"]
 
 [params]
 
