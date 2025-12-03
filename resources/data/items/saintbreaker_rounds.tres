@@ -1,6 +1,6 @@
 [gd_resource type="Resource" script_class="TechItem" load_steps=3 format=3 uid="uid://u74jddveflvn"]
 
-[ext_resource type="Texture2D" uid="uid://besggnlebjysf" path="res://items/gilden-bullet-shroud.png" id="1_l1k1c"]
+[ext_resource type="Texture2D" uid="uid://k3jqch1rlqp5" path="res://assets/art/items/saintbreaker-rounds.png" id="1_l1k1c"]
 [ext_resource type="Script" uid="uid://dffo8i2x86hdm" path="res://resources/data/tech_item.gd" id="1_tech"]
 
 [resource]

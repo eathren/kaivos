@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://g1txoet126t0"
-path="res://.godot/imported/exp_crystal.png-0177c65e34487972e40dba71406c333b.ctex"
+uid="uid://kurifclj3jy1"
+path="res://.godot/imported/scrap.png-0c12145b1adbd4797e4cd0c0d6763f39.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://items/exp_crystal.png"
-dest_files=["res://.godot/imported/exp_crystal.png-0177c65e34487972e40dba71406c333b.ctex"]
+source_file="res://assets/art/pickups/scrap.png"
+dest_files=["res://.godot/imported/scrap.png-0c12145b1adbd4797e4cd0c0d6763f39.ctex"]
 
 [params]
 

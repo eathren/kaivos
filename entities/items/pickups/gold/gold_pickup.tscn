@@ -1,7 +1,7 @@
 [gd_scene load_steps=5 format=3 uid="uid://dblk3omug65di"]
 
 [ext_resource type="Script" uid="uid://hp00ou34ied3" path="res://entities/items/pickups/resource_pickup.gd" id="1_gold"]
-[ext_resource type="Texture2D" uid="uid://bs662lqidmcrn" path="res://items/gold.png" id="2_bpfym"]
+[ext_resource type="Texture2D" uid="uid://bs662lqidmcrn" path="res://assets/art/pickups/gold.png" id="2_bpfym"]
 [ext_resource type="PackedScene" uid="uid://tmfco4kro07s" path="res://components/pickup_component/pickup_component.tscn" id="3_pickup"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_gold"]

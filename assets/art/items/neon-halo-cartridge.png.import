@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://besggnlebjysf"
-path="res://.godot/imported/gilden-bullet-shroud.png-f769d71ce7ff680d753030830348305c.ctex"
+uid="uid://cb67o6l27ffe6"
+path="res://.godot/imported/neon-halo-cartridge.png-89c0de92ad0928160bc1190ceb9b5f76.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://items/gilden-bullet-shroud.png"
-dest_files=["res://.godot/imported/gilden-bullet-shroud.png-f769d71ce7ff680d753030830348305c.ctex"]
+source_file="res://assets/art/items/neon-halo-cartridge.png"
+dest_files=["res://.godot/imported/neon-halo-cartridge.png-89c0de92ad0928160bc1190ceb9b5f76.ctex"]
 
 [params]
 
