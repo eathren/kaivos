@@ -66,4 +66,10 @@ func spawn(scene: PackedScene, parent: Node = null) -> Node2D:
 
 	parent.add_child(inst)
 	inst.global_position = pos
+	
+	# Apply run difficulty level to enemy
+	if RunManager and RunManager.difficulty and inst.has_method("apply_level"):
+		var level := RunManager.difficulty.get_enemy_level()
+		inst.apply_level(level)
+	
 	return inst

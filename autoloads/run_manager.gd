@@ -13,6 +13,9 @@ var current_level_num: int = 1
 var level_start_time: float = 0.0
 var level_duration_minutes: float = 10.0
 
+# Difficulty tracking
+var difficulty: RunDifficulty = RunDifficulty.new()
+
 # Level configuration (can be overridden)
 var shaft_height_tiles: int = 2000  # Reduced from 3000
 var shaft_width_tiles: int = 100  # Reduced from 400 (
@@ -20,8 +23,8 @@ var starter_clearing_width_px: float = 300.0
 var starter_clearing_height_px: float = 500.0
 
 func _ready() -> void:
-	# RunManager is ready
-	pass
+	# Add difficulty node as child so it processes
+	add_child(difficulty)
 
 ## Start a new run with a seed
 func start_run(run_seed: int = 0) -> void:
@@ -31,6 +34,9 @@ func start_run(run_seed: int = 0) -> void:
 	current_seed = run_seed
 	current_level_num = 1
 	level_start_time = Time.get_ticks_msec() / 1000.0
+	
+	# Reset difficulty for new run
+	difficulty.reset()
 	
 	_load_level("res://levels/mine/level_mine.tscn")
 	run_started.emit(run_seed)

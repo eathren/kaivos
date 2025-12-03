@@ -17,19 +17,11 @@ func setup(p_item: TechItem, current_stack: int) -> void:
 		return
 	
 	# Set name with rarity color
-	item_name_label.text = item.display_name
-	item_name_label.modulate = item.get_rarity_color()
-	
-	# Set description
-	item_description.clear()
-	item_description.append_text(item.get_description(current_stack + 1))
-	
-	# Show stack count if not first stack
+	var display_text = item.display_name
 	if current_stack > 0:
-		stack_label.text = "Stack: %d -> %d" % [current_stack, current_stack + 1]
-		stack_label.show()
-	else:
-		stack_label.hide()
+		display_text += " [%d]" % current_stack
+	item_name_label.text = display_text
+	item_name_label.modulate = item.get_rarity_color()
 	
 	# Set icon if available
 	if item.icon:

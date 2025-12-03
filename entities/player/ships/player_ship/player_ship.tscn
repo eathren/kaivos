@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3 uid="uid://dvdwdt6vbluqh"]
+[gd_scene load_steps=14 format=3 uid="uid://dvdwdt6vbluqh"]
 
 [ext_resource type="PackedScene" uid="uid://bqe8adk2boluh" path="res://systems/combat/laser.tscn" id="1_laser"]
 [ext_resource type="Script" uid="uid://cdwve1ivpvgr2" path="res://entities/player/ships/player_ship/player_ship.gd" id="1_script"]
@@ -27,9 +27,11 @@ properties/2/path = NodePath(".:velocity")
 properties/2/spawn = true
 properties/2/replication_mode = 1
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_pm10k"]
+
 [node name="PlayerShip" type="CharacterBody2D"]
 collision_layer = 4
-collision_mask = 521
+collision_mask = 4616
 motion_mode = 1
 script = ExtResource("1_script")
 
@@ -90,3 +92,8 @@ zoom = Vector2(5, 5)
 
 [node name="PlayerController" type="Node" parent="."]
 script = ExtResource("10_controller")
+
+[node name="PlayerHitbox" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PlayerHitbox"]
+shape = SubResource("CircleShape2D_pm10k")

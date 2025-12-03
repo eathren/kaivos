@@ -4,6 +4,8 @@
 [ext_resource type="Texture2D" uid="uid://btyw6bsgsr1vg" path="res://assets/art/player/player.png" id="2_77456"]
 [ext_resource type="PackedScene" uid="uid://hx0v5hqvqkmy" path="res://components/health_component/health_component.tscn" id="3_health"]
 [ext_resource type="PackedScene" uid="uid://c5k8x6v4pbwi" path="res://components/speed_component/speed_component.tscn" id="4_speed"]
+[ext_resource type="PackedScene" uid="uid://dptvykd5bxq0a" path="res://components/hurtbox/hurtbox_component.tscn" id="5_hurtbox"]
+[ext_resource type="PackedScene" uid="uid://c7h4k8v3pbwi2" path="res://components/health_regen/health_regen_component.tscn" id="6_regen"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_fbmmh"]
 radius = 2.0
@@ -27,6 +29,8 @@ shape = SubResource("CircleShape2D_fbmmh")
 
 [node name="SpeedComponent" parent="." instance=ExtResource("4_speed")]
 
+[node name="HealthRegenComponent" parent="." instance=ExtResource("6_regen")]
+
 [node name="PickupArea" type="Area2D" parent="."]
 collision_layer = 0
 collision_mask = 256
@@ -34,9 +38,7 @@ collision_mask = 256
 [node name="CollisionShape2D" type="CollisionShape2D" parent="PickupArea"]
 shape = SubResource("CircleShape2D_pickup")
 
-[node name="HurtBox" type="Area2D" parent="."]
-collision_layer = 0
-collision_mask = 8
+[node name="HurtboxComponent" parent="." instance=ExtResource("5_hurtbox")]
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtBox"]
+[node name="CollisionShape2D" parent="HurtboxComponent" index="0"]
 shape = SubResource("CircleShape2D_fbmmh")

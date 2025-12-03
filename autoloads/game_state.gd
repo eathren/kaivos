@@ -23,6 +23,15 @@ var current_level: int = 1
 var current_xp: int = 0
 var xp_to_next_level: int = 30  # Level 1 requires 30 XP
 
+# Base stats for players that scale with team level
+# Health increases by 30% per level, damage and regen by 20%
+const BASE_MAX_HEALTH: int = 100
+const BASE_DAMAGE: float = 10.0
+const BASE_HEALTH_REGEN: float = 1.0  # HP per second
+const HEALTH_SCALING_PER_LEVEL: float = 0.30  # 30% increase (players only)
+const DAMAGE_SCALING_PER_LEVEL: float = 0.20  # 20% increase (players only)
+const REGEN_SCALING_PER_LEVEL: float = 0.20  # 20% increase (players only)
+
 # Weapon and Upgrade system
 var unlocked_weapons: Array[int] = [0]  # Start with LASER (0)
 var weapon_levels: Dictionary = {0: 1}  # Weapon type -> level
@@ -31,6 +40,8 @@ var weapon_damage_multiplier: float = 1.0
 var ship_speed_multiplier: float = 1.0
 var pickup_range_multiplier: float = 1.0  # Affects how far pickups are attracted from
 var blessed_luck: float = 0.0  # Increases chance of higher tier items
+var crit_chance: float = 0.10  # Base crit chance (0.0 to 1.0) - TODO: Set to 0.0 for production
+var megacrit_chance: float = 0.02  # Base megacrit chance (0.0 to 1.0) - TODO: Set to 0.0 for production
 
 # Resource tracking
 var kills: int = 0
@@ -107,6 +118,8 @@ func reset_run() -> void:
 	ship_speed_multiplier = 1.0
 	pickup_range_multiplier = 1.0
 	blessed_luck = 0.0
+	crit_chance = 0.10  # Test value - TODO: Set to 0.0 for production
+	megacrit_chance = 0.02  # Test value - TODO: Set to 0.0 for production
 	
 	print("GameState: Run reset to defaults")  
 
@@ -164,6 +177,22 @@ func get_xp_progress() -> float:
 		return 0.0
 	return float(current_xp) / float(xp_to_next_level)
 
+## Base stats that scale with team level
+func get_base_max_health() -> int:
+	"""Get max health scaled by team level (30% increase per level)"""
+	var level_bonus := (current_level - 1) * HEALTH_SCALING_PER_LEVEL
+	return int(BASE_MAX_HEALTH * (1.0 + level_bonus))
+
+func get_base_damage() -> float:
+	"""Get base damage scaled by team level (20% increase per level)"""
+	var level_bonus := (current_level - 1) * DAMAGE_SCALING_PER_LEVEL
+	return BASE_DAMAGE * (1.0 + level_bonus)
+
+func get_base_health_regen() -> float:
+	"""Get health regeneration scaled by team level (20% increase per level)"""
+	var level_bonus := (current_level - 1) * REGEN_SCALING_PER_LEVEL
+	return BASE_HEALTH_REGEN * (1.0 + level_bonus)
+
 ## Weapon and upgrade system
 func get_unlocked_weapons() -> Array[int]:
 	return unlocked_weapons
@@ -216,6 +245,24 @@ func get_blessed_luck() -> float:
 func add_blessed_luck(amount: float) -> void:
 	blessed_luck += amount
 	print("GameState: Blessed luck increased to ", blessed_luck)
+
+func get_crit_chance() -> float:
+	return crit_chance
+
+func add_crit_chance(amount: float) -> void:
+	crit_chance += amount
+	if crit_chance > 1.0:
+		crit_chance = 1.0
+	print("GameState: Crit chance increased to ", crit_chance * 100, "%")
+
+func get_megacrit_chance() -> float:
+	return megacrit_chance
+
+func add_megacrit_chance(amount: float) -> void:
+	megacrit_chance += amount
+	if megacrit_chance > 1.0:
+		megacrit_chance = 1.0
+	print("GameState: Megacrit chance increased to ", megacrit_chance * 100, "%")
 
 ## Resource management
 func add_kill() -> void:

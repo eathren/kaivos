@@ -139,6 +139,12 @@ func _fire_bullet(target: Node2D, origin: Node2D) -> void:
 		if "damage" in bullet:
 			bullet.damage = bullet_damage
 		
+		# Apply crit chances from GameState
+		if "crit_chance" in bullet and GameState:
+			bullet.crit_chance = GameState.get_crit_chance()
+		if "megacrit_chance" in bullet and GameState:
+			bullet.megacrit_chance = GameState.get_megacrit_chance()
+		
 		# Set position & rotation
 		var spawn_pos := muzzle.global_position
 		bullet.global_position = spawn_pos
@@ -221,6 +227,12 @@ func _fire_bullet_in_direction(origin: Node2D, direction: Vector2) -> void:
 			bullet.speed = bullet_speed
 		if "damage" in bullet:
 			bullet.damage = bullet_damage
+		
+		# Apply crit chances from GameState
+		if "crit_chance" in bullet and GameState:
+			bullet.crit_chance = GameState.get_crit_chance()
+		if "megacrit_chance" in bullet and GameState:
+			bullet.megacrit_chance = GameState.get_megacrit_chance()
 		
 		# Set position & rotation
 		var spawn_pos := muzzle.global_position

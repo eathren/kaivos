@@ -2,6 +2,38 @@
 
 Goal: Co-op Isaac / Nuclear Throne style builds where players stay in the same power band without cloning items.
 
+BASE STATS SCALING (IMPLEMENTED)
+================================
+RUN DIFFICULTY SYSTEM:
+- RunManager.difficulty tracks time_elapsed and depth_traveled
+- Enemy level = 1 + floor(time_minutes + depth_factor)
+- Enemies query difficulty ONCE at spawn and bake stats
+- Old enemies keep their spawn stats (no mid-fight jumps)
+
+PLAYER SCALING (dynamic with team level):
+- Base Maximum Health: 100 HP → +30% per level
+- Base Damage: 10 → +20% per level  
+- Base Health Regen: 1 HP/sec → +20% per level
+
+ENEMY SCALING (baked at spawn):
+- Health: +30% per difficulty level
+- Damage: +20% per difficulty level
+- Regen: 0 (enemies don't regenerate)
+- Stats frozen at spawn level
+
+Effect: Fights take longer at higher levels as health outscales damage (30% > 20%).
+Enemies spawned at difficulty 5 stay at difficulty 5 even as run progresses.
+
+Access in code:
+  # Players
+  GameState.get_base_max_health() -> int
+  GameState.get_base_damage() -> float
+  GameState.get_base_health_regen() -> float
+  
+  # Enemies
+  RunManager.difficulty.get_enemy_level() -> int
+  enemy.apply_level(level)  # Called by spawner
+
 Shared run power curve
 
 - Use a single shared run progression value: `team_rank` (run level).

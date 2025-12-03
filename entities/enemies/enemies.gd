@@ -13,6 +13,11 @@ var _target: Node2D = null
 var _health_component: HealthComponent = null
 var _speed_component: SpeedComponent = null
 
+# Level baked in at spawn time
+var spawn_level: int = 1
+var scaled_health: float = 0.0
+var scaled_damage: float = 0.0
+
 func _ready() -> void:
 	add_to_group("enemy")
 	
@@ -21,10 +26,19 @@ func _ready() -> void:
 	_speed_component = get_node_or_null("SpeedComponent")
 	
 	# Apply stats from resource
+	# Note: If spawner hasn't called apply_level() yet, we use base stats
 	if enemy_stats:
-		if _health_component:
-			_health_component.max_health = enemy_stats.max_health
-			_health_component.current_health = enemy_stats.max_health
+		if scaled_health > 0:
+			# Use pre-scaled stats from apply_level()
+			if _health_component:
+				_health_component.max_health = int(scaled_health)
+				_health_component.current_health = _health_component.max_health
+		else:
+			# Fallback to base stats if no level applied
+			if _health_component:
+				_health_component.max_health = enemy_stats.max_health
+				_health_component.current_health = enemy_stats.max_health
+		
 		if _speed_component:
 			_speed_component.base_speed = enemy_stats.move_speed
 	
@@ -72,7 +86,8 @@ func _deal_damage_to(target: Node, delta: float) -> void:
 	# Look for HealthComponent on target
 	var health_comp = target.get_node_or_null("HealthComponent")
 	if health_comp and health_comp.has_method("take_damage"):
-		var dps := enemy_stats.damage_per_second if enemy_stats else 10.0
+		# Use baked damage from spawn level
+		var dps := scaled_damage if scaled_damage > 0 else (enemy_stats.damage_per_second if enemy_stats else 10.0)
 		health_comp.take_damage(dps * delta)
 
 func _on_death() -> void:
@@ -134,3 +149,31 @@ func take_damage(amount: float) -> void:
 	else:
 		# No health component, die immediately
 		_on_death()
+
+func apply_level(level: int) -> void:
+	"""Called by spawner to bake in stats based on run difficulty"""
+	spawn_level = level
+	
+	if not enemy_stats:
+		return
+	
+	# Scale stats based on level (same formula as before, but baked in)
+	# Health: +30% per level
+	var hp_mult := 1.0 + 0.30 * float(level - 1)
+	scaled_health = enemy_stats.max_health * hp_mult
+	
+	# Damage: +20% per level
+	var dmg_mult := 1.0 + 0.20 * float(level - 1)
+	scaled_damage = enemy_stats.damage_per_second * dmg_mult
+	
+	# Apply to components if they're already initialized
+	if _health_component:
+		_health_component.max_health = int(scaled_health)
+		_health_component.current_health = _health_component.max_health
+	
+	# Update TouchDamageComponent if present
+	var touch_damage = get_node_or_null("TouchDamageComponent")
+	if touch_damage and touch_damage.has_method("set_scaled_damage"):
+		# Use same damage scaling for touch damage
+		var base_touch_damage = touch_damage.damage
+		touch_damage.set_scaled_damage(int(base_touch_damage * dmg_mult))

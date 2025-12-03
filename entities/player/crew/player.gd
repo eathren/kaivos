@@ -5,32 +5,35 @@ extends CharacterBody2D
 var speed: float = 200.0  # Set from crew_stats in _ready()
 var is_active: bool = true
 var health_bar: ProgressBar = null
-var invulnerable: bool = false
-var invulnerable_timer: float = 0.0
-const INVULNERABLE_TIME: float = 0.5  # Half second of invulnerability after hit
 
 func _ready() -> void:
 	add_to_group("player")
 	
-	# Connect hurt box
-	var hurt_box = get_node_or_null("HurtBox") as Area2D
-	if hurt_box:
-		hurt_box.area_entered.connect(_on_hurt_box_area_entered)
+	# Connect to hurtbox component signals
+	var hurtbox = get_node_or_null("HurtboxComponent") as HurtboxComponent
+	if hurtbox:
+		hurtbox.hit_received.connect(_on_hit_received)
 	
 	# Apply stats from crew_stats resource
 	if crew_stats:
 		speed = crew_stats.move_speed
 		
-		# Apply to HealthComponent
+		# Apply to HealthComponent (scaled by team level)
 		var health_component := get_node_or_null("HealthComponent") as HealthComponent
 		if health_component:
-			health_component.max_health = crew_stats.max_health
-			health_component.current_health = crew_stats.max_health
+			health_component.max_health = GameState.get_base_max_health()
+			health_component.current_health = health_component.max_health
 		
 		# Apply to SpeedComponent
 		var speed_component := get_node_or_null("SpeedComponent") as SpeedComponent
 		if speed_component:
 			speed_component.base_speed = crew_stats.move_speed
+		
+		# Apply to HealthRegenComponent (scaled by team level)
+		var health_regen := get_node_or_null("HealthRegenComponent") as HealthRegenComponent
+		if health_regen:
+			health_regen.base_regen_per_second = GameState.get_base_health_regen()
+			health_regen.current_regen_rate = GameState.get_base_health_regen()
 		
 		# Apply pickup range to PickupArea
 		var pickup_area := get_node_or_null("PickupArea") as Area2D
@@ -43,19 +46,6 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if not is_active:
 		return
-	
-	# Update invulnerability timer
-	if invulnerable:
-		invulnerable_timer -= delta
-		if invulnerable_timer <= 0:
-			invulnerable = false
-			modulate = Color.WHITE
-		
-		# Flash effect during invulnerability
-		if int(invulnerable_timer * 10) % 2 == 0:
-			modulate = Color(1, 1, 1, 0.5)
-		else:
-			modulate = Color.WHITE
 	
 	# Only process input for local authority
 	if not is_multiplayer_authority():
@@ -85,44 +75,23 @@ func activate() -> void:
 	visible = true
 	set_physics_process(true)
 
-func _on_hurt_box_area_entered(area: Area2D) -> void:
-	"""Handle damage from enemy damage areas"""
-	if invulnerable:
-		return
+func _on_hit_received(damage: int, attacker: Node) -> void:
+	"""Called when HurtboxComponent receives damage"""
+	# Show/update health bar
+	if not health_bar:
+		_spawn_health_bar()
 	
-	# Check if it's an enemy damage area
-	var enemy = area.get_parent()
-	var damage_component = enemy.get_node_or_null("TouchDamageComponent")
-	if damage_component and damage_component.has_method("can_damage_target"):
-		if damage_component.can_damage_target(self):
-			var damage = damage_component.get_damage()
-			damage_component.record_damage(self)
-			take_damage(damage)
-
-func take_damage(amount: int) -> void:
-	"""Take damage and update health bar"""
-	if invulnerable:
-		return
-	
-	var health_component = get_node_or_null("HealthComponent") as HealthComponent
-	if health_component:
-		health_component.take_damage(amount)
-		
-		# Show health bar if not visible
-		if not health_bar:
-			_spawn_health_bar()
-		
-		# Update health bar
-		if health_bar:
+	if health_bar:
+		var health_component = get_node_or_null("HealthComponent") as HealthComponent
+		if health_component:
 			health_bar.max_value = health_component.max_health
 			health_bar.value = health_component.current_health
 			health_bar.visible = true
-		
-		# Start invulnerability
-		invulnerable = true
-		invulnerable_timer = INVULNERABLE_TIME
-		
-		print("Player took %d damage! Health: %d/%d" % [amount, health_component.current_health, health_component.max_health])
+
+func take_damage(amount: int) -> void:
+	"""Deprecated - damage is now handled by HurtboxComponent"""
+	pass
+	
 
 func _spawn_health_bar() -> void:
 	"""Create floating health bar above player"""

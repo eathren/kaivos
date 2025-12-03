@@ -13,6 +13,7 @@ signal item_chosen(item: TechItem)
 var current_choices: Array[TechItem] = []
 var player_id: int = 1
 var item_button_scene: PackedScene = preload("res://ui/level_up/item_choice_button.tscn")
+var banner_scene: PackedScene = preload("res://ui/level_up/item_acquired_banner.tscn")
 
 func _ready() -> void:
 	hide()
@@ -75,14 +76,23 @@ func show_choices(p_id: int, level: int) -> void:
 func _on_item_chosen(item: TechItem) -> void:
 	"""Player chose an item"""
 	# Add item to player
-	TechManager.add_item_stack(player_id, item)
+	var stack_count = TechManager.add_item_stack(player_id, item)
 	
 	# Resume time
 	Engine.time_scale = 1.0
 	
+	# Show acquisition banner
+	_show_acquisition_banner(item, stack_count)
+	
 	# Emit signal and hide
 	item_chosen.emit(item)
 	hide()
+
+func _show_acquisition_banner(item: TechItem, stack_count: int) -> void:
+	"""Show banner at bottom of screen"""
+	var banner = banner_scene.instantiate()
+	get_tree().root.add_child(banner)
+	banner.show_item(item, stack_count)
 
 func _on_skip_pressed() -> void:
 	"""Player skipped level up"""

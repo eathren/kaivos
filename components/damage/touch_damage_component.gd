@@ -7,9 +7,15 @@ class_name TouchDamageComponent
 @export var damage_cooldown: float = 1.0  # Time between damage ticks
 
 var last_damage_time: Dictionary = {}  # target -> timestamp
+var scaled_damage: int = 0  # Set by parent's apply_level() if needed
 
 func get_damage() -> int:
-	return damage
+	# Use scaled damage if set, otherwise base damage
+	return scaled_damage if scaled_damage > 0 else damage
+
+func set_scaled_damage(amount: int) -> void:
+	"""Called by enemy when apply_level() bakes in stats"""
+	scaled_damage = amount
 
 func can_damage_target(target: Node) -> bool:
 	"""Check if enough time has passed to damage this target again"""

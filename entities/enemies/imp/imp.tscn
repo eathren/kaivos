@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://c5k8x6v4pbwi" path="res://components/speed_component/speed_component.tscn" id="4_speed"]
 [ext_resource type="PackedScene" path="res://components/pathfinding/pathfinding_component.tscn" id="6_pathfind"]
 [ext_resource type="PackedScene" uid="uid://touch_damage_component" path="res://components/damage/touch_damage_component.tscn" id="7_damage"]
+[ext_resource type="PackedScene" uid="uid://dptvykd5bxq0a" path="res://components/hurtbox/hurtbox_component.tscn" id="8_hurtbox"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_45r1c"]
 radius = 5.0
@@ -47,6 +48,11 @@ waypoint_distance = 16.0
 
 [node name="TouchDamageComponent" parent="." instance=ExtResource("7_damage")]
 damage = 5
+
+[node name="HurtboxComponent" parent="." instance=ExtResource("8_hurtbox")]
+
+[node name="CollisionShape2D" parent="HurtboxComponent" index="0"]
+shape = SubResource("CircleShape2D_45r1c")
 
 [node name="DamageArea" type="Area2D" parent="."]
 collision_layer = 8
