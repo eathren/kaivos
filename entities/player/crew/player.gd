@@ -4,9 +4,18 @@ extends CharacterBody2D
 
 var speed: float = 200.0  # Set from crew_stats in _ready()
 var is_active: bool = true
+var health_bar: ProgressBar = null
+var invulnerable: bool = false
+var invulnerable_timer: float = 0.0
+const INVULNERABLE_TIME: float = 0.5  # Half second of invulnerability after hit
 
 func _ready() -> void:
 	add_to_group("player")
+	
+	# Connect hurt box
+	var hurt_box = get_node_or_null("HurtBox") as Area2D
+	if hurt_box:
+		hurt_box.area_entered.connect(_on_hurt_box_area_entered)
 	
 	# Apply stats from crew_stats resource
 	if crew_stats:
@@ -35,6 +44,19 @@ func _physics_process(delta: float) -> void:
 	if not is_active:
 		return
 	
+	# Update invulnerability timer
+	if invulnerable:
+		invulnerable_timer -= delta
+		if invulnerable_timer <= 0:
+			invulnerable = false
+			modulate = Color.WHITE
+		
+		# Flash effect during invulnerability
+		if int(invulnerable_timer * 10) % 2 == 0:
+			modulate = Color(1, 1, 1, 0.5)
+		else:
+			modulate = Color.WHITE
+	
 	# Only process input for local authority
 	if not is_multiplayer_authority():
 		return
@@ -62,3 +84,63 @@ func activate() -> void:
 	is_active = true
 	visible = true
 	set_physics_process(true)
+
+func _on_hurt_box_area_entered(area: Area2D) -> void:
+	"""Handle damage from enemy damage areas"""
+	if invulnerable:
+		return
+	
+	# Check if it's an enemy damage area
+	var enemy = area.get_parent()
+	var damage_component = enemy.get_node_or_null("TouchDamageComponent")
+	if damage_component and damage_component.has_method("can_damage_target"):
+		if damage_component.can_damage_target(self):
+			var damage = damage_component.get_damage()
+			damage_component.record_damage(self)
+			take_damage(damage)
+
+func take_damage(amount: int) -> void:
+	"""Take damage and update health bar"""
+	if invulnerable:
+		return
+	
+	var health_component = get_node_or_null("HealthComponent") as HealthComponent
+	if health_component:
+		health_component.take_damage(amount)
+		
+		# Show health bar if not visible
+		if not health_bar:
+			_spawn_health_bar()
+		
+		# Update health bar
+		if health_bar:
+			health_bar.max_value = health_component.max_health
+			health_bar.value = health_component.current_health
+			health_bar.visible = true
+		
+		# Start invulnerability
+		invulnerable = true
+		invulnerable_timer = INVULNERABLE_TIME
+		
+		print("Player took %d damage! Health: %d/%d" % [amount, health_component.current_health, health_component.max_health])
+
+func _spawn_health_bar() -> void:
+	"""Create floating health bar above player"""
+	if health_bar:
+		return
+	
+	health_bar = ProgressBar.new()
+	health_bar.custom_minimum_size = Vector2(40, 6)
+	health_bar.position = Vector2(-20, -20)
+	health_bar.show_percentage = false
+	
+	# Style the health bar
+	var style_bg = StyleBoxFlat.new()
+	style_bg.bg_color = Color(0.2, 0.2, 0.2, 0.8)
+	health_bar.add_theme_stylebox_override("background", style_bg)
+	
+	var style_fill = StyleBoxFlat.new()
+	style_fill.bg_color = Color(0.8, 0.2, 0.2, 1.0)
+	health_bar.add_theme_stylebox_override("fill", style_fill)
+	
+	add_child(health_bar)

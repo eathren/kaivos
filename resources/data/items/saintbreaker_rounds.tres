@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="TechItem" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="TechItem" load_steps=3 format=3 uid="uid://u74jddveflvn"]
 
-[ext_resource type="Script" path="res://resources/data/tech_item.gd" id="1_tech"]
+[ext_resource type="Texture2D" uid="uid://besggnlebjysf" path="res://items/gilden-bullet-shroud.png" id="1_l1k1c"]
+[ext_resource type="Script" uid="uid://dffo8i2x86hdm" path="res://resources/data/tech_item.gd" id="1_tech"]
 
 [resource]
 script = ExtResource("1_tech")
@@ -8,6 +9,5 @@ id = "saintbreaker_rounds"
 display_name = "Saintbreaker Rounds"
 description = "Shots pierce 1 enemy and gain +15% damage against elites and bosses."
 stack_description = "+1 extra pierce every 2 stacks, +10% boss/elite damage per stack."
+icon = ExtResource("1_l1k1c")
 rarity = 2
-category = 0
-max_stacks = 10

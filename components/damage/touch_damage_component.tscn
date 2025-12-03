@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://touch_damage_component"]
+
+[ext_resource type="Script" path="res://components/damage/touch_damage_component.gd" id="1_script"]
+
+[node name="TouchDamageComponent" type="Node"]
+script = ExtResource("1_script")
+damage = 10
+damage_cooldown = 1.0
