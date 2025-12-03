@@ -14,6 +14,8 @@ script = ExtResource("3_script")
 
 [node name="WorldRoot" parent="." instance=ExtResource("1_world")]
 
+[node name="RoomRoot" type="Node2D" parent="WorldRoot"]
+
 [node name="Trawler" parent="." instance=ExtResource("2_trawler")]
 position = Vector2(74, -44)
 

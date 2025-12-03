@@ -23,6 +23,7 @@ SpawnManager="*res://autoloads/spawn_manager.gd"
 RunManager="*res://autoloads/run_manager.gd"
 ControlManager="*res://autoloads/control_manager.gd"
 NetworkManager="*res://autoloads/network_manager.gd"
+RoomLibrary="*res://autoloads/room_library.gd"
 SceneTransition="*res://ui/transitions/scene_transition.tscn"
 
 [display]

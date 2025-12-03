@@ -1,8 +1,9 @@
-[gd_scene load_steps=12 format=3 uid="uid://dwjxh6hrypua3"]
+[gd_scene load_steps=13 format=3 uid="uid://dwjxh6hrypua3"]
 
 [ext_resource type="Script" uid="uid://b31epxhbt6duc" path="res://entities/vehicles/trawler/trawler.gd" id="1_byw1e"]
 [ext_resource type="Texture2D" uid="uid://d1x04najel8kl" path="res://assets/art/player/trawler/trawler.png" id="4_p3rct"]
 [ext_resource type="PackedScene" uid="uid://ccioahkom5fb3" path="res://entities/player/ships/turret.tscn" id="5_t1h18"]
+[ext_resource type="Texture2D" uid="uid://dk2mwwmiirwag" path="res://assets/art/player/trawler/go_stick.png" id="9_08py4"]
 [ext_resource type="PackedScene" uid="uid://hx0v5hqvqkmy" path="res://components/health_component/health_component.tscn" id="9_health"]
 [ext_resource type="PackedScene" uid="uid://cktow4fougwxd" path="res://components/lighting/flashlight.tscn" id="10_i8mar"]
 [ext_resource type="PackedScene" uid="uid://c5k8x6v4pbwi" path="res://components/speed_component/speed_component.tscn" id="10_speed"]
@@ -30,11 +31,6 @@ polygon = PackedVector2Array(-47, -144, 47, -144, 47, 145, -48, 145)
 collision_layer = 2
 collision_mask = 8
 script = ExtResource("1_byw1e")
-ship_stats = null
-burst_multiplier = null
-max_speed_for_line = null
-max_line_length = null
-line_lerp_speed = null
 
 [node name="Drill" parent="." instance=ExtResource("11_i8mar")]
 position = Vector2(0, -141)
@@ -110,3 +106,12 @@ replication_config = SubResource("SceneReplicationConfig_trawler")
 
 [node name="LightOccluder2D" type="LightOccluder2D" parent="."]
 occluder = SubResource("OccluderPolygon2D_p3rct")
+
+[node name="GoStick" type="Node2D" parent="."]
+
+[node name="Sprite2D" type="Sprite2D" parent="GoStick"]
+position = Vector2(-7, 128)
+texture = ExtResource("9_08py4")
+
+[node name="Marker2D" type="Marker2D" parent="GoStick"]
+position = Vector2(0, 129)

@@ -1,0 +1,41 @@
+[gd_scene load_steps=2 format=3 uid="uid://b3r7m9k5p2wnq"]
+
+[ext_resource type="Script" path="res://rooms/room_template.gd" id="1_template"]
+
+[node name="RoomCombatB" type="Node2D"]
+script = ExtResource("1_template")
+room_type = "combat"
+door_mask = 10
+
+[node name="FloorLayer" type="TileMapLayer" parent="."]
+
+[node name="WallLayer" type="TileMapLayer" parent="."]
+
+[node name="Markers" type="Node2D" parent="."]
+
+[node name="DoorMarkers" type="Node2D" parent="Markers"]
+
+[node name="DoorLeft" type="Marker2D" parent="Markers/DoorMarkers" groups=["room_door"]]
+position = Vector2(0, 96)
+
+[node name="DoorRight" type="Marker2D" parent="Markers/DoorMarkers" groups=["room_door"]]
+position = Vector2(256, 96)
+
+[node name="LootMarkers" type="Node2D" parent="Markers"]
+
+[node name="LootSpot1" type="Marker2D" parent="Markers/LootMarkers" groups=["room_loot"]]
+position = Vector2(128, 144)
+
+[node name="EnemyMarkers" type="Node2D" parent="Markers"]
+
+[node name="Enemy1" type="Marker2D" parent="Markers/EnemyMarkers" groups=["room_enemy"]]
+position = Vector2(80, 80)
+
+[node name="Enemy2" type="Marker2D" parent="Markers/EnemyMarkers" groups=["room_enemy"]]
+position = Vector2(176, 80)
+
+[node name="Enemy3" type="Marker2D" parent="Markers/EnemyMarkers" groups=["room_enemy"]]
+position = Vector2(128, 112)
+
+[node name="Enemy4" type="Marker2D" parent="Markers/EnemyMarkers" groups=["room_enemy"]]
+position = Vector2(96, 128)

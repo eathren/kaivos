@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bjmivsmcfd771" path="res://entities/weapons/shotgun/shotgun.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://ds6df0mnhn0xu" path="res://assets/art/player/weapons/shotgun.png" id="2_ti805"]
-[ext_resource type="AudioStream" path="res://assets/audio/sfx/gameplay/shot.wav" id="3_gunshot"]
+[ext_resource type="AudioStream" uid="uid://m83sktau1qk" path="res://assets/audio/sfx/gameplay/pistol_shot.mp3" id="3_0edeb"]
 
 [node name="Shotgun" type="Node2D"]
 script = ExtResource("1_script")
@@ -18,5 +18,5 @@ region_rect = Rect2(0, 0, 16, 16)
 position = Vector2(16, 0)
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
-stream = ExtResource("3_gunshot")
-volume_db = -5.0
+stream = ExtResource("3_0edeb")
+volume_db = -20.0

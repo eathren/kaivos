@@ -18,6 +18,8 @@ signal drill_toggled(is_on: bool)
 var base_speed: float = 10.0  # Set from ship_stats in _ready()
 
 @onready var enemy_detector: Area2D = $EnemyDetector
+@onready var go_stick: Node = $GoStick
+@onready var drill: Node = $Drill
 
 var current_state: MovementState = MovementState.GO
 var current_line_length: float = 0.0
@@ -58,6 +60,14 @@ func _ready() -> void:
 	# Connect enemy damage detection
 	if enemy_detector:
 		enemy_detector.body_entered.connect(_on_enemy_entered)
+	
+	# Connect GoStick signal
+	if go_stick and go_stick.has_signal("state_changed"):
+		go_stick.state_changed.connect(_on_go_stick_state_changed)
+		print("Trawler: Connected to GoStick")
+	
+	# Update drill state initially
+	_update_drill_state()
 
 func _on_enemy_entered(body: Node) -> void:
 	"""Handle damage when enemy touches trawler"""
@@ -81,6 +91,7 @@ func set_movement_state(new_state: MovementState) -> void:
 	if current_state != new_state:
 		current_state = new_state
 		_update_speed_from_state()
+		_update_drill_state()
 		movement_state_changed.emit(new_state)
 
 func _update_speed_from_state() -> void:
@@ -91,3 +102,34 @@ func _update_speed_from_state() -> void:
 			current_speed = base_speed
 		MovementState.BURST:
 			current_speed = base_speed * burst_multiplier
+
+func _on_go_stick_state_changed(stick_state: int) -> void:
+	"""Handle GoStick state changes and update trawler movement"""
+	match stick_state:
+		0:  # LEFT_STOP
+			set_movement_state(MovementState.STOP)
+			print("Trawler: GoStick set to STOP")
+		1:  # UP_GO
+			set_movement_state(MovementState.GO)
+			print("Trawler: GoStick set to GO")
+		2:  # RIGHT_BURST
+			set_movement_state(MovementState.BURST)
+			print("Trawler: GoStick set to BURST (turbo)")
+
+func _update_drill_state() -> void:
+	"""Update drill active state and audio based on movement state"""
+	if not drill:
+		return
+	
+	# Drill is only active when moving (not stopped)
+	var should_be_active := current_state != MovementState.STOP
+	
+	if drill.has_method("set_active"):
+		drill.set_active(should_be_active)
+	elif "is_active" in drill:
+		drill.is_active = should_be_active
+		# Manually update drill animation and audio if no method
+		if drill.has_method("_update_animation"):
+			drill._update_animation()
+		if drill.has_method("_update_audio"):
+			drill._update_audio()

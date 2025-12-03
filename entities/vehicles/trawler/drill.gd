@@ -34,7 +34,7 @@ func _process(delta: float) -> void:
 	_update_audio()
 
 func _on_movement_state_changed(new_state) -> void:
-	# Auto-enable drill when moving
+	# Auto-enable drill when moving (not stopped)
 	var was_active = is_active
 	is_active = (new_state != trawler.MovementState.STOP)
 	
@@ -43,6 +43,14 @@ func _on_movement_state_changed(new_state) -> void:
 	if was_active != is_active:
 		_update_animation()
 		_update_audio()
+
+func set_active(active: bool) -> void:
+	"""Public method to set drill active state"""
+	if is_active != active:
+		is_active = active
+		_update_animation()
+		_update_audio()
+		print("Drill: Set active to ", is_active)
 
 func _on_drill_toggled(enabled: bool) -> void:
 	is_active = enabled

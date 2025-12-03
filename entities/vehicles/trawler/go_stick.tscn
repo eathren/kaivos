@@ -1,0 +1,33 @@
+[gd_scene load_steps=4 format=3 uid="uid://gostick_trawler_123"]
+
+[ext_resource type="Script" path="res://entities/vehicles/trawler/go_stick.gd" id="1_gostick"]
+
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_stick"]
+size = Vector2(8, 32)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_interact"]
+radius = 40.0
+
+[node name="GoStick" type="Sprite2D"]
+modulate = Color(0.8, 0.6, 0.2, 1)
+texture = SubResource("PlaceholderTexture2D_stick")
+offset = Vector2(0, 16)
+script = ExtResource("1_gostick")
+
+[node name="InteractionArea" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionArea"]
+shape = SubResource("CircleShape2D_interact")
+
+[node name="InteractionLabel" type="Label" parent="."]
+offset_left = -40.0
+offset_top = -50.0
+offset_right = 40.0
+offset_bottom = -30.0
+theme_override_colors/font_color = Color(1, 1, 0.5, 1)
+theme_override_font_sizes/font_size = 12
+text = "[E] Toggle Speed"
+horizontal_alignment = 1
+vertical_alignment = 1

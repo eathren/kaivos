@@ -7,7 +7,7 @@ signal experience_gained(amount: int, total: int)
 @export var base_laser_dps: float = 20.0
 @export var base_enemy_speed: float = 60.0
 @export var base_trawler_speed: float = 5.0
-
+@export var tile_size: int = 16
 # how many tiles wide we mine in front of the ship
 @export var base_mine_width_tiles: int = 8
 
