@@ -72,3 +72,24 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_constants/separation = 16
 alignment = 1
+
+[node name="BottomContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+alignment = 2
+
+[node name="BanishInfoLabel" type="Label" parent="VBoxContainer/BottomContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Banishes: 3"
+horizontal_alignment = 2
+
+[node name="Spacer" type="Control" parent="VBoxContainer/BottomContainer"]
+custom_minimum_size = Vector2(20, 0)
+layout_mode = 2
+
+[node name="SkipButton" type="Button" parent="VBoxContainer/BottomContainer"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 40)
+layout_mode = 2
+text = "Skip"

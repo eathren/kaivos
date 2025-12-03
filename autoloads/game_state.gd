@@ -30,6 +30,7 @@ var fire_rate_multiplier: float = 1.0
 var weapon_damage_multiplier: float = 1.0
 var ship_speed_multiplier: float = 1.0
 var pickup_range_multiplier: float = 1.0  # Affects how far pickups are attracted from
+var blessed_luck: float = 0.0  # Increases chance of higher tier items
 
 # Resource tracking
 var kills: int = 0
@@ -105,6 +106,7 @@ func reset_run() -> void:
 	weapon_damage_multiplier = 1.0
 	ship_speed_multiplier = 1.0
 	pickup_range_multiplier = 1.0
+	blessed_luck = 0.0
 	
 	print("GameState: Run reset to defaults")  
 
@@ -207,6 +209,13 @@ func get_pickup_range_multiplier() -> float:
 func set_pickup_range_multiplier(value: float) -> void:
 	pickup_range_multiplier = value
 	print("GameState: Pickup range multiplier set to ", value)
+
+func get_blessed_luck() -> float:
+	return blessed_luck
+
+func add_blessed_luck(amount: float) -> void:
+	blessed_luck += amount
+	print("GameState: Blessed luck increased to ", blessed_luck)
 
 ## Resource management
 func add_kill() -> void:

@@ -37,3 +37,18 @@ func setup(p_item: TechItem, current_stack: int) -> void:
 		icon_rect.show()
 	else:
 		icon_rect.hide()
+
+func add_banish_button(callback: Callable) -> void:
+	"""Add a banish button to this item choice"""
+	var banish_btn = Button.new()
+	banish_btn.text = "Banish"
+	banish_btn.tooltip_text = "Remove this item from future level-ups"
+	banish_btn.pressed.connect(func():
+		callback.call()
+		queue_free()  # Remove this button after banishing
+	)
+	
+	# Add to the VBoxContainer
+	var vbox = get_node("VBoxContainer")
+	if vbox:
+		vbox.add_child(banish_btn)

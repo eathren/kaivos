@@ -12,6 +12,12 @@ var player_items: Dictionary = {}
 # Item pool - preload all items
 var item_pool: Array[TechItem] = []
 
+# Banish system: player_id -> { item_id -> true }
+var banished_items: Dictionary = {}
+
+# Banish uses remaining: player_id -> int
+var banish_uses: Dictionary = {}
+
 func _ready() -> void:
 	_load_item_pool()
 
@@ -69,36 +75,51 @@ func add_item_stack(player_id: int, item: TechItem) -> int:
 func get_player_items(player_id: int) -> Dictionary:
 	return player_items.get(player_id, {})
 
-## Generate item choices for level up (can include duplicates)
-func generate_item_choices(player_id: int, count: int = 4, force_rarity: TechItem.Rarity = -1) -> Array[TechItem]:
+## Generate item choices for level up (always returns exactly count items)
+func generate_item_choices(player_id: int, count: int = 4, level: int = 1) -> Array[TechItem]:
 	var choices: Array[TechItem] = []
+	
+	# Get available items (not at max stacks and not banished)
 	var available_items = item_pool.duplicate()
-	
-	# Filter by rarity if specified
-	if force_rarity >= 0:
-		available_items = available_items.filter(func(item): return item.rarity == force_rarity)
-	
-	# Remove items at max stacks
 	available_items = available_items.filter(func(item):
 		var stack = get_item_stack(player_id, item.id)
-		return item.max_stacks < 0 or stack < item.max_stacks
+		var not_maxed = item.max_stacks < 0 or stack < item.max_stacks
+		var not_banished = not is_item_banished(player_id, item)
+		return not_maxed and not_banished
 	)
 	
-	# If no items available, return empty
+	# If no items available, return empty (shouldn't happen with proper pool)
 	if available_items.is_empty():
+		push_warning("TechManager: No available items for player %d!" % player_id)
 		return choices
 	
-	# Randomly select items (WITH replacement - items can appear multiple times)
+	# Get luck from GameState
+	var luck = GameState.get_blessed_luck() if GameState else 0.0
+	
+	# Generate each choice with individual rarity roll
 	for i in range(count):
-		var random_item = available_items[randi() % available_items.size()]
+		# Determine rarity for this choice based on level and luck
+		var rarity = get_level_up_rarity(level, luck)
+		
+		# Filter items by this rarity
+		var rarity_items = available_items.filter(func(item): return item.rarity == rarity)
+		
+		# If no items of this rarity, fall back to all available
+		if rarity_items.is_empty():
+			rarity_items = available_items
+		
+		# Pick random item (with replacement - can appear multiple times)
+		var random_item = rarity_items[randi() % rarity_items.size()]
 		choices.append(random_item)
 	
 	return choices
 
-## Determine rarity for level up based on level
-func get_level_up_rarity(level: int) -> TechItem.Rarity:
-	# Simple rarity scaling
+## Determine rarity for level up based on level and luck
+func get_level_up_rarity(level: int, luck: float = 0.0) -> TechItem.Rarity:
+	# Base roll with luck modifier (each point of luck shifts towards higher tiers)
 	var roll = randf()
+	# Apply luck bonus - each 1.0 luck increases roll by 0.1 (capped)
+	roll = clamp(roll + (luck * 0.1), 0.0, 1.0)
 	
 	if level < 5:
 		# Early game: mostly common
@@ -133,6 +154,34 @@ func get_level_up_rarity(level: int) -> TechItem.Rarity:
 func reset_player_items(player_id: int = -1) -> void:
 	if player_id >= 0:
 		player_items.erase(player_id)
+		banished_items.erase(player_id)
+		banish_uses[player_id] = 3  # Start with 3 banish uses
 	else:
 		player_items.clear()
+		banished_items.clear()
+		banish_uses.clear()
 	print("TechManager: Reset items for player %d" % player_id)
+
+## Check if player has banish uses remaining
+func get_banish_uses(player_id: int) -> int:
+	return banish_uses.get(player_id, 3)
+
+## Banish an item (prevent it from appearing again)
+func banish_item(player_id: int, item: TechItem) -> bool:
+	if get_banish_uses(player_id) <= 0:
+		return false
+	
+	if not banished_items.has(player_id):
+		banished_items[player_id] = {}
+	
+	banished_items[player_id][item.id] = true
+	banish_uses[player_id] = get_banish_uses(player_id) - 1
+	
+	print("TechManager: Player %d banished %s (%d uses left)" % [player_id, item.display_name, get_banish_uses(player_id)])
+	return true
+
+## Check if an item is banished for a player
+func is_item_banished(player_id: int, item: TechItem) -> bool:
+	if not banished_items.has(player_id):
+		return false
+	return banished_items[player_id].get(item.id, false)
