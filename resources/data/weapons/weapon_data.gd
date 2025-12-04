@@ -27,6 +27,7 @@ enum FirePattern {
 
 # Base stats (level 1)
 @export var base_damage: float = 10.0
+@export var damage_variance: float = 0.2  # ±20% damage range (e.g., 8-12 for base 10)
 @export var base_fire_rate: float = 1.0  # Shots per second
 @export var base_projectile_count: int = 1
 @export var base_projectile_speed: float = 400.0

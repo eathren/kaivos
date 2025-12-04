@@ -28,8 +28,6 @@ SceneTransition="*res://ui/transitions/scene_transition.tscn"
 
 [display]
 
-window/size/viewport_width=640
-window/size/viewport_height=360
 window/size/window_width_override=3840
 window/size/window_height_override=2160
 window/stretch/mode="viewport"

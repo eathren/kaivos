@@ -128,16 +128,19 @@ func _fire_bullet(target: Node2D, origin: Node2D) -> void:
 		
 		# Apply weapon data properties
 		var bullet_speed := weapon_data.projectile_speed
-		var bullet_damage := weapon_data.damage
+		var bullet_base_damage := weapon_data.base_damage
+		var bullet_variance := weapon_data.damage_variance
 		
 		# Apply GameState multipliers
 		if GameState and GameState.has_method("get_weapon_damage_multiplier"):
-			bullet_damage = int(bullet_damage * GameState.get_weapon_damage_multiplier())
+			bullet_base_damage = bullet_base_damage * GameState.get_weapon_damage_multiplier()
 		
 		if "speed" in bullet:
 			bullet.speed = bullet_speed
-		if "damage" in bullet:
-			bullet.damage = bullet_damage
+		if "base_damage" in bullet:
+			bullet.base_damage = int(bullet_base_damage)
+		if "damage_variance" in bullet:
+			bullet.damage_variance = bullet_variance
 		
 		# Apply crit chances from GameState
 		if "crit_chance" in bullet and GameState:
@@ -217,16 +220,19 @@ func _fire_bullet_in_direction(origin: Node2D, direction: Vector2) -> void:
 		
 		# Apply weapon data properties
 		var bullet_speed := weapon_data.projectile_speed
-		var bullet_damage := weapon_data.damage
+		var bullet_base_damage := weapon_data.base_damage
+		var bullet_variance := weapon_data.damage_variance
 		
 		# Apply GameState multipliers
 		if GameState and GameState.has_method("get_weapon_damage_multiplier"):
-			bullet_damage = int(bullet_damage * GameState.get_weapon_damage_multiplier())
+			bullet_base_damage = bullet_base_damage * GameState.get_weapon_damage_multiplier()
 		
 		if "speed" in bullet:
 			bullet.speed = bullet_speed
-		if "damage" in bullet:
-			bullet.damage = bullet_damage
+		if "base_damage" in bullet:
+			bullet.base_damage = int(bullet_base_damage)
+		if "damage_variance" in bullet:
+			bullet.damage_variance = bullet_variance
 		
 		# Apply crit chances from GameState
 		if "crit_chance" in bullet and GameState:

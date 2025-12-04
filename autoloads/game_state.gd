@@ -264,6 +264,24 @@ func add_megacrit_chance(amount: float) -> void:
 		megacrit_chance = 1.0
 	print("GameState: Megacrit chance increased to ", megacrit_chance * 100, "%")
 
+func roll_damage_in_range(base_damage: float, variance: float = 0.2) -> float:
+	"""Roll damage within a range, weighted higher by blessed luck
+	Example: base=10, variance=0.2 gives range 8-12
+	Luck pushes the roll towards the higher end"""
+	var min_damage := base_damage * (1.0 - variance)
+	var max_damage := base_damage * (1.0 + variance)
+	
+	# Roll twice and take weighted average based on luck
+	var roll1 := randf_range(min_damage, max_damage)
+	var roll2 := randf_range(min_damage, max_damage)
+	
+	# Luck weight: 0 luck = 50/50, higher luck favors better roll
+	var luck_weight = clamp(blessed_luck * 0.1, 0.0, 1.0)  # 10 luck = 100% favor better roll
+	var better_roll = max(roll1, roll2)
+	var worse_roll = min(roll1, roll2)
+	
+	return lerp(worse_roll, better_roll, luck_weight + 0.5)  # Base 50% + luck bonus
+
 ## Resource management
 func add_kill() -> void:
 	kills += 1

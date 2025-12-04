@@ -1,7 +1,8 @@
-extends PanelContainer
+extends CanvasLayer
 
-## Banner that appears at bottom of screen when item is acquired
+## Banner that appears at top of screen when item is acquired
 
+@onready var panel: PanelContainer = $PanelContainer
 @onready var icon_rect: TextureRect = %IconRect
 @onready var item_name_label: Label = %ItemNameLabel
 @onready var description_label: Label = %DescriptionLabel
@@ -11,7 +12,8 @@ var fade_time: float = 0.5
 var timer: float = 0.0
 
 func _ready() -> void:
-	modulate.a = 0.0
+	if panel:
+		panel.modulate.a = 0.0
 
 func show_item(item: TechItem, stack_count: int) -> void:
 	"""Display item acquisition"""
@@ -40,21 +42,18 @@ func show_item(item: TechItem, stack_count: int) -> void:
 	
 	# Animate in
 	timer = 0.0
-	show()
 	
 	# Fade in
-	var tween = create_tween()
-	tween.tween_property(self, "modulate:a", 1.0, fade_time)
+	if panel:
+		var tween = create_tween()
+		tween.tween_property(panel, "modulate:a", 1.0, fade_time)
 
 func _process(delta: float) -> void:
-	if not visible:
-		return
-	
 	timer += delta
 	
 	# Start fading out
-	if timer >= display_time:
+	if timer >= display_time and panel:
 		var tween = create_tween()
-		tween.tween_property(self, "modulate:a", 0.0, fade_time)
+		tween.tween_property(panel, "modulate:a", 0.0, fade_time)
 		tween.finished.connect(func(): queue_free())
 		set_process(false)
