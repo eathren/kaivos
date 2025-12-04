@@ -3,8 +3,6 @@ extends Button
 ## Individual item choice button
 
 @onready var item_name_label: Label = %ItemNameLabel
-@onready var item_description: RichTextLabel = %ItemDescription
-@onready var stack_label: Label = %StackLabel
 @onready var icon_rect: TextureRect = %IconRect
 
 var item: TechItem = null

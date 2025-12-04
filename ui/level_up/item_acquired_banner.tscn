@@ -27,7 +27,6 @@ offset_right = -20.0
 offset_bottom = 90.0
 grow_horizontal = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_banner")
-script = ExtResource("1_script")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="PanelContainer"]
 layout_mode = 2
