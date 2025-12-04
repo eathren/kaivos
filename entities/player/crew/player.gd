@@ -5,9 +5,15 @@ extends CharacterBody2D
 var speed: float = 200.0  # Set from crew_stats in _ready()
 var is_active: bool = true
 var health_bar: ProgressBar = null
+var look_direction: Vector2 = Vector2.UP  # Track aim direction
 
 func _ready() -> void:
 	add_to_group("player")
+	
+	# Set player ID on weapon component so it can read modifiers
+	var weapon_component = get_node_or_null("WeaponComponent") as WeaponComponent
+	if weapon_component and weapon_component.has_method("set_player_id"):
+		weapon_component.set_player_id(multiplayer.get_unique_id())
 	
 	# Connect to hurtbox component signals
 	var hurtbox = get_node_or_null("HurtboxComponent") as HurtboxComponent
@@ -51,9 +57,8 @@ func _physics_process(delta: float) -> void:
 	if not is_multiplayer_authority():
 		return
 	
+	# Movement (left stick / WASD)
 	var input_dir := Vector2.ZERO
-
-	# Use your own input actions, not ui_left/right/up/down
 	input_dir.x = Input.get_action_strength("move_right") - Input.get_action_strength("move_left")
 	input_dir.y = Input.get_action_strength("move_down") - Input.get_action_strength("move_up")
 
@@ -64,6 +69,12 @@ func _physics_process(delta: float) -> void:
 		velocity = Vector2.ZERO
 
 	move_and_slide()
+	
+	# Firing (right stick / mouse aim) - Twin-stick shooter style
+	_handle_firing()
+	
+	# Update halo glow based on zeal
+	_update_halo_glow()
 
 func deactivate() -> void:
 	is_active = false
@@ -91,7 +102,50 @@ func _on_hit_received(damage: int, attacker: Node) -> void:
 func take_damage(amount: int) -> void:
 	"""Deprecated - damage is now handled by HurtboxComponent"""
 	pass
+
+func _handle_firing() -> void:
+	"""Twin-stick shooter firing - aim with right stick or mouse"""
+	var weapon_component = get_node_or_null("WeaponComponent") as WeaponComponent
+	if not weapon_component:
+		return
 	
+	# Get aim direction from right stick or mouse
+	var aim_dir := Vector2.ZERO
+	
+	# Controller right stick (aim_right/aim_left/aim_up/aim_down)
+	var aim_x := Input.get_action_strength("aim_right") - Input.get_action_strength("aim_left")
+	var aim_y := Input.get_action_strength("aim_down") - Input.get_action_strength("aim_up")
+	aim_dir = Vector2(aim_x, aim_y)
+	
+	# Fallback to mouse aiming if no controller input
+	if aim_dir.length() < 0.1:
+		# Check if fire button is held (for mouse/keyboard)
+		if Input.is_action_pressed("fire"):
+			var mouse_pos := get_global_mouse_position()
+			aim_dir = global_position.direction_to(mouse_pos)
+	
+	# Fire continuously while aiming
+	if aim_dir.length() > 0.1:
+		aim_dir = aim_dir.normalized()
+		look_direction = aim_dir
+		weapon_component.fire_in_direction(self, aim_dir)
+
+func _update_halo_glow() -> void:
+	"""Update halo glow based on current Zeal"""
+	var halo = get_node_or_null("PlayerHalo") as PointLight2D
+	if not halo or not ZealManager:
+		return
+	
+	var player_id = multiplayer.get_unique_id()
+	var zeal_ratio = ZealManager.get_zeal(player_id)  # 0.0 to 1.0
+	
+	# Scale energy from 0.5 (no zeal) to 2.5 (full zeal)
+	halo.energy = lerp(0.5, 2.5, zeal_ratio)
+	
+	# Color shifts from cool blue to hot white/yellow as zeal increases
+	var cool = Color(0.8, 0.9, 1.0)  # Blue
+	var hot = Color(1.0, 0.95, 0.8)  # Warm white
+	halo.color = cool.lerp(hot, zeal_ratio)
 
 func _spawn_health_bar() -> void:
 	"""Create floating health bar above player"""

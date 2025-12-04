@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://b7amuvneubnl" path="res://assets/art/lights/flashlight_nd.png" id="1_lv2jd"]
 
 [node name="Flashlight" type="PointLight2D"]
+offset = Vector2(0, 80)
 color = Color(1, 0.96, 0.88, 1)
 energy = 1.2
 shadow_enabled = true

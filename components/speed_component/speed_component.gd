@@ -31,4 +31,3 @@ func clear_modifiers() -> void:
 func set_base_speed(new_speed: float) -> void:
 	base_speed = new_speed
 	speed_changed.emit(get_current_speed())
-

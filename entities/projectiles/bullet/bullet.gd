@@ -10,12 +10,14 @@ extends Area2D
 @export var crit_multiplier: float = 2.0
 @export var megacrit_chance: float = 0.0  # 0.0 to 1.0
 @export var megacrit_multiplier: float = 4.0
+@export var elite_damage_bonus: float = 0.0  # Bonus damage vs elites/bosses (0.15 = +15%)
 
 var _age: float = 0.0
 var _pierce_count: int = 0  # How many enemies we've hit so far
 var _is_crit: bool = false
 var _is_megacrit: bool = false
 var _rolled_damage: int = 0  # Actual damage rolled for this bullet
+var shooter_id: int = -1  # Who fired this bullet (for kill credit)
 
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
@@ -61,8 +63,12 @@ func _on_body_entered(body: Node) -> void:
 		elif _is_crit:
 			final_damage = int(_rolled_damage * crit_multiplier)
 		
+		# Apply elite/boss damage bonus if target is elite or boss
+		if elite_damage_bonus > 0.0 and body.has_method("get") and (body.get("is_elite") or body.get("is_boss")):
+			final_damage = int(final_damage * (1.0 + elite_damage_bonus))
+		
 		print("  Applying damage: ", final_damage, " (base roll: ", _rolled_damage, ", crit: ", _is_crit, ", megacrit: ", _is_megacrit, ")")
-		health.apply_damage(final_damage, _is_crit, _is_megacrit)
+		health.apply_damage(final_damage, _is_crit, _is_megacrit, shooter_id)
 		_pierce_count += 1
 		
 		# Check if we've pierced enough enemies

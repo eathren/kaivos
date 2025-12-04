@@ -36,6 +36,7 @@ var current_dock: Node2D = null
 @onready var player_sprite: Sprite2D = $Sprite2D
 @onready var weapon_manager: WeaponManager = $WeaponManager
 @onready var weapon_hand: Node2D = $WeaponHand
+@onready var flashlight: PointLight2D = $Flashlight
 
 var lasers_enabled: bool = false
 var starting_weapon := preload("res://resources/config/weapons/basic_gun.tres") as WeaponData
@@ -159,6 +160,10 @@ func _update_sprite_and_weapons() -> void:
 		var perpendicular = Vector2(-look_direction.y, look_direction.x)
 		left_laser.position = perpendicular * -6.0
 		right_laser.position = perpendicular * 6.0
+	
+	# Rotate flashlight to point in look_direction
+	if flashlight:
+		flashlight.rotation = look_direction.angle()
 	
 	# Update weapon aim and position
 	if current_weapon and current_weapon.has_method("update_aim"):

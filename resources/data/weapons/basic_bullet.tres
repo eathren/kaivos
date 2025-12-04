@@ -1,10 +1,13 @@
-[gd_resource type="Resource" script_class="WeaponData" load_steps=4 format=3 uid="uid://b1bm41mlll4cj"]
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3 uid="uid://b1bm41mlll4cj"]
 
-[ext_resource type="Script" uid="uid://cbs7tb2talunw" path="res://resources/data/weapon_data.gd" id="1_weapon"]
-[ext_resource type="Resource" path="res://resources/config/weapons/basic_bullet_stats.tres" id="2_stats"]
+[ext_resource type="Script" uid="uid://j7y4014ogrdd" path="res://resources/data/weapons/weapon_data.gd" id="1_weapon"]
 [ext_resource type="PackedScene" uid="uid://bjsas1kty8730" path="res://entities/projectiles/bullet/bullet.tscn" id="3_bullet"]
 
 [resource]
 script = ExtResource("1_weapon")
-weapon_stats = ExtResource("2_stats")
+weapon_name = "Basic Bullets"
+base_fire_rate = 5.0
+base_projectile_speed = 600.0
+base_range = 800.0
+fire_rate_per_level = 0.5
 projectile_scene = ExtResource("3_bullet")

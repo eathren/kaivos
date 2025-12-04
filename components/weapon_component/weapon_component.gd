@@ -15,6 +15,7 @@ var _current_target: Node2D = null
 var _muzzle_nodes: Array[Node2D] = []
 var _level_root: Node = null
 var _owner_body: Node2D = null
+var _player_id: int = -1  # Set by player/ship
 
 # Weapon types available
 enum WeaponType {
@@ -50,7 +51,7 @@ func can_fire() -> bool:
 	if not weapon_data:
 		return false
 	
-	var fire_rate := weapon_data.fire_rate
+	var fire_rate = weapon_data.fire_rate
 	# Apply fire rate multiplier from GameState
 	if GameState and GameState.has_method("get_fire_rate_multiplier"):
 		var multiplier: float = GameState.get_fire_rate_multiplier()
@@ -127,13 +128,24 @@ func _fire_bullet(target: Node2D, origin: Node2D) -> void:
 		parent.add_child(bullet)
 		
 		# Apply weapon data properties
-		var bullet_speed := weapon_data.projectile_speed
+		var bullet_speed = weapon_data.projectile_speed
 		var bullet_base_damage := weapon_data.base_damage
 		var bullet_variance := weapon_data.damage_variance
+		var bullet_pierce := weapon_data.base_pierce
 		
-		# Apply GameState multipliers
+		# Apply player item modifiers
+		var damage_mod := get_player_modifier("damage")
+		var crit_mod := get_player_modifier("crit_chance")
+		var pierce_mod := get_player_modifier("pierce")
+		var elite_damage_mod := get_player_modifier("elite_damage")
+		
+		# Apply damage modifiers (additive from items + multiplicative from GameState)
+		bullet_base_damage *= (1.0 + damage_mod)
 		if GameState and GameState.has_method("get_weapon_damage_multiplier"):
-			bullet_base_damage = bullet_base_damage * GameState.get_weapon_damage_multiplier()
+			bullet_base_damage *= GameState.get_weapon_damage_multiplier()
+		
+		# Apply pierce modifier
+		bullet_pierce += int(pierce_mod)
 		
 		if "speed" in bullet:
 			bullet.speed = bullet_speed
@@ -141,12 +153,17 @@ func _fire_bullet(target: Node2D, origin: Node2D) -> void:
 			bullet.base_damage = int(bullet_base_damage)
 		if "damage_variance" in bullet:
 			bullet.damage_variance = bullet_variance
+		if "pierce" in bullet:
+			bullet.pierce = bullet_pierce
 		
-		# Apply crit chances from GameState
-		if "crit_chance" in bullet and GameState:
-			bullet.crit_chance = GameState.get_crit_chance()
+		# Apply crit chances from GameState + player items
+		if "crit_chance" in bullet:
+			var base_crit = GameState.get_crit_chance() if GameState else 0.0
+			bullet.crit_chance = base_crit + crit_mod
 		if "megacrit_chance" in bullet and GameState:
 			bullet.megacrit_chance = GameState.get_megacrit_chance()
+		if "elite_damage_bonus" in bullet:
+			bullet.elite_damage_bonus = elite_damage_mod
 		
 		# Set position & rotation
 		var spawn_pos := muzzle.global_position
@@ -164,6 +181,10 @@ func _fire_bullet(target: Node2D, origin: Node2D) -> void:
 			var faction_component := _owner_body.get_node_or_null("FactionComponent")
 			if faction_component:
 				bullet.faction = faction_component.faction
+		
+		# Set shooter ID for kill credit
+		if "shooter_id" in bullet:
+			bullet.shooter_id = _player_id
 #
 #func _fire_missile(target: Node2D, origin: Node2D) -> void:
 	#"""Fire a homing missile"""
@@ -195,6 +216,16 @@ func _cache_muzzles() -> void:
 		if node and node is Node2D:
 			_muzzle_nodes.append(node)
 
+func set_player_id(player_id: int) -> void:
+	"""Set the player ID for this weapon to read their modifiers"""
+	_player_id = player_id
+
+func get_player_modifier(modifier_name: String) -> float:
+	"""Get modifier value from player's items"""
+	if _player_id < 0 or not TechManager:
+		return 0.0
+	return TechManager.get_player_modifier(_player_id, modifier_name)
+
 func _fire_bullet_in_direction(origin: Node2D, direction: Vector2) -> void:
 	"""Fire a bullet in a specific direction"""
 	if not weapon_data or not weapon_data.projectile_scene or not is_instance_valid(origin):
@@ -219,13 +250,24 @@ func _fire_bullet_in_direction(origin: Node2D, direction: Vector2) -> void:
 		parent.add_child(bullet)
 		
 		# Apply weapon data properties
-		var bullet_speed := weapon_data.projectile_speed
-		var bullet_base_damage := weapon_data.base_damage
-		var bullet_variance := weapon_data.damage_variance
+		var bullet_speed = weapon_data.projectile_speed
+		var bullet_base_damage = weapon_data.base_damage
+		var bullet_variance = weapon_data.damage_variance
+		var bullet_pierce = weapon_data.base_pierce
 		
-		# Apply GameState multipliers
+		# Apply player item modifiers
+		var damage_mod := get_player_modifier("damage")
+		var crit_mod := get_player_modifier("crit_chance")
+		var pierce_mod := get_player_modifier("pierce")
+		var elite_damage_mod := get_player_modifier("elite_damage")
+		
+		# Apply damage modifiers (additive from items + multiplicative from GameState)
+		bullet_base_damage *= (1.0 + damage_mod)
 		if GameState and GameState.has_method("get_weapon_damage_multiplier"):
-			bullet_base_damage = bullet_base_damage * GameState.get_weapon_damage_multiplier()
+			bullet_base_damage *= GameState.get_weapon_damage_multiplier()
+		
+		# Apply pierce modifier
+		bullet_pierce += int(pierce_mod)
 		
 		if "speed" in bullet:
 			bullet.speed = bullet_speed
@@ -233,12 +275,17 @@ func _fire_bullet_in_direction(origin: Node2D, direction: Vector2) -> void:
 			bullet.base_damage = int(bullet_base_damage)
 		if "damage_variance" in bullet:
 			bullet.damage_variance = bullet_variance
+		if "pierce" in bullet:
+			bullet.pierce = bullet_pierce
 		
-		# Apply crit chances from GameState
-		if "crit_chance" in bullet and GameState:
-			bullet.crit_chance = GameState.get_crit_chance()
+		# Apply crit chances from GameState + player items
+		if "crit_chance" in bullet:
+			var base_crit = GameState.get_crit_chance() if GameState else 0.0
+			bullet.crit_chance = base_crit + crit_mod
 		if "megacrit_chance" in bullet and GameState:
 			bullet.megacrit_chance = GameState.get_megacrit_chance()
+		if "elite_damage_bonus" in bullet:
+			bullet.elite_damage_bonus = elite_damage_mod
 		
 		# Set position & rotation
 		var spawn_pos := muzzle.global_position
@@ -254,3 +301,8 @@ func _fire_bullet_in_direction(origin: Node2D, direction: Vector2) -> void:
 			var faction_component := _owner_body.get_node_or_null("FactionComponent")
 			if faction_component:
 				bullet.faction = faction_component.faction
+		
+		# Set shooter ID for kill credit
+		if "shooter_id" in bullet:
+			bullet.shooter_id = _player_id
+

@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://c5k8x6v4pbwi" path="res://components/speed_component/speed_component.tscn" id="4_speed"]
 [ext_resource type="PackedScene" uid="uid://dptvykd5bxq0a" path="res://components/hurtbox/hurtbox_component.tscn" id="5_hurtbox"]
 [ext_resource type="PackedScene" uid="uid://c7h4k8v3pbwi2" path="res://components/health_regen/health_regen_component.tscn" id="6_regen"]
+[ext_resource type="PackedScene" uid="uid://d1b5mm0ubnl9" path="res://components/lighting/player_halo.tscn" id="7_halo"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_fbmmh"]
 radius = 2.0
@@ -42,3 +43,5 @@ shape = SubResource("CircleShape2D_pickup")
 
 [node name="CollisionShape2D" parent="HurtboxComponent" index="0"]
 shape = SubResource("CircleShape2D_fbmmh")
+
+[node name="PlayerHalo" parent="." instance=ExtResource("7_halo")]

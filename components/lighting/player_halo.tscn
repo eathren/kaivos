@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3 uid="uid://d1b5mm0ubnl9"]
+
+[ext_resource type="Texture2D" uid="uid://b7amuvneubnl" path="res://assets/art/lights/light.webp" id="1_light"]
+
+[node name="PlayerHalo" type="PointLight2D"]
+z_index = -1
+offset = Vector2(0, 0)
+color = Color(0.8, 0.9, 1, 1)
+energy = 0.5
+shadow_enabled = false
+texture = ExtResource("1_light")
+texture_scale = 1.0
+blend_mode = 0

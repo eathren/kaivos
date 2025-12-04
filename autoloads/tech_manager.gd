@@ -75,6 +75,54 @@ func add_item_stack(player_id: int, item: TechItem) -> int:
 func get_player_items(player_id: int) -> Dictionary:
 	return player_items.get(player_id, {})
 
+## Get total modifier value from player's items
+func get_player_modifier(player_id: int, modifier_name: String) -> float:
+	"""
+	Calculate total modifier value from all of a player's items
+	Examples: "crit_chance", "damage", "fire_rate", "pierce"
+	"""
+	var total: float = 0.0
+	var items = get_player_items(player_id)
+	
+	for item_id in items:
+		var stack_count = items[item_id]
+		var item = _get_item_by_id(item_id)
+		
+		if not item:
+			continue
+		
+		# Apply item effects based on the modifier name
+		match item_id:
+			"neon_halo_cartridge":
+				# Primary fire gains +10% crit chance (+5% per stack)
+				if modifier_name == "crit_chance":
+					total += 0.10 + (stack_count - 1) * 0.05
+				# Note: Chain lightning effect needs to be implemented separately when crits happen
+				
+			"gilded_barrel_shroud":
+				# While continuously firing: +20% damage (+10% per additional stack)
+				# TODO: This needs continuous firing tracking - for now just apply flat bonus
+				if modifier_name == "damage":
+					total += 0.20 + (stack_count - 1) * 0.10
+				# TODO: Recoil knockback needs implementation
+				
+			"saintbreaker_rounds":
+				# Shots pierce 1 enemy (+1 every 2 stacks)
+				if modifier_name == "pierce":
+					total += 1.0 + float(int((stack_count - 1) / 2))
+				# +15% damage against elites/bosses (+10% per additional stack)
+				if modifier_name == "elite_damage":
+					total += 0.15 + (stack_count - 1) * 0.10
+	
+	return total
+
+## Get item by ID from pool
+func _get_item_by_id(item_id: String) -> TechItem:
+	for item in item_pool:
+		if item.id == item_id:
+			return item
+	return null
+
 ## Generate item choices for level up (always returns exactly count items)
 func generate_item_choices(player_id: int, count: int = 4, level: int = 1) -> Array[TechItem]:
 	var choices: Array[TechItem] = []

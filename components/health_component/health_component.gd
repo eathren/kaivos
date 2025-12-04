@@ -9,13 +9,18 @@ signal health_changed(current: int, max: int)
 signal died
 
 var damage_number_scene: PackedScene = preload("res://ui/damage_numbers/damage_number.tscn")
+var last_attacker_id: int = -1  # Track who dealt the last damage (for kill credit)
 
 func _ready() -> void:
 	current_health = max_health
 
-func apply_damage(amount: int, is_crit: bool = false, is_megacrit: bool = false) -> void:
+func apply_damage(amount: int, is_crit: bool = false, is_megacrit: bool = false, attacker_id: int = -1) -> void:
 	if amount <= 0 or current_health <= 0:
 		return
+	
+	# Track who dealt this damage
+	if attacker_id >= 0:
+		last_attacker_id = attacker_id
 
 	current_health -= amount
 	if current_health < 0:

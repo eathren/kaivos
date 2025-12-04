@@ -17,6 +17,8 @@ var _speed_component: SpeedComponent = null
 var spawn_level: int = 1
 var scaled_health: float = 0.0
 var scaled_damage: float = 0.0
+var is_elite: bool = false
+var is_boss: bool = false
 
 func _ready() -> void:
 	add_to_group("enemy")
@@ -28,6 +30,9 @@ func _ready() -> void:
 	# Apply stats from resource
 	# Note: If spawner hasn't called apply_level() yet, we use base stats
 	if enemy_stats:
+		# Copy elite/boss status
+		is_elite = enemy_stats.is_elite
+		is_boss = enemy_stats.is_boss
 		if scaled_health > 0:
 			# Use pre-scaled stats from apply_level()
 			if _health_component:
@@ -94,6 +99,10 @@ func _on_death() -> void:
 	# Increment kill counter
 	if GameState:
 		GameState.add_kill()
+	
+	# Award zeal to the killer
+	if _health_component and ZealManager:
+		ZealManager.add_zeal(_health_component.last_attacker_id)
 	
 	# Use loot table for drops
 	if loot_table:
