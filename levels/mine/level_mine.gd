@@ -3,23 +3,16 @@ extends Node2D
 ## Level_Mine - Contains the mine level with walls, trawler, and enemies
 ## Uses MineGenerator to build the level data, then applies it to TileMaps
 
-const RoomConstants = preload("res://rooms/room_constants.gd")
-
 @onready var ground: TileMapLayer = $WorldRoot/Floor
 @onready var wall: TileMapLayer = $WorldRoot/Wall
 @onready var trawler: CharacterBody2D = $Trawler
 @onready var enemy_root: Node2D = $WorldRoot/EnemyRoot
-@onready var room_root: Node2D = $WorldRoot/RoomRoot
 @onready var pathfinding_manager: PathfindingManager = $PathfindingManager
 @export var enemy_scene: PackedScene = preload("res://entities/enemies/imp/imp.tscn")
 @export var spawns_per_second: float = 5.0
-@export var rooms_per_chunk: int = 3  # Number of rooms to spawn per chunk
-@export var chunk_spacing: float = 800.0  # Distance between room chunks
 
 var _spawn_timer: float = 0.0
 var _player_controllers: Dictionary = {}  # peer_id -> PlayerController
-var _spawned_chunks: Dictionary = {}  # Vector2i -> bool (tracks spawned room chunks)
-var _active_rooms: Array[RoomTemplate] = []
 
 func _ready() -> void:
 	add_to_group("level")
@@ -79,9 +72,6 @@ func _ready() -> void:
 			net_manager.player_connected.connect(_on_player_connected)
 		if not net_manager.player_disconnected.is_connected(_on_player_disconnected):
 			net_manager.player_disconnected.connect(_on_player_disconnected)
-	
-	# Spawn initial rooms near the trawler
-	_spawn_initial_rooms()
 
 func _process(delta: float) -> void:
 	# Spawn enemies at the specified rate
@@ -91,10 +81,6 @@ func _process(delta: float) -> void:
 	while _spawn_timer >= spawn_interval:
 		_spawn_timer -= spawn_interval
 		_spawn_enemy()
-	
-	# Check for new room chunks to spawn based on trawler position
-	if multiplayer.is_server():
-		_check_and_spawn_rooms()
 
 func _spawn_player_controllers() -> void:
 	if not multiplayer.is_server():
@@ -349,121 +335,3 @@ func _apply_tiles(level_data: Dictionary) -> void:
 		boundaries.setup_boundaries(min_x, max_x, min_y, max_y)
 	
 	print("Level_Mine: Applied %d tiles to TileMap" % wall_cells.size())
-
-## Spawn initial rooms near the trawler
-func _spawn_initial_rooms() -> void:
-	if not multiplayer.is_server():
-		return
-	
-	if not trawler:
-		return
-	
-	# Spawn rooms in front and around the trawler
-	var trawler_pos := trawler.global_position
-	var forward_offset := Vector2.DOWN * chunk_spacing  # Down is forward in the mine
-	
-	# Spawn 3 chunks ahead
-	for i in range(3):
-		var chunk_pos := trawler_pos + forward_offset * (i + 1)
-		_spawn_room_chunk(chunk_pos)
-
-## Check trawler position and spawn rooms ahead
-func _check_and_spawn_rooms() -> void:
-	if not trawler:
-		return
-	
-	var trawler_pos := trawler.global_position
-	var chunk_id := _get_chunk_id(trawler_pos)
-	
-	# Spawn chunks ahead of the trawler (down direction)
-	for offset_y in range(1, 4):  # 3 chunks ahead
-		var check_chunk := chunk_id + Vector2i(0, offset_y)
-		if not _spawned_chunks.has(check_chunk):
-			var chunk_world_pos := _chunk_id_to_position(check_chunk)
-			_spawn_room_chunk(chunk_world_pos)
-			_spawned_chunks[check_chunk] = true
-
-## Get chunk ID from world position
-func _get_chunk_id(world_pos: Vector2) -> Vector2i:
-	return Vector2i(
-		floori(world_pos.x / chunk_spacing),
-		floori(world_pos.y / chunk_spacing)
-	)
-
-## Convert chunk ID to world position
-func _chunk_id_to_position(chunk_id: Vector2i) -> Vector2:
-	return Vector2(chunk_id) * chunk_spacing
-
-## Spawn a cluster of rooms at the given position
-func _spawn_room_chunk(chunk_center: Vector2) -> void:
-	if not room_root:
-		push_error("Level_Mine: RoomRoot node not found!")
-		return
-	
-	# Generate a small dungeon layout for this chunk
-	var layout := DungeonLayout.generate_layout(rooms_per_chunk, randi())
-	
-	if layout.is_empty():
-		return
-	
-	print("Level_Mine: Spawning %d rooms at chunk %s" % [layout.size(), chunk_center])
-	
-	# Spawn each room
-	for room_node in layout:
-		_create_room_at_chunk(room_node, chunk_center)
-
-## Create a single room at the chunk position
-func _create_room_at_chunk(room_node: DungeonLayout.RoomNode, chunk_center: Vector2) -> void:
-	# Get matching room template
-	var scene: PackedScene = RoomLibrary.get_random(room_node.mask, room_node.room_type)
-	
-	if scene == null:
-		push_warning("Level_Mine: No template for mask=%d type=%s" % [room_node.mask, room_node.room_type])
-		return
-	
-	# Instantiate room
-	var room_inst: RoomTemplate = scene.instantiate()
-	room_root.add_child(room_inst)
-	
-	# Position relative to chunk center
-	var room_offset := Vector2(room_node.grid_pos) * Vector2(RoomConstants.ROOM_SIZE_PX)
-	room_inst.global_position = chunk_center + room_offset
-	
-	# Store reference
-	_active_rooms.append(room_inst)
-	
-	# Populate room with enemies and loot
-	_populate_room(room_inst)
-
-## Populate a room with enemies and loot based on markers
-func _populate_room(room: RoomTemplate) -> void:
-	# Spawn enemies at each enemy marker
-	for marker in room.get_enemy_markers():
-		_spawn_enemy_at_position(marker.global_position)
-	
-	# Spawn loot at 40% of loot markers
-	for marker in room.get_loot_markers():
-		if randf() < 0.4:
-			_spawn_loot_at_position(marker.global_position)
-
-## Spawn an enemy at a specific position (for rooms)
-func _spawn_enemy_at_position(pos: Vector2) -> void:
-	if enemy_scene == null:
-		return
-	
-	var enemy := enemy_scene.instantiate() as Node2D
-	if enemy == null:
-		return
-	
-	var parent := enemy_root if enemy_root != null else get_tree().current_scene
-	parent.add_child(enemy)
-	enemy.global_position = pos
-
-## Spawn loot at a specific position (placeholder)
-func _spawn_loot_at_position(pos: Vector2) -> void:
-	# TODO: Replace with actual loot spawning
-	print("Level_Mine: Loot spawn at ", pos)
-	# Example:
-	# var loot = preload("res://entities/items/health_pickup.tscn").instantiate()
-	# get_tree().current_scene.add_child(loot)
-	# loot.global_position = pos

@@ -3,9 +3,10 @@ class_name MineGenerator
 
 ## Pure generation logic - works on data structures, not nodes
 ## Given a seed and config, outputs tile data and spawn positions
-## Now uses WFC for terrain generation
+## Now uses WFC for terrain generation with structure planning
 
 const WfcHelper = preload("res://scripts/generation/wfc_helper.gd")
+const StructurePlanner = preload("res://scripts/generation/structure_planner.gd")
 
 # Level configuration
 var shaft_height_tiles: int = 3000
@@ -23,6 +24,11 @@ var ore_cells: Array[Vector2i] = []
 var lava_cells: Array[Vector2i] = []
 var feature_cells: Dictionary = {}  # symbol -> Array[Vector2i]
 var trawler_start_cell: Vector2i = Vector2i.ZERO
+
+# Structure planner for high-level layout
+var structure: Dictionary = {}  # Vector2i -> StructurePlanner.CellType
+var use_structure_planning: bool = true
+var planner: StructurePlanner = null  # Keep reference for room data
 
 # Debug visualization
 var debug_view: Node = null
@@ -113,7 +119,15 @@ func _generate_with_wfc(
 	clearing_left_x: int, clearing_right_x: int,
 	clearing_top_y: int, clearing_bottom_y: int
 ) -> void:
-	"""Generate level using WFC in chunks"""
+	"""Generate level using WFC in chunks with structure planning"""
+	
+	# Phase 1: Generate high-level structure (rooms, corridors, etc.)
+	if use_structure_planning:
+		planner = StructurePlanner.new()
+		var clearing_rect = Rect2i(clearing_left_x, clearing_top_y, 
+			clearing_right_x - clearing_left_x, clearing_bottom_y - clearing_top_y)
+		structure = planner.generate_mine_structure(level_seed, left_x, right_x, top_y, bottom_y, clearing_rect)
+		print("[StructurePlanner] Generated structure with %d rooms and %d defined cells" % [planner.rooms.size(), structure.size()])
 	
 	# Calculate chunk grid bounds
 	var chunk_left := int(floor(float(left_x) / chunk_size))
@@ -161,7 +175,24 @@ func _generate_chunk(
 	clearing_left_x: int, clearing_right_x: int,
 	clearing_top_y: int, clearing_bottom_y: int
 ) -> void:
-	"""Generate a single chunk using WFC"""
+	"""Generate a single chunk using WFC, respecting structure"""
+	
+	var chunk_origin := Vector2i(cx * chunk_size, cy * chunk_size)
+	
+	# Check if this chunk has structure-defined cells
+	var has_structure := false
+	var structure_override := {}  # local_pos -> forced_symbol
+	
+	if use_structure_planning and not structure.is_empty():
+		for y in range(chunk_size):
+			for x in range(chunk_size):
+				var cell_pos := Vector2i(chunk_origin.x + x, chunk_origin.y + y)
+				if structure.has(cell_pos):
+					has_structure = true
+					var cell_type = structure[cell_pos]
+					# Map structure type to WFC symbol
+					var forced_symbol := _structure_type_to_symbol(cell_type)
+					structure_override[Vector2i(x, y)] = forced_symbol
 	
 	# Get deterministic seed for this chunk
 	var chunk_seed := WfcHelper.chunk_seed(str(level_seed), cx, cy)
@@ -177,12 +208,16 @@ func _generate_chunk(
 		print("[WFC ERROR] Generation failed for chunk (%d, %d)" % [cx, cy])
 		return
 	
+	# Override WFC with structure-defined cells
+	if has_structure:
+		for local_pos in structure_override:
+			symbol_grid[local_pos.y][local_pos.x] = structure_override[local_pos]
+	
 	# Paint chunk to debug view
 	if debug_view:
 		debug_view.paint_chunk(Vector2i(cx, cy), symbol_grid)
 	
 	# Convert symbols to cell positions
-	var chunk_origin := Vector2i(cx * chunk_size, cy * chunk_size)
 	var symbol_counts := {}
 	var cells_skipped := 0
 	
@@ -220,3 +255,21 @@ func _generate_chunk(
 	
 	# Log chunk statistics (disabled for performance)
 	# print("[WFC] Chunk (%d, %d) symbols: %s | Skipped: %d cells" % [cx, cy, symbol_counts, cells_skipped])
+
+## Map structure type to WFC symbol
+func _structure_type_to_symbol(cell_type: int) -> String:
+	match cell_type:
+		StructurePlanner.CellType.ROOM:
+			return "ROOM_FLOOR"
+		StructurePlanner.CellType.CORRIDOR:
+			return "CORRIDOR"
+		StructurePlanner.CellType.WALL:
+			return "WALL"
+		StructurePlanner.CellType.DOOR:
+			return "DOOR"
+		StructurePlanner.CellType.TREASURE:
+			return "TREASURE"
+		StructurePlanner.CellType.CLEARING:
+			return "EMPTY"
+		_:
+			return "ROCK"  # Default for undefined
