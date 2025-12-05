@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://systems/generation/wfc_test.gd" id="1_test"]
+[ext_resource type="PackedScene" path="res://systems/world/world_root.tscn" id="2_world"]
+
+[node name="WfcTest" type="Node2D"]
+script = ExtResource("1_test")
+
+[node name="TileMap" parent="." instance=ExtResource("2_world")]
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(2, 2)
+
+[node name="Label" type="Label" parent="."]
+offset_right = 400.0
+offset_bottom = 50.0
+text = "Press SPACE to regenerate
+WASD to move camera"

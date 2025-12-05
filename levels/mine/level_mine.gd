@@ -234,8 +234,12 @@ func _apply_tiles(level_data: Dictionary) -> void:
 	print("Level_Mine: wall_edge_coords=", wall_edge_coords)
 	print("Level_Mine: wall_face_coords=", wall_face_coords)
 	
-	# Get wall cells from level data
+	# Get all cell types from level data
 	var wall_cells: Array = level_data.get("wall_cells", [])
+	var floor_cells: Array = level_data.get("floor_cells", [])
+	var ore_cells: Array = level_data.get("ore_cells", [])
+	var lava_cells: Array = level_data.get("lava_cells", [])
+	var feature_cells: Dictionary = level_data.get("feature_cells", {})
 	
 	# Build a set for O(1) neighbor lookups
 	var wall_set := {}
@@ -253,12 +257,19 @@ func _apply_tiles(level_data: Dictionary) -> void:
 		min_y = mini(min_y, cell.y)
 		max_y = maxi(max_y, cell.y)
 	
-	# Fill entire map area with floor tiles
-	print("Level_Mine: Filling floor from (", min_x, ",", min_y, ") to (", max_x, ",", max_y, ")")
-	for y in range(min_y, max_y + 1):
-		for x in range(min_x, max_x + 1):
-			var cell := Vector2i(x, y)
-			ground.set_cell(cell, tile_source_id, ground_coord)
+	# Place explicit floor tiles (from WFC EMPTY/CORRIDOR/ROOM_FLOOR)
+	for cell in floor_cells:
+		ground.set_cell(cell, tile_source_id, ground_coord)
+	
+	# Fill remaining areas with floor tiles (for non-WFC areas)
+	if floor_cells.is_empty():
+		# Fallback: fill entire map area
+		print("Level_Mine: Filling floor from (", min_x, ",", min_y, ") to (", max_x, ",", max_y, ")")
+		for y in range(min_y, max_y + 1):
+			for x in range(min_x, max_x + 1):
+				var cell := Vector2i(x, y)
+				if not wall_set.has(cell):
+					ground.set_cell(cell, tile_source_id, ground_coord)
 	
 	# Place wall tiles on Wall layer based on neighbors
 	for cell in wall_cells:
@@ -276,6 +287,30 @@ func _apply_tiles(level_data: Dictionary) -> void:
 		else:
 			# Interior tile - use center
 			wall.set_cell(cell, tile_source_id, wall_center_coord)
+	
+	# Place ore tiles (TODO: Add ore tile coordinates to wall.gd)
+	for cell in ore_cells:
+		# For now, use ground with a different color or variant
+		ground.set_cell(cell, tile_source_id, ground_coord)
+	
+	# Place lava tiles (TODO: Add lava tile coordinates)
+	for cell in lava_cells:
+		ground.set_cell(cell, tile_source_id, ground_coord)
+	
+	# Place feature tiles (doors, treasure, pillars, etc.)
+	for symbol in feature_cells:
+		var cells: Array = feature_cells[symbol]
+		for cell in cells:
+			# TODO: Map features to actual tiles
+			ground.set_cell(cell, tile_source_id, ground_coord)
+	
+	print("Level_Mine: Placed %d walls, %d floors, %d ores, %d lavas, %d features" % [
+		wall_cells.size(),
+		floor_cells.size(),
+		ore_cells.size(),
+		lava_cells.size(),
+		feature_cells.size()
+	])
 	
 	# Setup map boundaries
 	var boundaries = $WorldRoot/MapBoundaries

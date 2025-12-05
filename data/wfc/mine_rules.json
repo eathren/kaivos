@@ -1,0 +1,88 @@
+{
+  "symbols": [
+    "ROCK",
+    "EMPTY", 
+    "ORE",
+    "LAVA",
+    "WALL",
+    "ROOM_FLOOR",
+    "CORRIDOR",
+    "DOOR",
+    "TREASURE",
+    "PILLAR"
+  ],
+  "weights": {
+    "ROCK": 10,
+    "EMPTY": 5,
+    "ORE": 2,
+    "LAVA": 1,
+    "WALL": 8,
+    "ROOM_FLOOR": 3,
+    "CORRIDOR": 4,
+    "DOOR": 1,
+    "TREASURE": 0.5,
+    "PILLAR": 1
+  },
+  "neighbors": {
+    "ROCK": {
+      "N": ["ROCK", "EMPTY", "ORE", "WALL", "LAVA"],
+      "E": ["ROCK", "EMPTY", "ORE", "WALL", "LAVA"],
+      "S": ["ROCK", "EMPTY", "ORE", "WALL", "LAVA"],
+      "W": ["ROCK", "EMPTY", "ORE", "WALL", "LAVA"]
+    },
+    "EMPTY": {
+      "N": ["ROCK", "EMPTY", "ORE", "WALL", "CORRIDOR"],
+      "E": ["ROCK", "EMPTY", "ORE", "WALL", "CORRIDOR"],
+      "S": ["ROCK", "EMPTY", "ORE", "WALL", "CORRIDOR"],
+      "W": ["ROCK", "EMPTY", "ORE", "WALL", "CORRIDOR"]
+    },
+    "ORE": {
+      "N": ["ROCK", "EMPTY", "ORE", "WALL"],
+      "E": ["ROCK", "EMPTY", "ORE", "WALL"],
+      "S": ["ROCK", "EMPTY", "ORE", "WALL"],
+      "W": ["ROCK", "EMPTY", "ORE", "WALL"]
+    },
+    "LAVA": {
+      "N": ["ROCK", "LAVA", "WALL"],
+      "E": ["ROCK", "LAVA", "WALL"],
+      "S": ["ROCK", "LAVA", "WALL"],
+      "W": ["ROCK", "LAVA", "WALL"]
+    },
+    "WALL": {
+      "N": ["WALL", "ROCK", "EMPTY", "ORE", "ROOM_FLOOR", "CORRIDOR", "DOOR", "LAVA"],
+      "E": ["WALL", "ROCK", "EMPTY", "ORE", "ROOM_FLOOR", "CORRIDOR", "DOOR", "LAVA"],
+      "S": ["WALL", "ROCK", "EMPTY", "ORE", "ROOM_FLOOR", "CORRIDOR", "DOOR", "LAVA"],
+      "W": ["WALL", "ROCK", "EMPTY", "ORE", "ROOM_FLOOR", "CORRIDOR", "DOOR", "LAVA"]
+    },
+    "ROOM_FLOOR": {
+      "N": ["ROOM_FLOOR", "WALL", "DOOR", "PILLAR", "TREASURE"],
+      "E": ["ROOM_FLOOR", "WALL", "DOOR", "PILLAR", "TREASURE"],
+      "S": ["ROOM_FLOOR", "WALL", "DOOR", "PILLAR", "TREASURE"],
+      "W": ["ROOM_FLOOR", "WALL", "DOOR", "PILLAR", "TREASURE"]
+    },
+    "CORRIDOR": {
+      "N": ["CORRIDOR", "DOOR", "WALL", "EMPTY"],
+      "E": ["CORRIDOR", "DOOR", "WALL", "EMPTY"],
+      "S": ["CORRIDOR", "DOOR", "WALL", "EMPTY"],
+      "W": ["CORRIDOR", "DOOR", "WALL", "EMPTY"]
+    },
+    "DOOR": {
+      "N": ["ROOM_FLOOR", "CORRIDOR", "WALL"],
+      "E": ["ROOM_FLOOR", "CORRIDOR", "WALL"],
+      "S": ["ROOM_FLOOR", "CORRIDOR", "WALL"],
+      "W": ["ROOM_FLOOR", "CORRIDOR", "WALL"]
+    },
+    "TREASURE": {
+      "N": ["ROOM_FLOOR", "WALL"],
+      "E": ["ROOM_FLOOR", "WALL"],
+      "S": ["ROOM_FLOOR", "WALL"],
+      "W": ["ROOM_FLOOR", "WALL"]
+    },
+    "PILLAR": {
+      "N": ["ROOM_FLOOR", "PILLAR"],
+      "E": ["ROOM_FLOOR", "PILLAR"],
+      "S": ["ROOM_FLOOR", "PILLAR"],
+      "W": ["ROOM_FLOOR", "PILLAR"]
+    }
+  }
+}

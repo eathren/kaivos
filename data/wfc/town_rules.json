@@ -1,0 +1,128 @@
+{
+  "symbols": [
+    "GRASS",
+    "DIRT",
+    "STONE_PATH",
+    "WATER",
+    "TREE",
+    "ROCK_SMALL",
+    "WALL_STONE",
+    "WALL_WOOD",
+    "FLOOR_STONE",
+    "FLOOR_WOOD",
+    "DOOR",
+    "WINDOW",
+    "ROOF",
+    "BARREL",
+    "CRATE"
+  ],
+  "weights": {
+    "GRASS": 10,
+    "DIRT": 5,
+    "STONE_PATH": 3,
+    "WATER": 2,
+    "TREE": 3,
+    "ROCK_SMALL": 2,
+    "WALL_STONE": 5,
+    "WALL_WOOD": 5,
+    "FLOOR_STONE": 4,
+    "FLOOR_WOOD": 4,
+    "DOOR": 1,
+    "WINDOW": 2,
+    "ROOF": 6,
+    "BARREL": 1,
+    "CRATE": 1
+  },
+  "neighbors": {
+    "GRASS": {
+      "N": ["GRASS", "DIRT", "TREE", "ROCK_SMALL", "STONE_PATH", "WALL_STONE", "WALL_WOOD"],
+      "E": ["GRASS", "DIRT", "TREE", "ROCK_SMALL", "STONE_PATH", "WALL_STONE", "WALL_WOOD"],
+      "S": ["GRASS", "DIRT", "TREE", "ROCK_SMALL", "STONE_PATH", "WALL_STONE", "WALL_WOOD"],
+      "W": ["GRASS", "DIRT", "TREE", "ROCK_SMALL", "STONE_PATH", "WALL_STONE", "WALL_WOOD"]
+    },
+    "DIRT": {
+      "N": ["GRASS", "DIRT", "STONE_PATH", "WALL_STONE", "WALL_WOOD"],
+      "E": ["GRASS", "DIRT", "STONE_PATH", "WALL_STONE", "WALL_WOOD"],
+      "S": ["GRASS", "DIRT", "STONE_PATH", "WALL_STONE", "WALL_WOOD"],
+      "W": ["GRASS", "DIRT", "STONE_PATH", "WALL_STONE", "WALL_WOOD"]
+    },
+    "STONE_PATH": {
+      "N": ["STONE_PATH", "GRASS", "DIRT", "DOOR", "WALL_STONE"],
+      "E": ["STONE_PATH", "GRASS", "DIRT", "DOOR", "WALL_STONE"],
+      "S": ["STONE_PATH", "GRASS", "DIRT", "DOOR", "WALL_STONE"],
+      "W": ["STONE_PATH", "GRASS", "DIRT", "DOOR", "WALL_STONE"]
+    },
+    "WATER": {
+      "N": ["WATER", "GRASS", "DIRT"],
+      "E": ["WATER", "GRASS", "DIRT"],
+      "S": ["WATER", "GRASS", "DIRT"],
+      "W": ["WATER", "GRASS", "DIRT"]
+    },
+    "TREE": {
+      "N": ["GRASS", "DIRT", "TREE"],
+      "E": ["GRASS", "DIRT", "TREE"],
+      "S": ["GRASS", "DIRT", "TREE"],
+      "W": ["GRASS", "DIRT", "TREE"]
+    },
+    "ROCK_SMALL": {
+      "N": ["GRASS", "DIRT", "ROCK_SMALL"],
+      "E": ["GRASS", "DIRT", "ROCK_SMALL"],
+      "S": ["GRASS", "DIRT", "ROCK_SMALL"],
+      "W": ["GRASS", "DIRT", "ROCK_SMALL"]
+    },
+    "WALL_STONE": {
+      "N": ["WALL_STONE", "DOOR", "WINDOW", "ROOF", "GRASS", "DIRT", "STONE_PATH"],
+      "E": ["WALL_STONE", "DOOR", "WINDOW", "ROOF", "GRASS", "DIRT", "STONE_PATH"],
+      "S": ["WALL_STONE", "DOOR", "WINDOW", "ROOF", "GRASS", "DIRT", "STONE_PATH", "FLOOR_STONE"],
+      "W": ["WALL_STONE", "DOOR", "WINDOW", "ROOF", "GRASS", "DIRT", "STONE_PATH"]
+    },
+    "WALL_WOOD": {
+      "N": ["WALL_WOOD", "DOOR", "WINDOW", "ROOF", "GRASS", "DIRT"],
+      "E": ["WALL_WOOD", "DOOR", "WINDOW", "ROOF", "GRASS", "DIRT"],
+      "S": ["WALL_WOOD", "DOOR", "WINDOW", "ROOF", "GRASS", "DIRT", "FLOOR_WOOD"],
+      "W": ["WALL_WOOD", "DOOR", "WINDOW", "ROOF", "GRASS", "DIRT"]
+    },
+    "FLOOR_STONE": {
+      "N": ["FLOOR_STONE", "WALL_STONE", "DOOR", "BARREL", "CRATE"],
+      "E": ["FLOOR_STONE", "WALL_STONE", "DOOR", "BARREL", "CRATE"],
+      "S": ["FLOOR_STONE", "WALL_STONE", "DOOR", "BARREL", "CRATE"],
+      "W": ["FLOOR_STONE", "WALL_STONE", "DOOR", "BARREL", "CRATE"]
+    },
+    "FLOOR_WOOD": {
+      "N": ["FLOOR_WOOD", "WALL_WOOD", "DOOR", "BARREL", "CRATE"],
+      "E": ["FLOOR_WOOD", "WALL_WOOD", "DOOR", "BARREL", "CRATE"],
+      "S": ["FLOOR_WOOD", "WALL_WOOD", "DOOR", "BARREL", "CRATE"],
+      "W": ["FLOOR_WOOD", "WALL_WOOD", "DOOR", "BARREL", "CRATE"]
+    },
+    "DOOR": {
+      "N": ["FLOOR_STONE", "FLOOR_WOOD", "STONE_PATH", "GRASS", "DIRT"],
+      "E": ["WALL_STONE", "WALL_WOOD"],
+      "S": ["FLOOR_STONE", "FLOOR_WOOD", "STONE_PATH", "GRASS", "DIRT"],
+      "W": ["WALL_STONE", "WALL_WOOD"]
+    },
+    "WINDOW": {
+      "N": ["ROOF"],
+      "E": ["WALL_STONE", "WALL_WOOD", "WINDOW"],
+      "S": ["FLOOR_STONE", "FLOOR_WOOD"],
+      "W": ["WALL_STONE", "WALL_WOOD", "WINDOW"]
+    },
+    "ROOF": {
+      "N": ["ROOF"],
+      "E": ["ROOF", "WALL_STONE", "WALL_WOOD"],
+      "S": ["WINDOW", "WALL_STONE", "WALL_WOOD"],
+      "W": ["ROOF", "WALL_STONE", "WALL_WOOD"]
+    },
+    "BARREL": {
+      "N": ["FLOOR_STONE", "FLOOR_WOOD", "WALL_STONE", "WALL_WOOD"],
+      "E": ["FLOOR_STONE", "FLOOR_WOOD", "WALL_STONE", "WALL_WOOD", "CRATE"],
+      "S": ["FLOOR_STONE", "FLOOR_WOOD", "WALL_STONE", "WALL_WOOD"],
+      "W": ["FLOOR_STONE", "FLOOR_WOOD", "WALL_STONE", "WALL_WOOD", "CRATE"]
+    },
+    "CRATE": {
+      "N": ["FLOOR_STONE", "FLOOR_WOOD", "WALL_STONE", "WALL_WOOD"],
+      "E": ["FLOOR_STONE", "FLOOR_WOOD", "WALL_STONE", "WALL_WOOD", "BARREL"],
+      "S": ["FLOOR_STONE", "FLOOR_WOOD", "WALL_STONE", "WALL_WOOD"],
+      "W": ["FLOOR_STONE", "FLOOR_WOOD", "WALL_STONE", "WALL_WOOD", "BARREL"]
+    }
+  }
+}

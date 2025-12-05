@@ -1,0 +1,120 @@
+{
+  "symbols": [
+    "VOID",
+    "WALL_DUNGEON",
+    "FLOOR",
+    "CORRIDOR",
+    "DOOR",
+    "STAIRS_UP",
+    "STAIRS_DOWN",
+    "PILLAR",
+    "ALTAR",
+    "CHEST",
+    "TORCH",
+    "TRAP",
+    "WATER_DEEP",
+    "BRIDGE"
+  ],
+  "weights": {
+    "VOID": 15,
+    "WALL_DUNGEON": 12,
+    "FLOOR": 8,
+    "CORRIDOR": 5,
+    "DOOR": 2,
+    "STAIRS_UP": 0.5,
+    "STAIRS_DOWN": 0.5,
+    "PILLAR": 2,
+    "ALTAR": 0.3,
+    "CHEST": 0.8,
+    "TORCH": 3,
+    "TRAP": 1,
+    "WATER_DEEP": 1,
+    "BRIDGE": 0.5
+  },
+  "neighbors": {
+    "VOID": {
+      "N": ["VOID", "WALL_DUNGEON"],
+      "E": ["VOID", "WALL_DUNGEON"],
+      "S": ["VOID", "WALL_DUNGEON"],
+      "W": ["VOID", "WALL_DUNGEON"]
+    },
+    "WALL_DUNGEON": {
+      "N": ["WALL_DUNGEON", "VOID", "FLOOR", "CORRIDOR", "DOOR", "TORCH"],
+      "E": ["WALL_DUNGEON", "VOID", "FLOOR", "CORRIDOR", "DOOR", "TORCH"],
+      "S": ["WALL_DUNGEON", "VOID", "FLOOR", "CORRIDOR", "DOOR", "TORCH"],
+      "W": ["WALL_DUNGEON", "VOID", "FLOOR", "CORRIDOR", "DOOR", "TORCH"]
+    },
+    "FLOOR": {
+      "N": ["FLOOR", "WALL_DUNGEON", "DOOR", "PILLAR", "CHEST", "ALTAR", "STAIRS_UP", "STAIRS_DOWN", "TRAP", "TORCH"],
+      "E": ["FLOOR", "WALL_DUNGEON", "DOOR", "PILLAR", "CHEST", "ALTAR", "STAIRS_UP", "STAIRS_DOWN", "TRAP", "TORCH"],
+      "S": ["FLOOR", "WALL_DUNGEON", "DOOR", "PILLAR", "CHEST", "ALTAR", "STAIRS_UP", "STAIRS_DOWN", "TRAP", "TORCH"],
+      "W": ["FLOOR", "WALL_DUNGEON", "DOOR", "PILLAR", "CHEST", "ALTAR", "STAIRS_UP", "STAIRS_DOWN", "TRAP", "TORCH"]
+    },
+    "CORRIDOR": {
+      "N": ["CORRIDOR", "FLOOR", "DOOR", "WALL_DUNGEON", "TRAP", "TORCH"],
+      "E": ["CORRIDOR", "FLOOR", "DOOR", "WALL_DUNGEON", "TRAP", "TORCH"],
+      "S": ["CORRIDOR", "FLOOR", "DOOR", "WALL_DUNGEON", "TRAP", "TORCH"],
+      "W": ["CORRIDOR", "FLOOR", "DOOR", "WALL_DUNGEON", "TRAP", "TORCH"]
+    },
+    "DOOR": {
+      "N": ["FLOOR", "CORRIDOR"],
+      "E": ["WALL_DUNGEON"],
+      "S": ["FLOOR", "CORRIDOR"],
+      "W": ["WALL_DUNGEON"]
+    },
+    "STAIRS_UP": {
+      "N": ["FLOOR", "WALL_DUNGEON"],
+      "E": ["FLOOR", "WALL_DUNGEON"],
+      "S": ["FLOOR", "WALL_DUNGEON"],
+      "W": ["FLOOR", "WALL_DUNGEON"]
+    },
+    "STAIRS_DOWN": {
+      "N": ["FLOOR", "WALL_DUNGEON"],
+      "E": ["FLOOR", "WALL_DUNGEON"],
+      "S": ["FLOOR", "WALL_DUNGEON"],
+      "W": ["FLOOR", "WALL_DUNGEON"]
+    },
+    "PILLAR": {
+      "N": ["FLOOR", "PILLAR"],
+      "E": ["FLOOR", "PILLAR"],
+      "S": ["FLOOR", "PILLAR"],
+      "W": ["FLOOR", "PILLAR"]
+    },
+    "ALTAR": {
+      "N": ["FLOOR"],
+      "E": ["FLOOR"],
+      "S": ["FLOOR"],
+      "W": ["FLOOR"]
+    },
+    "CHEST": {
+      "N": ["FLOOR", "WALL_DUNGEON"],
+      "E": ["FLOOR", "WALL_DUNGEON"],
+      "S": ["FLOOR", "WALL_DUNGEON"],
+      "W": ["FLOOR", "WALL_DUNGEON"]
+    },
+    "TORCH": {
+      "N": ["FLOOR", "CORRIDOR"],
+      "E": ["WALL_DUNGEON"],
+      "S": ["FLOOR", "CORRIDOR"],
+      "W": ["WALL_DUNGEON"]
+    },
+    "TRAP": {
+      "N": ["FLOOR", "CORRIDOR"],
+      "E": ["FLOOR", "CORRIDOR"],
+      "S": ["FLOOR", "CORRIDOR"],
+      "W": ["FLOOR", "CORRIDOR"]
+    },
+    "WATER_DEEP": {
+      "N": ["WATER_DEEP", "BRIDGE", "WALL_DUNGEON"],
+      "E": ["WATER_DEEP", "BRIDGE", "WALL_DUNGEON"],
+      "S": ["WATER_DEEP", "BRIDGE", "WALL_DUNGEON"],
+      "W": ["WATER_DEEP", "BRIDGE", "WALL_DUNGEON"]
+    },
+    "BRIDGE": {
+      "N": ["FLOOR", "CORRIDOR"],
+      "E": ["WATER_DEEP"],
+      "S": ["FLOOR", "CORRIDOR"],
+      "W": ["WATER_DEEP"]
+    }
+  }
+}
