@@ -12,7 +12,7 @@ signal needs_pickup_multiplier(component: PickupComponent)
 @export var can_be_picked_by_trawler: bool = true
 @export var can_be_picked_by_player: bool = true
 @export var can_be_picked_by_ship: bool = true
-@export var pickup_sound: AudioStream = null
+@export var pickup_sound: AudioStream = preload("res://assets/audio/sfx/gameplay/pickup.wav")
 @export var player_group_name: String = "player_ship"  # Configurable group
 
 var _target: Node2D = null

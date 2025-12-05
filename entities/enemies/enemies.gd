@@ -95,14 +95,14 @@ func _deal_damage_to(target: Node, delta: float) -> void:
 		var dps := scaled_damage if scaled_damage > 0 else (enemy_stats.damage_per_second if enemy_stats else 10.0)
 		health_comp.take_damage(dps * delta)
 
-func _on_death() -> void:
+func _on_death(last_attacker_id: int = -1) -> void:
 	# Increment kill counter
 	if GameState:
 		GameState.add_kill()
 	
 	# Award zeal to the killer
-	if _health_component and ZealManager:
-		ZealManager.add_zeal(_health_component.last_attacker_id)
+	if ZealManager:
+		ZealManager.add_zeal(last_attacker_id)
 	
 	# Use loot table for drops
 	if loot_table:
