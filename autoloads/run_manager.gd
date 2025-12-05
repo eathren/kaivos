@@ -29,7 +29,10 @@ func _ready() -> void:
 ## Start a new run with a seed
 func start_run(run_seed: int = 0) -> void:
 	if run_seed == 0:
+		# Generate consistent random seed once
+		randomize()
 		run_seed = randi()
+		print("RunManager: Generated random seed: ", run_seed)
 	
 	current_seed = run_seed
 	current_level_num = 1
@@ -38,6 +41,7 @@ func start_run(run_seed: int = 0) -> void:
 	# Reset difficulty for new run
 	difficulty.reset()
 	
+	print("RunManager: Starting run with seed: ", current_seed)
 	_load_level("res://levels/mine/level_mine.tscn")
 	run_started.emit(run_seed)
 

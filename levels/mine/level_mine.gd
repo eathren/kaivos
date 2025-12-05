@@ -263,19 +263,27 @@ func _apply_tiles(level_data: Dictionary) -> void:
 		min_y = mini(min_y, cell.y)
 		max_y = maxi(max_y, cell.y)
 	
-	# Place explicit floor tiles (from WFC EMPTY/CORRIDOR/ROOM_FLOOR)
-	for cell in floor_cells:
-		ground.set_cell(cell, tile_source_id, ground_coord)
+	# Place floor tiles EVERYWHERE (including under walls for mining gameplay)
+	# Calculate bounds from all cells (walls + floors)
+	var all_cells := wall_cells + floor_cells + ore_cells + lava_cells
+	for symbol in feature_cells:
+		all_cells.append_array(feature_cells[symbol])
 	
-	# Fill remaining areas with floor tiles (for non-WFC areas)
-	if floor_cells.is_empty():
-		# Fallback: fill entire map area
-		print("Level_Mine: Filling floor from (", min_x, ",", min_y, ") to (", max_x, ",", max_y, ")")
-		for y in range(min_y, max_y + 1):
-			for x in range(min_x, max_x + 1):
-				var cell := Vector2i(x, y)
-				if not wall_set.has(cell):
-					ground.set_cell(cell, tile_source_id, ground_coord)
+	if all_cells.is_empty():
+		return
+	
+	# Get bounds
+	for cell in all_cells:
+		min_x = mini(min_x, cell.x)
+		max_x = maxi(max_x, cell.x)
+		min_y = mini(min_y, cell.y)
+		max_y = maxi(max_y, cell.y)
+	
+	# Fill entire area with floor tiles so there's always ground under walls
+	print("Level_Mine: Filling floor from (", min_x, ",", min_y, ") to (", max_x, ",", max_y, ")")
+	for y in range(min_y, max_y + 1):
+		for x in range(min_x, max_x + 1):
+			ground.set_cell(Vector2i(x, y), tile_source_id, ground_coord)
 	
 	# Place wall tiles on Wall layer based on neighbors
 	for cell in wall_cells:

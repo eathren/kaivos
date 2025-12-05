@@ -231,7 +231,7 @@ func step() -> bool:
 	
 	return true
 
-func run_to_completion(max_iterations: int = 100000) -> bool:
+func run_to_completion(max_iterations: int = 10000) -> bool:
 	"""Run WFC until complete or contradiction. Returns true if successful"""
 	var iterations := 0
 	
@@ -241,7 +241,7 @@ func run_to_completion(max_iterations: int = 100000) -> bool:
 			return is_complete()
 		iterations += 1
 	
-	push_error("WFC exceeded max iterations")
+	push_error("WFC exceeded max iterations (%d)" % max_iterations)
 	return false
 
 func is_complete() -> bool:

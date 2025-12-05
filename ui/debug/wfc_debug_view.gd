@@ -90,7 +90,7 @@ func paint_chunk(chunk_pos: Vector2i, symbol_grid: Array) -> void:
 			var img_y := int((world_pos.y - world_min.y) * pixel_size)
 			
 			# Get color for symbol
-			var color := SYMBOL_COLORS.get(symbol, Color.MAGENTA)  # Magenta for unknown
+			var color = SYMBOL_COLORS.get(symbol, Color.MAGENTA)  # Magenta for unknown
 			
 			# Paint pixel (and neighbors if pixel_size > 1)
 			for py in range(int(pixel_size)):
@@ -132,7 +132,7 @@ func update_stats_display() -> void:
 	text += "Symbol Distribution:\n"
 	for symbol in generation_stats.symbol_totals:
 		var count: int = generation_stats.symbol_totals[symbol]
-		var percent := (float(count) / max(1, generation_stats.cells_generated)) * 100.0
+		var percent = (float(count) / max(1, generation_stats.cells_generated)) * 100.0
 		text += "  %s: %d (%.1f%%)\n" % [symbol, count, percent]
 	
 	text += "\nPress F3 to toggle"

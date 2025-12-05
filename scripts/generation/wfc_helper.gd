@@ -93,7 +93,6 @@ static func generate_chunk(rules_path: String, chunk_size: int, seed_value: int)
 		push_error("[WFC] Failed to load rules from: " + rules_path)
 		return []
 	
-	print("[WFC] Initializing %dx%d grid with seed %d" % [chunk_size, chunk_size, seed_value])
 	wfc.init_grid(chunk_size, chunk_size, seed_value)
 	
 	if not wfc.run_to_completion():

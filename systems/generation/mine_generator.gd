@@ -13,7 +13,7 @@ var shaft_width_tiles: int = 400  # Width on each side of trawler (800 total)
 var starter_clearing_width_px: float = 500.0
 var starter_clearing_height_px: float = 1000.0
 var tile_size: float = 16.0
-var chunk_size: int = 32  # Size of WFC chunks
+var chunk_size: int = 16  # Size of WFC chunks (reduced from 32 for faster generation)
 var use_wfc: bool = true  # Enable WFC generation
 
 # Generation result data
@@ -165,7 +165,6 @@ func _generate_chunk(
 	
 	# Get deterministic seed for this chunk
 	var chunk_seed := WfcHelper.chunk_seed(str(level_seed), cx, cy)
-	print("[WFC] Generating chunk (%d, %d) with seed %d" % [cx, cy, chunk_seed])
 	
 	# Generate WFC symbols
 	var symbol_grid := WfcHelper.generate_chunk(
@@ -219,5 +218,5 @@ func _generate_chunk(
 						feature_cells[symbol] = []
 					feature_cells[symbol].append(cell_pos)
 	
-	# Log chunk statistics
-	print("[WFC] Chunk (%d, %d) symbols: %s | Skipped: %d cells" % [cx, cy, symbol_counts, cells_skipped])
+	# Log chunk statistics (disabled for performance)
+	# print("[WFC] Chunk (%d, %d) symbols: %s | Skipped: %d cells" % [cx, cy, symbol_counts, cells_skipped])
