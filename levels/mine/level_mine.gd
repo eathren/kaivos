@@ -302,21 +302,30 @@ func _apply_tiles(level_data: Dictionary) -> void:
 			# Interior tile - use center
 			wall.set_cell(cell, tile_source_id, wall_center_coord)
 	
-	# Place ore tiles (TODO: Add ore tile coordinates to wall.gd)
+	# Place ore tiles (on ground layer as overlay)
 	for cell in ore_cells:
-		# For now, use ground with a different color or variant
-		ground.set_cell(cell, tile_source_id, ground_coord)
+		var variant = randi() % wall.ore_coords.size()
+		ground.set_cell(cell, tile_source_id, wall.ore_coords[variant])
 	
-	# Place lava tiles (TODO: Add lava tile coordinates)
+	# Place lava tiles (hazard floor)
 	for cell in lava_cells:
-		ground.set_cell(cell, tile_source_id, ground_coord)
+		ground.set_cell(cell, tile_source_id, wall.lava_coord)
 	
-	# Place feature tiles (doors, treasure, pillars, etc.)
+	# Place feature tiles (doors, treasure, pillars, etc.) on ground layer
 	for symbol in feature_cells:
 		var cells: Array = feature_cells[symbol]
 		for cell in cells:
-			# TODO: Map features to actual tiles
-			ground.set_cell(cell, tile_source_id, ground_coord)
+			match symbol:
+				"DOOR":
+					var variant = randi() % wall.door_coords.size()
+					ground.set_cell(cell, tile_source_id, wall.door_coords[variant])
+				"TREASURE":
+					ground.set_cell(cell, tile_source_id, wall.treasure_coord)
+				"PILLAR":
+					ground.set_cell(cell, tile_source_id, wall.pillar_coord)
+				_:
+					# Default to ground for unknown features
+					ground.set_cell(cell, tile_source_id, ground_coord)
 	
 	print("Level_Mine: Placed %d walls, %d floors, %d ores, %d lavas, %d features" % [
 		wall_cells.size(),

@@ -10,22 +10,28 @@ var chunk_size: int = 32
 var map_texture: ImageTexture
 var map_image: Image
 
-# Color mapping for symbols
+# Color mapping for symbols (matches new tileset)
 const SYMBOL_COLORS := {
-	"ROCK": Color(0.3, 0.3, 0.3),      # Dark gray
+	"ROCK": Color(0.3, 0.3, 0.3),      # Dark gray (wall center)
 	"WALL": Color(0.3, 0.3, 0.3),      # Dark gray
 	"EMPTY": Color(0.8, 0.8, 0.7),     # Light tan (floor)
-	"CORRIDOR": Color(0.7, 0.7, 0.6),  # Tan
-	"ROOM_FLOOR": Color(0.8, 0.8, 0.7),# Light tan
+	"CORRIDOR": Color(0.7, 0.7, 0.6),  # Tan (floor variant)
+	"ROOM_FLOOR": Color(0.75, 0.75, 0.65), # Tan (floor variant)
 	"FLOOR": Color(0.8, 0.8, 0.7),     # Light tan
-	"ORE": Color(0.8, 0.6, 0.2),       # Orange/gold
-	"LAVA": Color(1.0, 0.3, 0.0),      # Bright red-orange
-	"DOOR": Color(0.6, 0.4, 0.2),      # Brown
-	"TREASURE": Color(1.0, 0.84, 0.0), # Gold
-	"PILLAR": Color(0.5, 0.5, 0.5),    # Gray
-	"VOID": Color(0.0, 0.0, 0.0),      # Black
-	"WATER": Color(0.2, 0.4, 0.8),     # Blue
+	"ORE": Color(0.9, 0.7, 0.3),       # Orange/gold (ore)
+	"LAVA": Color(1.0, 0.3, 0.0),      # Bright red-orange (lava)
+	"DOOR": Color(0.6, 0.4, 0.2),      # Brown (door)
+	"TREASURE": Color(1.0, 0.84, 0.0), # Gold (treasure chest)
+	"PILLAR": Color(0.5, 0.5, 0.5),    # Gray (pillar)
+	"VOID": Color(0.1, 0.0, 0.1),      # Near-black (pit)
+	"WATER": Color(0.2, 0.4, 0.8),     # Blue (water/lava)
+	"WATER_DEEP": Color(0.1, 0.2, 0.6),# Dark blue
 	"GRASS": Color(0.3, 0.6, 0.3),     # Green
+	"BARREL": Color(0.5, 0.3, 0.1),    # Dark brown (barrel)
+	"CRATE": Color(0.6, 0.5, 0.3),     # Light brown (crate)
+	"SHRINE": Color(0.8, 0.6, 1.0),    # Purple (shrine/altar)
+	"ALTAR": Color(0.8, 0.6, 1.0),     # Purple
+	"WALL_DUNGEON": Color(0.2, 0.2, 0.25), # Dark gray (reinforced)
 }
 
 var world_min: Vector2i = Vector2i.ZERO

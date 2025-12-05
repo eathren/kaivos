@@ -5,12 +5,43 @@ extends TileMapLayer
 @export var nose_gap_tiles: int = 6
 @export var tile_source_id: int = 0  # Wall tileset source (TileSetAtlasSource_tiljq)
 
-# Tile atlas coordinates
-@export var ground_coord: Vector2i = Vector2i(1, 5)  # Ground/floor tile
-@export var wall_center_coord: Vector2i = Vector2i(2, 1)  # Interior wall
+# Tile atlas coordinates (based on new expanded tileset)
+# Row 0: Ceiling tiles (decorative)
+@export var ceiling_coords: Array[Vector2i] = [Vector2i(1, 0), Vector2i(2, 0), Vector2i(3, 0)]
+
+# Row 1: Wall centers (solid interior)
+@export var wall_center_coord: Vector2i = Vector2i(1, 1)  # Interior wall
+@export var wall_center_coords: Array[Vector2i] = [Vector2i(1, 1), Vector2i(2, 1), Vector2i(3, 1)]
+
+# Row 2: Wall edges (top lip)
 @export_group("Wall Edge Variants")
 @export var wall_edge_coords: Array[Vector2i] = [Vector2i(1, 2), Vector2i(2, 2), Vector2i(3, 2)]  # Top edge
+
+# Row 3: Wall faces (visible front)
 @export var wall_face_coords: Array[Vector2i] = [Vector2i(1, 3), Vector2i(2, 3), Vector2i(3, 3)]  # Vertical face
+
+# Row 4: Reinforced walls
+@export var reinforced_coords: Array[Vector2i] = [Vector2i(1, 4), Vector2i(2, 4), Vector2i(3, 4)]
+
+# Row 5: Ground tiles
+@export var ground_coord: Vector2i = Vector2i(1, 5)  # Ground/floor tile
+@export var ground_coords: Array[Vector2i] = [Vector2i(1, 5), Vector2i(2, 5), Vector2i(3, 5), Vector2i(4, 5), Vector2i(5, 5), Vector2i(6, 5), Vector2i(7, 5)]
+
+# Row 6: Resources and hazards
+@export var ore_coord: Vector2i = Vector2i(0, 6)
+@export var ore_coords: Array[Vector2i] = [Vector2i(0, 6), Vector2i(1, 6), Vector2i(2, 6)]
+@export var lava_coord: Vector2i = Vector2i(3, 6)
+@export var pit_coord: Vector2i = Vector2i(4, 6)
+@export var hazard_stripe_coord: Vector2i = Vector2i(5, 6)
+
+# Row 7: Interactive objects
+@export var door_coord: Vector2i = Vector2i(0, 7)
+@export var door_coords: Array[Vector2i] = [Vector2i(0, 7), Vector2i(1, 7)]
+@export var pillar_coord: Vector2i = Vector2i(2, 7)
+@export var treasure_coord: Vector2i = Vector2i(3, 7)
+@export var shrine_coord: Vector2i = Vector2i(4, 7)
+@export var crate_coord: Vector2i = Vector2i(5, 7)
+@export var barrel_coord: Vector2i = Vector2i(6, 7)
 
 @export var fill_radius_world: float = 1000.0
 @export var clear_radius_tiles: int = 5

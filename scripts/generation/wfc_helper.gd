@@ -3,50 +3,50 @@ extends Node
 ## Helper for converting WFC symbols to TileMap tiles
 
 # Map symbols to tile coordinates
-# Using your actual tileset coordinates from wall.gd
+# Using your expanded tileset coordinates from wall.gd
 const SYMBOL_TO_TILE := {
 	# Mine symbols - Core tiles (MAPPED TO YOUR ACTUAL TILESET)
-	"ROCK": { "source_id": 0, "atlas": Vector2i(2, 1) },        # Wall center
+	"ROCK": { "source_id": 0, "atlas": Vector2i(1, 1) },        # Wall center
 	"EMPTY": { "source_id": 0, "atlas": Vector2i(1, 5) },       # Ground/floor
-	"WALL": { "source_id": 0, "atlas": Vector2i(2, 1) },        # Wall center
-	"ROOM_FLOOR": { "source_id": 0, "atlas": Vector2i(1, 5) },  # Ground
-	"CORRIDOR": { "source_id": 0, "atlas": Vector2i(1, 5) },    # Ground
+	"WALL": { "source_id": 0, "atlas": Vector2i(1, 1) },        # Wall center
+	"ROOM_FLOOR": { "source_id": 0, "atlas": Vector2i(2, 5) },  # Ground variant
+	"CORRIDOR": { "source_id": 0, "atlas": Vector2i(3, 5) },    # Ground variant
 	
-	# Mine features - TODO: Add these tiles to your tileset
-	"ORE": { "source_id": 0, "atlas": Vector2i(1, 0) },         # TODO: Add ore tile here
-	"LAVA": { "source_id": 0, "atlas": Vector2i(2, 0) },        # TODO: Add lava tile here
-	"DOOR": { "source_id": 0, "atlas": Vector2i(3, 0) },        # TODO: Add door tile here
-	"TREASURE": { "source_id": 0, "atlas": Vector2i(3, 1) },    # Use wall variant for now
-	"PILLAR": { "source_id": 0, "atlas": Vector2i(3, 1) },      # Use wall variant for now
+	# Mine features - Now mapped to actual tiles
+	"ORE": { "source_id": 0, "atlas": Vector2i(0, 6) },         # Ore tile
+	"LAVA": { "source_id": 0, "atlas": Vector2i(3, 6) },        # Lava tile
+	"DOOR": { "source_id": 0, "atlas": Vector2i(0, 7) },        # Door tile
+	"TREASURE": { "source_id": 0, "atlas": Vector2i(3, 7) },    # Treasure chest
+	"PILLAR": { "source_id": 0, "atlas": Vector2i(2, 7) },      # Pillar tile
 	
-	# Town/surface symbols - TODO: Add town tileset when needed
-	"GRASS": { "source_id": 2, "atlas": Vector2i(0, 1) },       # Ground tileset
-	"DIRT": { "source_id": 2, "atlas": Vector2i(0, 0) },        # Ground tileset
-	"STONE_PATH": { "source_id": 0, "atlas": Vector2i(1, 5) },  # Use ground for now
-	"WATER": { "source_id": 0, "atlas": Vector2i(2, 0) },       # TODO: Add water tile
-	"TREE": { "source_id": 0, "atlas": Vector2i(1, 0) },        # TODO: Add tree tile
-	"ROCK_SMALL": { "source_id": 0, "atlas": Vector2i(1, 0) },  # TODO: Add rock tile
-	"WALL_STONE": { "source_id": 0, "atlas": Vector2i(2, 1) },  # Use wall center
-	"WALL_WOOD": { "source_id": 0, "atlas": Vector2i(2, 1) },   # Use wall center
-	"FLOOR_STONE": { "source_id": 0, "atlas": Vector2i(1, 5) }, # Use ground
-	"FLOOR_WOOD": { "source_id": 0, "atlas": Vector2i(1, 5) },  # Use ground
-	"WINDOW": { "source_id": 0, "atlas": Vector2i(3, 0) },      # TODO: Add window tile
-	"ROOF": { "source_id": 0, "atlas": Vector2i(3, 0) },        # TODO: Add roof tile
-	"BARREL": { "source_id": 0, "atlas": Vector2i(1, 0) },      # TODO: Add barrel tile
-	"CRATE": { "source_id": 0, "atlas": Vector2i(1, 0) },       # TODO: Add crate tile
+	# Town/surface symbols - Use ground variants and new props
+	"GRASS": { "source_id": 0, "atlas": Vector2i(4, 5) },       # Ground variant
+	"DIRT": { "source_id": 0, "atlas": Vector2i(5, 5) },        # Ground variant
+	"STONE_PATH": { "source_id": 0, "atlas": Vector2i(6, 5) },  # Ground variant
+	"WATER": { "source_id": 0, "atlas": Vector2i(3, 6) },       # Lava/water tile
+	"TREE": { "source_id": 0, "atlas": Vector2i(5, 7) },        # Crate (placeholder)
+	"ROCK_SMALL": { "source_id": 0, "atlas": Vector2i(0, 6) },  # Ore (small rock)
+	"WALL_STONE": { "source_id": 0, "atlas": Vector2i(1, 1) },  # Wall center
+	"WALL_WOOD": { "source_id": 0, "atlas": Vector2i(2, 1) },   # Wall center variant
+	"FLOOR_STONE": { "source_id": 0, "atlas": Vector2i(1, 5) }, # Ground
+	"FLOOR_WOOD": { "source_id": 0, "atlas": Vector2i(2, 5) },  # Ground variant
+	"WINDOW": { "source_id": 0, "atlas": Vector2i(5, 6) },      # Hazard stripe
+	"ROOF": { "source_id": 0, "atlas": Vector2i(1, 0) },        # Ceiling tile
+	"BARREL": { "source_id": 0, "atlas": Vector2i(6, 7) },      # Barrel tile
+	"CRATE": { "source_id": 0, "atlas": Vector2i(5, 7) },       # Crate tile
 	
-	# Dungeon symbols - Use mine tiles for now
-	"VOID": { "source_id": 0, "atlas": Vector2i(2, 1) },        # Use wall (impassable)
-	"WALL_DUNGEON": { "source_id": 0, "atlas": Vector2i(2, 1) },# Use wall center
-	"FLOOR": { "source_id": 0, "atlas": Vector2i(1, 5) },       # Use ground
-	"STAIRS_UP": { "source_id": 0, "atlas": Vector2i(1, 5) },   # TODO: Add stairs tile
-	"STAIRS_DOWN": { "source_id": 0, "atlas": Vector2i(1, 5) }, # TODO: Add stairs tile
-	"ALTAR": { "source_id": 0, "atlas": Vector2i(3, 1) },       # Use wall variant
-	"CHEST": { "source_id": 0, "atlas": Vector2i(1, 0) },       # TODO: Add chest tile
-	"TORCH": { "source_id": 0, "atlas": Vector2i(1, 0) },       # TODO: Add torch tile
-	"TRAP": { "source_id": 0, "atlas": Vector2i(1, 5) },        # Use ground (invisible)
-	"WATER_DEEP": { "source_id": 0, "atlas": Vector2i(2, 0) },  # TODO: Add water tile
-	"BRIDGE": { "source_id": 0, "atlas": Vector2i(1, 5) }       # Use ground
+	# Dungeon symbols - Mapped to new tileset
+	"VOID": { "source_id": 0, "atlas": Vector2i(4, 6) },        # Pit tile (impassable)
+	"WALL_DUNGEON": { "source_id": 0, "atlas": Vector2i(1, 4) },# Reinforced wall
+	"FLOOR": { "source_id": 0, "atlas": Vector2i(1, 5) },       # Ground
+	"STAIRS_UP": { "source_id": 0, "atlas": Vector2i(5, 6) },   # Hazard stripe (placeholder)
+	"STAIRS_DOWN": { "source_id": 0, "atlas": Vector2i(5, 6) }, # Hazard stripe (placeholder)
+	"ALTAR": { "source_id": 0, "atlas": Vector2i(4, 7) },       # Shrine tile
+	"CHEST": { "source_id": 0, "atlas": Vector2i(3, 7) },       # Treasure chest
+	"TORCH": { "source_id": 0, "atlas": Vector2i(2, 7) },       # Pillar (torch placeholder)
+	"TRAP": { "source_id": 0, "atlas": Vector2i(5, 6) },        # Hazard stripe (visible)
+	"WATER_DEEP": { "source_id": 0, "atlas": Vector2i(3, 6) },  # Lava/water tile
+	"BRIDGE": { "source_id": 0, "atlas": Vector2i(1, 7) }       # Door variant (placeholder)
 }
 
 static func seed_from_string(s: String) -> int:
