@@ -24,6 +24,9 @@ var lava_cells: Array[Vector2i] = []
 var feature_cells: Dictionary = {}  # symbol -> Array[Vector2i]
 var trawler_start_cell: Vector2i = Vector2i.ZERO
 
+# Debug visualization
+var debug_view: Node = null
+
 func _init(config: Dictionary = {}) -> void:
 	if config.has("shaft_height_tiles"):
 		shaft_height_tiles = config["shaft_height_tiles"]
@@ -123,6 +126,11 @@ func _generate_with_wfc(
 	print("[WFC] World bounds: x=[%d to %d] y=[%d to %d]" % [left_x, right_x, top_y, bottom_y])
 	print("[WFC] Clearing area: x=[%d to %d] y=[%d to %d]" % [clearing_left_x, clearing_right_x, clearing_top_y, clearing_bottom_y])
 	
+	# Initialize debug view if available
+	if debug_view:
+		debug_view.initialize_map(Vector2i(left_x, top_y), Vector2i(right_x, bottom_y))
+		debug_view.update_chunk_progress(0, total_chunks)
+	
 	# Generate each chunk
 	var chunks_generated := 0
 	for cy in range(chunk_top, chunk_bottom + 1):
@@ -131,8 +139,21 @@ func _generate_with_wfc(
 			chunks_generated += 1
 			if chunks_generated % 10 == 0:
 				print("[WFC] Progress: %d/%d chunks generated" % [chunks_generated, total_chunks])
+			
+			# Update debug view
+			if debug_view:
+				debug_view.update_chunk_progress(chunks_generated, total_chunks)
 	
 	print("[WFC] Generation complete: %d chunks" % total_chunks)
+	
+	# Highlight clearing area in debug view
+	if debug_view:
+		debug_view.highlight_clearing({
+			"left": clearing_left_x,
+			"right": clearing_right_x,
+			"top": clearing_top_y,
+			"bottom": clearing_bottom_y
+		})
 
 func _generate_chunk(
 	level_seed: int,
@@ -156,6 +177,10 @@ func _generate_chunk(
 	if symbol_grid.is_empty():
 		print("[WFC ERROR] Generation failed for chunk (%d, %d)" % [cx, cy])
 		return
+	
+	# Paint chunk to debug view
+	if debug_view:
+		debug_view.paint_chunk(Vector2i(cx, cy), symbol_grid)
 	
 	# Convert symbols to cell positions
 	var chunk_origin := Vector2i(cx * chunk_size, cy * chunk_size)

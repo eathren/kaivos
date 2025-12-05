@@ -35,6 +35,12 @@ func _ready() -> void:
 	# This ensures deterministic generation - no need to sync tiles!
 	var gen := MineGenerator.new(RunManager.get_generator_config())
 	
+	# Add debug view
+	var debug_scene := preload("res://ui/debug/wfc_debug_view.tscn")
+	var debug_view := debug_scene.instantiate()
+	add_child(debug_view)
+	gen.debug_view = debug_view
+	
 	# Generate level data using shared seed
 	var level_data := gen.build_level(RunManager.current_seed, trawler_cell)
 	
