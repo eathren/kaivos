@@ -35,14 +35,12 @@ func _ready() -> void:
 	# Apply tiles to TileMap
 	_apply_tiles(level_data)
 	
-	# Position trawler at the bottom center (player spawn area)
-	# Trawler digs upward toward the boss at the top
+	# Position trawler using computed spawn cell from generated layout
 	var bounds: Vector2i = result["bounds"]
-	var trawler_tile := Vector2i(bounds.x / 2, bounds.y - 16)  # Center of bottom spawn area
+	var trawler_tile: Vector2i = level_data.get("trawler_start_cell", Vector2i(bounds.x / 2, 0))
 	var trawler_world_pos := wall.map_to_local(trawler_tile)
 	trawler.global_position = trawler_world_pos
 	print("Level_Mine: Positioned trawler at tile ", trawler_tile, " world ", trawler_world_pos)
-	print("Level_Mine: Boss spawns at top (y=0-1), Player at bottom (y=%d-%d)" % [bounds.y - 64, bounds.y])
 	
 	print("Level_Mine: Level generated with %d wall cells (seed: %d)" % [level_data["wall_cells"].size(), RunManager.current_seed])
 	
@@ -212,6 +210,7 @@ func _delete_tile_on_clients(cell: Vector2i) -> void:
 func _convert_segmented_to_level_data(result: Dictionary) -> Dictionary:
 	var layout_map: Dictionary = result["layout_map"]
 	var segments: Array = result["segments"]
+	var bounds: Vector2i = result["bounds"]
 	
 	var wall_cells: Array = []
 	var floor_cells: Array = []
@@ -239,9 +238,22 @@ func _convert_segmented_to_level_data(result: Dictionary) -> Dictionary:
 				feature_cells["shrine"].append(pos)
 				floor_cells.append(pos)  # Shrines on floor
 	
-	# Trawler spawns at bottom center (player spawn area)
-	var bounds: Vector2i = result["bounds"]
-	var trawler_cell := Vector2i(bounds.x / 2, bounds.y - 16)  # Center of bottom spawn area
+	# Build sets for O(1) checks
+	var floor_set := {}
+	var wall_set := {}
+	for c in floor_cells:
+		floor_set[c] = true
+	for c in wall_cells:
+		wall_set[c] = true
+	
+	# Spawn in the bottommost empty zone (segment 19, tiles 608-639)
+	# This is the EMPTY spawn area below the wall barrier
+	var center_x := bounds.x / 2
+	var spawn_segment_y := 19  # Bottom segment (EMPTY spawn zone)
+	var spawn_tile_y := (spawn_segment_y * 32) + 16  # Middle of spawn segment
+	var trawler_cell := Vector2i(center_x, spawn_tile_y)
+	
+	print("[Convert] Trawler spawn: segment ", spawn_segment_y, " tile ", trawler_cell)
 	
 	return {
 		"wall_cells": wall_cells,

@@ -96,17 +96,15 @@ func _create_macro_layout() -> void:
 func _generate_main_shaft() -> void:
 	"""Random walk shaft that wiggles left/right as it goes up from bottom to top"""
 	var x := SEG_W / 2
-	var y := SEG_H - 1  # Start at bottom
 	
-	# Create open player spawn area at bottom (player + trawler spawn)
-	# Make bottom 2 rows completely open
-	for spawn_y in range(SEG_H - 2, SEG_H):
-		for spawn_x in range(SEG_W):
-			segments[spawn_y][spawn_x] = SegmentType.ROOM
+	# TOP: Empty boss zone (segment 0) → Wall barrier (segment 1)
+	for boss_x in range(SEG_W):
+		segments[0][boss_x] = SegmentType.BIG_CHAMBER  # Boss spawn - completely empty
+	# segments[1] stays SOLID - wall barrier
 	
-	y = SEG_H - 3  # Start shaft above spawn area
-	
-	while y >= 2:  # Leave room for boss area at top
+	# Middle: Maze (segments 2 to 17)
+	var y := 2
+	while y <= 17:
 		segments[y][x] = SegmentType.SHAFT
 		
 		# Occasionally widen into ROOM or BIG_CHAMBER
@@ -124,19 +122,18 @@ func _generate_main_shaft() -> void:
 				x = nx
 				segments[y][x] = SegmentType.SHAFT
 		
-		y -= 1  # Move UP (toward y=0)
+		y += 1  # Move DOWN (toward bottom)
 	
-	# Create open boss area at top (boss spawn + enemy swarms)
-	# Make top 2 rows completely open
-	for boss_y in range(0, 2):
-		for boss_x in range(SEG_W):
-			segments[boss_y][boss_x] = SegmentType.BIG_CHAMBER
+	# BOTTOM: Wall barrier (segment 18) → Empty spawn zone (segment 19)
+	# segments[18] stays SOLID - wall barrier
+	for spawn_x in range(SEG_W):
+		segments[19][spawn_x] = SegmentType.ROOM  # Player spawn - completely empty
 	
-	print("[SegGen] Player spawn area: BOTTOM rows (y=%d-%d), Boss area: TOP rows (y=0-1)" % [SEG_H - 2, SEG_H - 1])
+	print("[SegGen] Layout: EMPTY(boss y=0) → WALL(y=1) → MAZE(y=2-17) → WALL(y=18) → EMPTY(spawn y=19)")
 
 func _generate_side_branches() -> void:
 	"""Spawn branching tunnels from random shaft segments"""
-	for y in range(2, SEG_H - 2):  # Don't branch in spawn or boss areas
+	for y in range(2, 18):  # Only in maze area (y=2-17), not in walls or spawn zones
 		# Only branch from shaft/room segments occasionally
 		var center_x := SEG_W / 2
 		for x in range(SEG_W):
@@ -183,7 +180,7 @@ func _scatter_blobby_zones(kind: SegmentType, attempts: int, max_radius: int) ->
 	"""Grow blobby zones from seeds instead of placing single segments"""
 	for i in range(attempts):
 		var sx := rng.randi_range(0, SEG_W - 1)
-		var sy := rng.randi_range(2, SEG_H - 3)  # Avoid spawn and boss areas
+		var sy := rng.randi_range(2, 17)  # Only in maze area (y=2-17)
 		if segments[sy][sx] != SegmentType.SOLID:
 			continue
 		
