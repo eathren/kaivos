@@ -94,7 +94,6 @@ texture = ExtResource("8_3soja")
 texture_scale = 1.2
 
 [node name="Camera2D" type="Camera2D" parent="."]
-zoom = Vector2(0.1, 0.1)
 
 [node name="PlayerController" type="Node" parent="."]
 script = ExtResource("10_controller")

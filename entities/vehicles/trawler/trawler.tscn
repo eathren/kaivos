@@ -95,20 +95,20 @@ position = Vector2(-22, 95)
 position = Vector2(22, 95)
 
 [node name="ShipDock1" parent="." instance=ExtResource("11_ship_dock")]
-position = Vector2(-50, 28)
+position = Vector2(-50, 140)
 
 [node name="ShipDock2" parent="." instance=ExtResource("11_ship_dock")]
-position = Vector2(-28, 133)
+position = Vector2(-28, 140)
 dock_position = 2
 home_ship_id = 1
 
 [node name="ShipDock3" parent="." instance=ExtResource("11_ship_dock")]
-position = Vector2(50, 28)
+position = Vector2(50, 140)
 dock_position = 1
 home_ship_id = 2
 
 [node name="ShipDock4" parent="." instance=ExtResource("11_ship_dock")]
-position = Vector2(28, 132)
+position = Vector2(28, 140)
 dock_position = 3
 home_ship_id = 3
 

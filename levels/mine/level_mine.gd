@@ -35,13 +35,14 @@ func _ready() -> void:
 	# Apply tiles to TileMap
 	_apply_tiles(level_data)
 	
-	# Position trawler at the top center (player spawn area at y=0)
-	# Map starts at 0,0 and builds downward
+	# Position trawler at the bottom center (player spawn area)
+	# Trawler digs upward toward the boss at the top
 	var bounds: Vector2i = result["bounds"]
-	var trawler_tile := Vector2i(bounds.x / 2, 16)  # Center of top spawn area
+	var trawler_tile := Vector2i(bounds.x / 2, bounds.y - 16)  # Center of bottom spawn area
 	var trawler_world_pos := wall.map_to_local(trawler_tile)
 	trawler.global_position = trawler_world_pos
 	print("Level_Mine: Positioned trawler at tile ", trawler_tile, " world ", trawler_world_pos)
+	print("Level_Mine: Boss spawns at top (y=0-1), Player at bottom (y=%d-%d)" % [bounds.y - 64, bounds.y])
 	
 	print("Level_Mine: Level generated with %d wall cells (seed: %d)" % [level_data["wall_cells"].size(), RunManager.current_seed])
 	
@@ -240,7 +241,7 @@ func _convert_segmented_to_level_data(result: Dictionary) -> Dictionary:
 	
 	# Trawler spawns at bottom center (player spawn area)
 	var bounds: Vector2i = result["bounds"]
-	var trawler_cell := Vector2i(bounds.x / 2, bounds.y - 32)  # Center of bottom spawn area
+	var trawler_cell := Vector2i(bounds.x / 2, bounds.y - 16)  # Center of bottom spawn area
 	
 	return {
 		"wall_cells": wall_cells,
