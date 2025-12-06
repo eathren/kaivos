@@ -98,13 +98,19 @@ func _generate_main_shaft() -> void:
 	var x := SEG_W / 2
 	var y := 0
 	
-	# Top 2 as spawn / lobby
-	segments[y][x] = SegmentType.ROOM
-	if y + 1 < SEG_H:
-		segments[y + 1][x] = SegmentType.ROOM
-		y += 2
+	# Create open boss area at top (boss spawn + enemy swarms)
+	# Make entire top row open for boss spawning
+	for boss_x in range(SEG_W):
+		segments[0][boss_x] = SegmentType.BIG_CHAMBER
 	
-	while y < SEG_H:
+	# Top 2-3 segments in center as boss lobby
+	segments[1][x] = SegmentType.BIG_CHAMBER
+	if y + 2 < SEG_H:
+		segments[2][x] = SegmentType.BIG_CHAMBER
+	
+	y = 3
+	
+	while y < SEG_H - 2:  # Leave room for player spawn area at bottom
 		segments[y][x] = SegmentType.SHAFT
 		
 		# Occasionally widen into ROOM or BIG_CHAMBER
@@ -123,10 +129,18 @@ func _generate_main_shaft() -> void:
 				segments[y][x] = SegmentType.SHAFT
 		
 		y += 1
+	
+	# Create open player spawn area at bottom (player + trawler spawn)
+	# Make bottom 2 rows open
+	for spawn_y in range(SEG_H - 2, SEG_H):
+		for spawn_x in range(SEG_W):
+			segments[spawn_y][spawn_x] = SegmentType.ROOM
+	
+	print("[SegGen] Boss area: top row (y=0), Player spawn area: bottom 2 rows (y=%d-%d)" % [SEG_H - 2, SEG_H - 1])
 
 func _generate_side_branches() -> void:
 	"""Spawn branching tunnels from random shaft segments"""
-	for y in range(3, SEG_H):
+	for y in range(3, SEG_H - 2):  # Don't branch in spawn or boss areas
 		# Only branch from shaft/room segments occasionally
 		var center_x := SEG_W / 2
 		for x in range(SEG_W):
@@ -173,7 +187,7 @@ func _scatter_blobby_zones(kind: SegmentType, attempts: int, max_radius: int) ->
 	"""Grow blobby zones from seeds instead of placing single segments"""
 	for i in range(attempts):
 		var sx := rng.randi_range(0, SEG_W - 1)
-		var sy := rng.randi_range(3, SEG_H - 1)
+		var sy := rng.randi_range(3, SEG_H - 3)  # Avoid spawn and boss areas
 		if segments[sy][sx] != SegmentType.SOLID:
 			continue
 		

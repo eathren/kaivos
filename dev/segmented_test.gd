@@ -49,9 +49,19 @@ func _apply_layout(result: Dictionary) -> void:
 		var seg_y = pos.y / 32
 		var seg_type = segments[seg_y][seg_x]
 		
-		# Vary wall tiles based on segment type
+		# Highlight spawn zones with distinct colors
 		var tile_coord = tiles.get(tile_type, Vector2i(1, 1))
-		if tile_type == SegmentedMineGenerator.TileType.WALL:
+		
+		# Boss area (top) - use bright distinctive floor
+		if seg_y == 0:
+			if tile_type == SegmentedMineGenerator.TileType.FLOOR:
+				tile_coord = Vector2i(4, 5)  # Bright floor for boss area
+		# Player spawn area (bottom) - use different distinctive floor
+		elif seg_y >= segments.size() - 2:
+			if tile_type == SegmentedMineGenerator.TileType.FLOOR:
+				tile_coord = Vector2i(0, 5)  # Different floor for player spawn
+		# Normal area styling
+		elif tile_type == SegmentedMineGenerator.TileType.WALL:
 			match seg_type:
 				SegmentedMineGenerator.SegmentType.CORRUPTED:
 					tile_coord = Vector2i(2, 1)  # Different wall style
@@ -70,7 +80,32 @@ func _apply_layout(result: Dictionary) -> void:
 	
 	# Print segment type distribution
 	print("[Test] Applied %d tiles" % layout.size())
+	print("[Test] Boss spawn area: TOP (y=0, bright floor)")
+	print("[Test] Player spawn area: BOTTOM (y=%d-%d, different floor)" % [segments.size() - 2, segments.size() - 1])
+	print("[Test] Use WASD to move camera, Q/E to zoom in/out")
 	_print_segment_stats(segments)
+
+func _process(delta: float) -> void:
+	var move_speed := 500.0 * delta
+	var zoom_speed := 0.5 * delta
+	
+	# Cwamera movement
+	if Input.is_key_pressed(KEY_W):
+		camera.position.y -= move_speed / camera.zoom.x
+	if Input.is_key_pressed(KEY_S):
+		camera.position.y += move_speed / camera.zoom.x
+	if Input.is_key_pressed(KEY_A):
+		camera.position.x -= move_speed / camera.zoom.x
+	if Input.is_key_pressed(KEY_D):
+		camera.position.x += move_speed / camera.zoom.x
+	
+	# Camera zoom
+	if Input.is_key_pressed(KEY_Q):
+		camera.zoom += Vector2.ONE * zoom_speed
+		camera.zoom = camera.zoom.clamp(Vector2(0.1, 0.1), Vector2(2.0, 2.0))
+	if Input.is_key_pressed(KEY_E):
+		camera.zoom -= Vector2.ONE * zoom_speed
+		camera.zoom = camera.zoom.clamp(Vector2(0.1, 0.1), Vector2(2.0, 2.0))
 
 func _print_segment_stats(segments: Array) -> void:
 	var counts = {}

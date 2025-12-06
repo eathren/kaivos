@@ -1,7 +1,9 @@
 extends Node2D
 
 ## Level_Mine - Contains the mine level with walls, trawler, and enemies
-## Uses MineGenerator to build the level data, then applies it to TileMaps
+## Uses SegmentedMineGenerator to build the level data, then applies it to TileMaps
+
+const SegmentedMineGenerator = preload("res://systems/generation/segmented_mine_generator.gd")
 
 @onready var ground: TileMapLayer = $WorldRoot/Floor
 @onready var wall: TileMapLayer = $WorldRoot/Wall
@@ -21,26 +23,25 @@ func _ready() -> void:
 		push_error("Level_Mine: RunManager not found")
 		return
 	
-	# Get trawler position for generation
-	var trawler_pos := trawler.global_position
-	var trawler_local := wall.to_local(trawler_pos)
-	var trawler_cell := wall.local_to_map(trawler_local)
-	
-	# Both host and clients generate the world using the same seed
-	# This ensures deterministic generation - no need to sync tiles!
-	var gen := MineGenerator.new(RunManager.get_generator_config())
-	
-	# Add debug view
-	var debug_scene := preload("res://ui/debug/wfc_debug_view.tscn")
-	var debug_view := debug_scene.instantiate()
-	add_child(debug_view)
-	gen.debug_view = debug_view
+	# Use new segmented generation system
+	var gen := SegmentedMineGenerator.new()
 	
 	# Generate level data using shared seed
-	var level_data := gen.build_level(RunManager.current_seed, trawler_cell)
+	var result := gen.generate(RunManager.current_seed)
+	
+	# Convert to level_data format expected by _apply_tiles
+	var level_data := _convert_segmented_to_level_data(result)
 	
 	# Apply tiles to TileMap
 	_apply_tiles(level_data)
+	
+	# Position trawler at the top center (player spawn area at y=0)
+	# Map starts at 0,0 and builds downward
+	var bounds: Vector2i = result["bounds"]
+	var trawler_tile := Vector2i(bounds.x / 2, 16)  # Center of top spawn area
+	var trawler_world_pos := wall.map_to_local(trawler_tile)
+	trawler.global_position = trawler_world_pos
+	print("Level_Mine: Positioned trawler at tile ", trawler_tile, " world ", trawler_world_pos)
 	
 	print("Level_Mine: Level generated with %d wall cells (seed: %d)" % [level_data["wall_cells"].size(), RunManager.current_seed])
 	
@@ -205,6 +206,52 @@ func _delete_tile_on_clients(cell: Vector2i) -> void:
 		# Update pathfinding grids (solid=false means walkable)
 		if pathfinding_manager:
 			pathfinding_manager.update_tile(cell, false)
+
+## Convert SegmentedMineGenerator result to level_data format
+func _convert_segmented_to_level_data(result: Dictionary) -> Dictionary:
+	var layout_map: Dictionary = result["layout_map"]
+	var segments: Array = result["segments"]
+	
+	var wall_cells: Array = []
+	var floor_cells: Array = []
+	var ore_cells: Array = []
+	var lava_cells: Array = []
+	var feature_cells: Dictionary = {}
+	
+	# Convert layout_map to cell arrays
+	for pos in layout_map:
+		var tile_type = layout_map[pos]
+		match tile_type:
+			SegmentedMineGenerator.TileType.FLOOR:
+				floor_cells.append(pos)
+			SegmentedMineGenerator.TileType.WALL:
+				wall_cells.append(pos)
+			SegmentedMineGenerator.TileType.ORE:
+				ore_cells.append(pos)
+				wall_cells.append(pos)  # Ore is also collidable
+			SegmentedMineGenerator.TileType.LAVA:
+				lava_cells.append(pos)
+				floor_cells.append(pos)  # Lava is walkable hazard
+			SegmentedMineGenerator.TileType.SHRINE:
+				if not feature_cells.has("shrine"):
+					feature_cells["shrine"] = []
+				feature_cells["shrine"].append(pos)
+				floor_cells.append(pos)  # Shrines on floor
+	
+	# Trawler spawns at bottom center (player spawn area)
+	var bounds: Vector2i = result["bounds"]
+	var trawler_cell := Vector2i(bounds.x / 2, bounds.y - 32)  # Center of bottom spawn area
+	
+	return {
+		"wall_cells": wall_cells,
+		"floor_cells": floor_cells,
+		"ore_cells": ore_cells,
+		"lava_cells": lava_cells,
+		"feature_cells": feature_cells,
+		"trawler_start_cell": trawler_cell,
+		"segments": segments,
+		"bounds": bounds
+	}
 
 ## Apply generated tile data to the TileMap
 func _apply_tiles(level_data: Dictionary) -> void:
