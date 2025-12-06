@@ -20,9 +20,14 @@ func _ready() -> void:
 	print("Paint tiles in SampleMap (left side) to create training patterns")
 	print("Press SPACE to generate from sample")
 	print("Press R to clear target and regenerate")
+	print("Press P to paint example pattern")
 	
 	# Center camera on target
 	camera.position = Vector2(target_width * 8, target_height * 8)
+	
+	# Paint example if SampleMap is empty
+	if sample_map.get_used_cells().is_empty():
+		paint_example_pattern()
 	
 	if start_on_ready:
 		generate_from_sample()
@@ -35,6 +40,10 @@ func _input(event: InputEvent) -> void:
 	elif event is InputEventKey and event.pressed and event.keycode == KEY_R:
 		target_map.clear()
 		generate_from_sample()
+	elif event is InputEventKey and event.pressed and event.keycode == KEY_P:
+		sample_map.clear()
+		paint_example_pattern()
+		print("[WFC] Example pattern painted! Press SPACE to generate.")
 
 func generate_from_sample() -> void:
 	print("\n[WFC] Starting generation...")
@@ -233,3 +242,100 @@ func _coord_to_id(coords: Vector2i) -> int:
 func _id_to_coord(tile_id: int) -> Vector2i:
 	"""Convert unique ID back to atlas coords"""
 	return Vector2i(tile_id % 100, tile_id / 100)
+
+func paint_example_pattern() -> void:
+	"""Paint an example mine pattern with rooms, corridors, and ore"""
+	sample_map.clear()
+	
+	# Using source_id = 6 for wfc_tileset
+	var source = 6
+	var wall = Vector2i(1, 1)    # Wall center
+	var floor = Vector2i(1, 5)   # Ground floor
+	var ore = Vector2i(0, 6)     # Ore
+	var lava = Vector2i(3, 6)    # Lava
+	
+	# Create a sample 64x48 area showing various patterns
+	var width = 64
+	var height = 48
+	
+	# Fill with rock walls as base
+	for y in range(height):
+		for x in range(width):
+			sample_map.set_cell(Vector2i(x, y), source, wall)
+	
+	# Room 1: Large rectangular room (top-left)
+	_carve_room(4, 4, 16, 10, source, floor)
+	# Add some ore deposits in room
+	sample_map.set_cell(Vector2i(8, 8), source, ore)
+	sample_map.set_cell(Vector2i(15, 12), source, ore)
+	
+	# Room 2: Smaller room (top-right)
+	_carve_room(40, 4, 12, 8, source, floor)
+	sample_map.set_cell(Vector2i(44, 7), source, ore)
+	
+	# Room 3: Irregular room (bottom-left)
+	_carve_room(6, 30, 14, 12, source, floor)
+	# Lava pool in corner
+	sample_map.set_cell(Vector2i(8, 38), source, lava)
+	sample_map.set_cell(Vector2i(9, 38), source, lava)
+	
+	# Room 4: Treasure room (bottom-right)
+	_carve_room(38, 32, 10, 10, source, floor)
+	# Surrounded by ore
+	sample_map.set_cell(Vector2i(42, 36), source, ore)
+	sample_map.set_cell(Vector2i(43, 36), source, ore)
+	
+	# Horizontal corridor connecting top rooms
+	_carve_corridor(20, 8, 40, 8, source, floor)
+	
+	# Vertical corridor down from room 1
+	_carve_corridor(12, 14, 12, 30, source, floor)
+	
+	# L-shaped corridor to bottom-right room
+	_carve_corridor(12, 36, 38, 36, source, floor)
+	
+	# Add some ore veins in walls near corridors
+	sample_map.set_cell(Vector2i(25, 7), source, ore)
+	sample_map.set_cell(Vector2i(11, 20), source, ore)
+	sample_map.set_cell(Vector2i(13, 20), source, ore)
+	
+	# Natural cave opening (top middle)
+	_carve_organic_cave(28, 4, 8, source, floor, ore)
+	
+	print("[WFC] Painted example: 4 rooms, 3 corridors, ore veins, 1 lava pool")
+
+func _carve_room(x: int, y: int, w: int, h: int, source: int, floor_tile: Vector2i) -> void:
+	"""Carve out a rectangular room"""
+	for ry in range(y, y + h):
+		for rx in range(x, x + w):
+			sample_map.set_cell(Vector2i(rx, ry), source, floor_tile)
+
+func _carve_corridor(x1: int, y1: int, x2: int, y2: int, source: int, floor_tile: Vector2i) -> void:
+	"""Carve a straight corridor between two points"""
+	if x1 == x2:  # Vertical
+		var start = mini(y1, y2)
+		var end = maxi(y1, y2)
+		for y in range(start, end + 1):
+			sample_map.set_cell(Vector2i(x1, y), source, floor_tile)
+			# Make it 2 tiles wide
+			sample_map.set_cell(Vector2i(x1 + 1, y), source, floor_tile)
+	else:  # Horizontal
+		var start = mini(x1, x2)
+		var end = maxi(x1, x2)
+		for x in range(start, end + 1):
+			sample_map.set_cell(Vector2i(x, y1), source, floor_tile)
+			# Make it 2 tiles wide
+			sample_map.set_cell(Vector2i(x, y1 + 1), source, floor_tile)
+
+func _carve_organic_cave(cx: int, cy: int, radius: int, source: int, floor_tile: Vector2i, ore_tile: Vector2i) -> void:
+	"""Carve an organic-looking cave area"""
+	for dy in range(-radius, radius + 1):
+		for dx in range(-radius, radius + 1):
+			var dist = sqrt(dx * dx + dy * dy)
+			if dist < radius:
+				var pos = Vector2i(cx + dx, cy + dy)
+				# 70% floor, 30% ore for organic look
+				if randf() < 0.7:
+					sample_map.set_cell(pos, source, floor_tile)
+				else:
+					sample_map.set_cell(pos, source, ore_tile)
