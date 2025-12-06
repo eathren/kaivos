@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://bfob1kfnxrlrs"]
+
+[ext_resource type="TileSet" uid="uid://cmlbl3ilv31lo" path="res://resources/tilesets/wall_tileset.tres" id="1_tileset"]
+[ext_resource type="Script" uid="uid://bk1iyrw06c15o" path="res://dev/segmented_test.gd" id="2_script"]
+
+[node name="SegmentedTest" type="Node2D"]
+script = ExtResource("2_script")
+
+[node name="TargetMap" type="TileMapLayer" parent="."]
+tile_set = ExtResource("1_tileset")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+zoom = Vector2(0.3, 0.3)
