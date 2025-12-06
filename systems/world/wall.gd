@@ -46,6 +46,10 @@ extends TileMapLayer
 @export var fill_radius_world: float = 1000.0
 @export var clear_radius_tiles: int = 5
 
+@export_group("Drops")
+@export var ore_drop_chance: float = 0.05  # 5% chance to drop ore
+@export var ore_pickup_scene: PackedScene = preload("res://entities/items/pickups/gold/gold_pickup.tscn")
+
 var left_x: int
 var right_x: int
 var top_y: int
@@ -80,6 +84,10 @@ func damage_cell(cell: Vector2i, damage: float) -> void:
 		erase_cell(cell)
 		cell_damage.erase(cell_key)
 		
+		# Try to drop ore
+		if randf() < ore_drop_chance and ore_pickup_scene:
+			_spawn_ore_drop(cell)
+		
 		# Update neighboring tiles to show proper edges
 		_update_neighbor_tiles(cell)
 
@@ -87,7 +95,7 @@ func _update_neighbor_tiles(destroyed_cell: Vector2i) -> void:
 	"""Update tiles around a destroyed cell to show proper edges"""
 	# Check the 4 cardinal neighbors
 	var neighbors = [
-		destroyed_cell + Vector2i(0, -1),  # Above
+		destroyed_cell + Vector2i(0, -1),  #w Above
 		destroyed_cell + Vector2i(0, 1),   # Below
 		destroyed_cell + Vector2i(-1, 0),  # Left
 		destroyed_cell + Vector2i(1, 0)    # Right
@@ -113,5 +121,18 @@ func _update_neighbor_tiles(destroyed_cell: Vector2i) -> void:
 		else:
 			# Interior - use center
 			set_cell(neighbor, tile_source_id, wall_center_coord)
+
+func _spawn_ore_drop(cell: Vector2i) -> void:
+	var drop = ore_pickup_scene.instantiate()
+	if drop:
+		# Add to the scene tree (usually to the parent of this tilemap, or a dedicated drops container)
+		var parent = get_parent()
+		if parent:
+			parent.add_child(drop)
+			# Position at center of tile
+			drop.global_position = map_to_local(cell)
+			# Configure drop (default is GOLD, amount 1)
+			# If you have different resource types, configure them here
+			# if drop.has_method("setup"): drop.setup(...)
 
 # _generate_initial() removed - level generation is now handled by LevelManager

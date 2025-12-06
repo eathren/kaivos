@@ -23,7 +23,7 @@ var cache_times: Dictionary = {}  # Key -> timestamp
 
 func _ready() -> void:
 	add_to_group("pathfinding_grid")
-	_initialize_grid()
+	#_initialize_grid()
 
 func setup(tilemap: TileMapLayer, initial_world_pos: Vector2 = Vector2.ZERO) -> void:
 	"""Initialize the pathfinding grid with a tilemap reference"""
@@ -52,14 +52,15 @@ func _initialize_grid() -> void:
 	print("PathfindingGrid: Initialized %dx%d grid" % [chunk_size, chunk_size])
 
 func _process(delta: float) -> void:
-	update_timer += delta
-	
-	if update_timer >= update_frequency:
-		update_timer = 0.0
-		_check_window_shift()
-	
-	# Clean old cached paths
-	_clean_path_cache()
+	pass
+	#update_timer += delta
+	#
+	#if update_timer >= update_frequency:
+		#update_timer = 0.0
+		#_check_window_shift()
+	#
+	## Clean old cached paths
+	#_clean_path_cache()
 
 func _update_center(world_pos: Vector2) -> void:
 	"""Manually update the grid center to a world position"""

@@ -92,7 +92,7 @@ func _create_macro_layout() -> void:
 	_generate_side_branches()
 	
 	# Overlay blobby zones on remaining SOLID areas
-	_scatter_blobby_zones(SegmentType.ORE, 4, 12)
+	# _scatter_blobby_zones(SegmentType.ORE, 2, 8)  # Removed for performance, now drops from walls
 	_scatter_blobby_zones(SegmentType.CORRUPTED, 3, 10)
 	_scatter_blobby_zones(SegmentType.TEMPLE, 2, 6)
 	

@@ -52,9 +52,9 @@ func _ready() -> void:
 		SpawnManager.setup(wall)
 	
 	# Setup pathfinding manager with trawler position
-	if pathfinding_manager:
-		pathfinding_manager.setup(wall, trawler.global_position)
-	
+	#if pathfinding_manager:
+		#pathfinding_manager.setup(wall, trawler.global_position)
+	#
 	# Load enemy scene if not set
 	if enemy_scene == null:
 		enemy_scene = load("res://entities/enemies/imp/imp.tscn") as PackedScene
@@ -98,8 +98,15 @@ func _process(delta: float) -> void:
 		var draw_calls = Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
 		var video_mem = Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1024.0 / 1024.0
 		
-		print("[Perf] FPS: %d | Mem: %.1f/%.1f MB | VMem: %.1f MB | CPU: %.2f ms | Phys: %.2f ms | Obj: %d | Draw: %d" % 
-			[fps, mem, peak, video_mem, process_time, physics_time, objects, draw_calls])
+		var enemy_count = get_tree().get_nodes_in_group("enemy").size()
+		var projectile_count = get_tree().get_nodes_in_group("projectile").size()
+		var pickup_count = get_tree().get_nodes_in_group("pickup").size()
+		
+		var active_objects = Performance.get_monitor(Performance.PHYSICS_2D_ACTIVE_OBJECTS)
+		var collision_pairs = Performance.get_monitor(Performance.PHYSICS_2D_COLLISION_PAIRS)
+		
+		print("[Perf] FPS: %d | Phys: %.2f ms | Obj: %d | ActivePhys: %d | Pairs: %d | Enemies: %d" % 
+			[fps, physics_time, objects, active_objects, collision_pairs, enemy_count])
 
 func _spawn_player_controllers() -> void:
 	if not multiplayer.is_server():
@@ -355,6 +362,16 @@ func _apply_tiles(level_data: Dictionary) -> void:
 		max_x = maxi(max_x, cell.x)
 		min_y = mini(min_y, cell.y)
 		max_y = maxi(max_y, cell.y)
+	
+	# Pass bounds to SpawnManager (convert to pixels, assuming 16px tiles)
+	if SpawnManager:
+		SpawnManager.set_bounds(min_x * 16.0, max_x * 16.0)
+	
+	# DEBUG: Disable wall collision to test performance
+	print("DEBUG: Disabling wall collision to test performance impact...")
+	wall.collision_enabled = false
+	
+	# Fill entire area with floor tiles so there's always ground under walls
 	
 	# Fill entire area with floor tiles so there's always ground under walls
 	print("Level_Mine: Filling floor from (", min_x, ",", min_y, ") to (", max_x, ",", max_y, ")")

@@ -5,7 +5,6 @@ var wall_tilemap: TileMapLayer
 # Spawn preferences
 @export var min_spawn_distance: float = 650.0  # Minimum distance (off-screen)
 @export var max_spawn_distance: float = 1000.0 # Maximum distance (relevant)
-@export var spawn_horizontal_spread: float = 200.0  # Deprecated, used for fallback
 
 
 
@@ -75,9 +74,16 @@ func _is_valid_spawn_pos(global_pos: Vector2) -> bool:
 	# But level_mine.gd says: "Place floor tiles EVERYWHERE... Place wall tiles on Wall layer"
 	# So if Wall layer has no tile, it's floor.
 	
-	var source_id := wall_tilemap.get_cell_source_id(cell)
-	if source_id == -1:
-		return true
+	# Check a 3x3 area to ensure the enemy (approx 32x32) fits
+	# This prevents spawning partially inside a wall
+	for y in range(-1, 2):
+		for x in range(-1, 2):
+			var check_cell = cell + Vector2i(x, y)
+			var source_id := wall_tilemap.get_cell_source_id(check_cell)
+			if source_id != -1:
+				return false # Found a wall in the 3x3 area
+				
+	return true
 		
 	return false
 

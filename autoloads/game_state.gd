@@ -16,7 +16,7 @@ var laser_multiplier: float = 1.0
 var enemy_speed_multiplier: float = 1.0
 var trawler_speed_multiplier: float = 1.0
 var mine_width_multiplier: float = 1.0
-var spawn_rate_multiplier: float = 200.0
+var spawn_rate_multiplier: float = 1.0
 
 # XP and Level system
 var current_level: int = 1

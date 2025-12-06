@@ -13,6 +13,12 @@ var _target: Node2D = null
 var _health_component: HealthComponent = null
 var _speed_component: SpeedComponent = null
 
+# Pathfinding
+var _pathfinding_manager: Node = null
+var _current_path: Array[Vector2] = []
+var _path_update_timer: float = 0.0
+var _path_update_interval: float = 0.5
+
 # Level baked in at spawn time
 var spawn_level: int = 1
 var scaled_health: float = 0.0
@@ -53,29 +59,70 @@ func _ready() -> void:
 	
 	# Find initial target (prefer player ship, fall back to trawler)
 	_update_target()
+	
+	# Get pathfinding manager
+	_pathfinding_manager = get_tree().get_first_node_in_group("pathfinding_manager")
+	
+	# Randomize update interval slightly to spread load
+	_path_update_interval = randf_range(0.4, 0.6)
 
 func _physics_process(delta: float) -> void:
 	# Update target if we don't have one
-	if _target == null or not is_instance_valid(_target):
-		_update_target()
-	
-	if _target == null:
+	pass
+	#if _target == null or not is_instance_valid(_target):
+		#_update_target()
+	#
+	#if _target == null:
+		#return
+	#
+	## Update path periodically
+	#_path_update_timer -= delta
+	#if _path_update_timer <= 0:
+		#_path_update_timer = _path_update_interval
+		#_update_path()
+	#
+	## Move towards target or next path point
+	#var move_target_pos = _target.global_position
+	#
+	## Use path if available
+	#if not _current_path.is_empty():
+		#var next_point = _current_path[0]
+		#var dist_to_point = global_position.distance_to(next_point)
+		#
+		#if dist_to_point < 16.0: # Reached waypoint
+			#_current_path.remove_at(0)
+			#if not _current_path.is_empty():
+				#move_target_pos = _current_path[0]
+		#else:
+			#move_target_pos = next_point
+	#
+	#var dir := (global_position.direction_to(move_target_pos))
+	#var current_speed := _speed_component.get_current_speed() if _speed_component else 60.0
+	#velocity = dir * current_speed
+	#move_and_slide()
+	#
+	## Check for collision damage
+	#for i in get_slide_collision_count():
+		#var collision := get_slide_collision(i)
+		#var collider := collision.get_collider()
+		#
+		## Damage player ship or trawler on collision
+		#if collider.is_in_group("player_ship") or collider.is_in_group("trawler"):
+			#_deal_damage_to(collider, delta)
+
+func _update_path() -> void:
+	if not _pathfinding_manager or not _target:
 		return
-	
-	# Move towards target
-	var dir := (global_position.direction_to(_target.global_position))
-	var current_speed := _speed_component.get_current_speed() if _speed_component else 60.0
-	velocity = dir * current_speed
-	move_and_slide()
-	
-	# Check for collision damage
-	for i in get_slide_collision_count():
-		var collision := get_slide_collision(i)
-		var collider := collision.get_collider()
 		
-		# Damage player ship or trawler on collision
-		if collider.is_in_group("player_ship") or collider.is_in_group("trawler"):
-			_deal_damage_to(collider, delta)
+	# Only pathfind if target is far enough or line of sight is blocked
+	# For now, always pathfind to ensure we navigate walls
+	if _pathfinding_manager.has_method("find_path"):
+		var new_path = _pathfinding_manager.find_path(global_position, _target.global_position)
+		if not new_path.is_empty():
+			_current_path = new_path
+			# Remove first point if it's too close (start point)
+			if not _current_path.is_empty() and global_position.distance_to(_current_path[0]) < 16.0:
+				_current_path.remove_at(0)
 
 func _update_target() -> void:
 	# Prefer player ship as target
