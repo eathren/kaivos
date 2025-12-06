@@ -367,12 +367,6 @@ func _apply_tiles(level_data: Dictionary) -> void:
 	if SpawnManager:
 		SpawnManager.set_bounds(min_x * 16.0, max_x * 16.0)
 	
-	# DEBUG: Disable wall collision to test performance
-	print("DEBUG: Disabling wall collision to test performance impact...")
-	wall.collision_enabled = false
-	
-	# Fill entire area with floor tiles so there's always ground under walls
-	
 	# Fill entire area with floor tiles so there's always ground under walls
 	print("Level_Mine: Filling floor from (", min_x, ",", min_y, ") to (", max_x, ",", max_y, ")")
 	for y in range(min_y, max_y + 1):

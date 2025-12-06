@@ -68,47 +68,62 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	# Update target if we don't have one
-	pass
-	#if _target == null or not is_instance_valid(_target):
-		#_update_target()
-	#
-	#if _target == null:
-		#return
-	#
-	## Update path periodically
-	#_path_update_timer -= delta
-	#if _path_update_timer <= 0:
-		#_path_update_timer = _path_update_interval
-		#_update_path()
-	#
-	## Move towards target or next path point
-	#var move_target_pos = _target.global_position
-	#
-	## Use path if available
-	#if not _current_path.is_empty():
-		#var next_point = _current_path[0]
-		#var dist_to_point = global_position.distance_to(next_point)
-		#
-		#if dist_to_point < 16.0: # Reached waypoint
-			#_current_path.remove_at(0)
-			#if not _current_path.is_empty():
-				#move_target_pos = _current_path[0]
-		#else:
-			#move_target_pos = next_point
-	#
-	#var dir := (global_position.direction_to(move_target_pos))
-	#var current_speed := _speed_component.get_current_speed() if _speed_component else 60.0
-	#velocity = dir * current_speed
-	#move_and_slide()
-	#
-	## Check for collision damage
-	#for i in get_slide_collision_count():
-		#var collision := get_slide_collision(i)
-		#var collider := collision.get_collider()
-		#
-		## Damage player ship or trawler on collision
-		#if collider.is_in_group("player_ship") or collider.is_in_group("trawler"):
-			#_deal_damage_to(collider, delta)
+	if _target == null or not is_instance_valid(_target):
+		_update_target()
+	
+	if _target == null:
+		return
+	
+	# Optimization: Despawn if too far from target
+	var dist_to_target = global_position.distance_to(_target.global_position)
+	if dist_to_target > 2000.0:
+		queue_free()
+		return
+	
+	# Optimization: Ghost Mode (Disable ALL collision if off-screen)
+	# This removes the object from the physics broadphase entirely
+	if dist_to_target > 800.0: # Reduced from 1000 to catch more enemies
+		collision_layer = 0
+		collision_mask = 0
+	else:
+		# Restore collision (Layer 1=Enemy, Mask 1=Wall, 2=Player, 6=Hitbox)
+		collision_layer = 1 
+		collision_mask = 1 | 2 | 32 
+	
+	# Update path periodically
+	_path_update_timer -= delta
+	if _path_update_timer <= 0:
+		_path_update_timer = _path_update_interval
+		_update_path()
+	
+	# Move towards target or next path point
+	var move_target_pos = _target.global_position
+	
+	# Use path if available
+	if not _current_path.is_empty():
+		var next_point = _current_path[0]
+		var dist_to_point = global_position.distance_to(next_point)
+		
+		if dist_to_point < 16.0: # Reached waypoint
+			_current_path.remove_at(0)
+			if not _current_path.is_empty():
+				move_target_pos = _current_path[0]
+		else:
+			move_target_pos = next_point
+	
+	var dir := (global_position.direction_to(move_target_pos))
+	var current_speed := _speed_component.get_current_speed() if _speed_component else 60.0
+	velocity = dir * current_speed
+	move_and_slide()
+	
+	# Check for collision damage
+	for i in get_slide_collision_count():
+		var collision := get_slide_collision(i)
+		var collider := collision.get_collider()
+		
+		# Damage player ship or trawler on collision
+		if collider.is_in_group("player_ship") or collider.is_in_group("trawler"):
+			_deal_damage_to(collider, delta)
 
 func _update_path() -> void:
 	if not _pathfinding_manager or not _target:
