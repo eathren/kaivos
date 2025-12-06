@@ -138,7 +138,7 @@ func _damage_overlapping_tiles(damage: float) -> void:
 					tiles_damaged += 1
 	
 	if tiles_damaged > 0:
-		print("Drill: Damaged ", tiles_damaged, " tiles with ", damage, " damage each")
+		# print("Drill: Damaged ", tiles_damaged, " tiles with ", damage, " damage each")
 		
 		# Add camera shake when digging
 		var camera = get_viewport().get_camera_2d()

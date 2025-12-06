@@ -44,14 +44,14 @@ func _physics_process(delta: float) -> void:
 
 func _on_body_entered(body: Node) -> void:
 	# Do NOT kill the bullet if it hits something that cannot be damaged
-	print("Collision detected with: ", body.name)
+	# print("Collision detected with: ", body.name)
 	var target_faction := body.get_node_or_null("FactionComponent") as FactionComponent
 	if target_faction == null:
-		print("  No FactionComponent found")
+		# print("  No FactionComponent found")
 		return
 
 	if not FactionComponent.is_hostile_factions(faction, target_faction.faction):
-		print("  Not hostile factions")
+		# print("  Not hostile factions")
 		return
 
 	var health := body.get_node_or_null("HealthComponent") as HealthComponent
@@ -67,7 +67,7 @@ func _on_body_entered(body: Node) -> void:
 		if elite_damage_bonus > 0.0 and body.has_method("get") and (body.get("is_elite") or body.get("is_boss")):
 			final_damage = int(final_damage * (1.0 + elite_damage_bonus))
 		
-		print("  Applying damage: ", final_damage, " (base roll: ", _rolled_damage, ", crit: ", _is_crit, ", megacrit: ", _is_megacrit, ")")
+		# print("  Applying damage: ", final_damage, " (base roll: ", _rolled_damage, ", crit: ", _is_crit, ", megacrit: ", _is_megacrit, ")")
 		health.apply_damage(final_damage, _is_crit, _is_megacrit, shooter_id)
 		_pierce_count += 1
 		
@@ -75,7 +75,8 @@ func _on_body_entered(body: Node) -> void:
 		if _pierce_count > pierce:
 			queue_free()
 	else:
-		print("  No HealthComponent found")
+		# print("  No HealthComponent found")
+		pass
 
 func _roll_crit() -> void:
 	"""Roll for critical hit on bullet creation"""

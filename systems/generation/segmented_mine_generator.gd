@@ -30,7 +30,9 @@ var segment_graph: Dictionary = {}  # segment_pos -> [neighbor_positions]
 var reserved_doors: Dictionary = {}  # Vector2i -> true (door positions)
 
 # Layout result
-var layout_map: Dictionary = {}  # Vector2i -> tile_id (floor, wall, ore, lava)
+var layout_map: PackedInt32Array
+var layout_width: int
+var layout_height: int
 var tile_size: float = 16.0
 
 # RNG
@@ -46,6 +48,13 @@ func generate(world_seed: int) -> Dictionary:
 	print("[SegGen] === Step 1: Segmentation ===")
 	_create_macro_layout()
 	
+	# Initialize layout map
+	layout_width = SEG_W * SEGMENT_SIZE
+	layout_height = SEG_H * SEGMENT_SIZE
+	layout_map = PackedInt32Array()
+	layout_map.resize(layout_width * layout_height)
+	layout_map.fill(TileType.WALL)
+	
 	print("[SegGen] === Step 2: Build connectivity graph ===")
 	_build_segment_graph()
 	
@@ -59,9 +68,11 @@ func generate(world_seed: int) -> Dictionary:
 	
 	return {
 		"layout_map": layout_map,
+		"layout_width": layout_width,
+		"layout_height": layout_height,
 		"segments": segments,
 		"reserved_doors": reserved_doors,
-		"bounds": Vector2i(SEG_W * SEGMENT_SIZE, SEG_H * SEGMENT_SIZE)
+		"bounds": Vector2i(layout_width, layout_height)
 	}
 
 ## Step 1: Create macro layout of segment types
@@ -351,11 +362,11 @@ func _floor_pairs_on_border(seg_a: Vector2i, seg_b: Vector2i) -> Array:
 
 func _is_floor(pos: Vector2i) -> bool:
 	"""Check if a world position is floor"""
-	return layout_map.get(pos, TileType.WALL) == TileType.FLOOR
+	return _get_tile(pos.x, pos.y) == TileType.FLOOR
 
 ## Step 4: Fill all segments with appropriate patterns
 func _fill_all_segments() -> void:
-	layout_map.clear()
+	# layout_map is already initialized and filled with WALL
 	
 	# Load and cache all template samples
 	var samples = _load_template_samples()
@@ -386,7 +397,7 @@ func _fill_segment_solid(sx: int, sy: int) -> void:
 	for local_y in range(SEGMENT_SIZE):
 		for local_x in range(SEGMENT_SIZE):
 			var pos = origin + Vector2i(local_x, local_y)
-			layout_map[pos] = TileType.WALL
+			_set_tile(pos.x, pos.y, TileType.WALL)
 
 func _fill_segment_wfc(sx: int, sy: int, seg_type: SegmentType) -> void:
 	"""Fill segment using WFC with type-specific rules"""
@@ -402,12 +413,12 @@ func _fill_segment_wfc(sx: int, sy: int, seg_type: SegmentType) -> void:
 			
 			# Respect reserved doors
 			if reserved_doors.has(pos):
-				layout_map[pos] = TileType.FLOOR
+				_set_tile(pos.x, pos.y, TileType.FLOOR)
 				continue
 			
 			# Apply type-specific fill logic
 			var tile = _get_tile_for_position(local_x, local_y, seg_type, rules)
-			layout_map[pos] = tile
+			_set_tile(pos.x, pos.y, tile)
 
 func _get_rules_for_type(seg_type: SegmentType) -> Dictionary:
 	"""Get generation rules for segment type"""
@@ -682,8 +693,18 @@ func _find_valid_tile_for_position(pos: Vector2i, placed: Dictionary, from_pos: 
 
 func _place_tile_in_segment(origin: Vector2i, local_pos: Vector2i, tile_id: int, placed: Dictionary) -> void:
 	var world_pos = origin + local_pos
-	layout_map[world_pos] = _tile_id_to_type(tile_id)
+	_set_tile(world_pos.x, world_pos.y, _tile_id_to_type(tile_id))
 	placed[local_pos] = tile_id
+
+func _get_tile(x: int, y: int) -> int:
+	if x < 0 or x >= layout_width or y < 0 or y >= layout_height:
+		return TileType.WALL
+	return layout_map[y * layout_width + x]
+
+func _set_tile(x: int, y: int, type: int) -> void:
+	if x < 0 or x >= layout_width or y < 0 or y >= layout_height:
+		return
+	layout_map[y * layout_width + x] = type
 
 func _tile_id_to_type(tile_id: int) -> int:
 	var coords = _id_to_coord(tile_id)

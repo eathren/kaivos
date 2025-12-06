@@ -27,7 +27,9 @@ func _ready() -> void:
 func _apply_layout(result: Dictionary) -> void:
 	target_map.clear()
 	
-	var layout = result["layout_map"]
+	var layout: PackedInt32Array = result["layout_map"]
+	var width: int = result["layout_width"]
+	var height: int = result["layout_height"]
 	var segments = result["segments"]
 	var source_id = 6
 	
@@ -41,42 +43,44 @@ func _apply_layout(result: Dictionary) -> void:
 	}
 	
 	# Apply tiles with segment-aware styling
-	for pos in layout:
-		var tile_type = layout[pos]
+	for y in range(height):
+		for x in range(width):
+			var pos = Vector2i(x, y)
+			var tile_type = layout[y * width + x]
 		
-		# Determine which segment this tile is in
-		var seg_x = pos.x / 32
-		var seg_y = pos.y / 32
-		var seg_type = segments[seg_y][seg_x]
-		
-		# Highlight spawn zones with distinct colors
-		var tile_coord = tiles.get(tile_type, Vector2i(1, 1))
-		
-		# Boss area (top) - use bright distinctive floor
-		if seg_y == 0:
-			if tile_type == SegmentedMineGenerator.TileType.FLOOR:
-				tile_coord = Vector2i(4, 5)  # Bright floor for boss area
-		# Player spawn area (bottom) - use different distinctive floor
-		elif seg_y >= segments.size() - 2:
-			if tile_type == SegmentedMineGenerator.TileType.FLOOR:
-				tile_coord = Vector2i(0, 5)  # Different floor for player spawn
-		# Normal area styling
-		elif tile_type == SegmentedMineGenerator.TileType.WALL:
-			match seg_type:
-				SegmentedMineGenerator.SegmentType.CORRUPTED:
-					tile_coord = Vector2i(2, 1)  # Different wall style
-				SegmentedMineGenerator.SegmentType.TEMPLE:
-					tile_coord = Vector2i(3, 1)  # Temple wall
-				SegmentedMineGenerator.SegmentType.ORE:
-					tile_coord = Vector2i(0, 1)  # Rocky wall
-		elif tile_type == SegmentedMineGenerator.TileType.FLOOR:
-			match seg_type:
-				SegmentedMineGenerator.SegmentType.CORRUPTED:
-					tile_coord = Vector2i(2, 5)  # Different floor
-				SegmentedMineGenerator.SegmentType.TEMPLE:
-					tile_coord = Vector2i(3, 5)  # Temple floor
-		
-		target_map.set_cell(pos, source_id, tile_coord)
+			# Determine which segment this tile is in
+			var seg_x = pos.x / 32
+			var seg_y = pos.y / 32
+			var seg_type = segments[seg_y][seg_x]
+			
+			# Highlight spawn zones with distinct colors
+			var tile_coord = tiles.get(tile_type, Vector2i(1, 1))
+			
+			# Boss area (top) - use bright distinctive floor
+			if seg_y == 0:
+				if tile_type == SegmentedMineGenerator.TileType.FLOOR:
+					tile_coord = Vector2i(4, 5)  # Bright floor for boss area
+			# Player spawn area (bottom) - use different distinctive floor
+			elif seg_y >= segments.size() - 2:
+				if tile_type == SegmentedMineGenerator.TileType.FLOOR:
+					tile_coord = Vector2i(0, 5)  # Different floor for player spawn
+			# Normal area styling
+			elif tile_type == SegmentedMineGenerator.TileType.WALL:
+				match seg_type:
+					SegmentedMineGenerator.SegmentType.CORRUPTED:
+						tile_coord = Vector2i(2, 1)  # Different wall style
+					SegmentedMineGenerator.SegmentType.TEMPLE:
+						tile_coord = Vector2i(3, 1)  # Temple wall
+					SegmentedMineGenerator.SegmentType.ORE:
+						tile_coord = Vector2i(0, 1)  # Rocky wall
+			elif tile_type == SegmentedMineGenerator.TileType.FLOOR:
+				match seg_type:
+					SegmentedMineGenerator.SegmentType.CORRUPTED:
+						tile_coord = Vector2i(2, 5)  # Different floor
+					SegmentedMineGenerator.SegmentType.TEMPLE:
+						tile_coord = Vector2i(3, 5)  # Temple floor
+			
+			target_map.set_cell(pos, source_id, tile_coord)
 	
 	# Print segment type distribution
 	print("[Test] Applied %d tiles" % layout.size())

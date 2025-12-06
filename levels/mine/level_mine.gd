@@ -14,6 +14,7 @@ const SegmentedMineGenerator = preload("res://systems/generation/segmented_mine_
 @export var spawns_per_second: float = 5.0
 
 var _spawn_timer: float = 0.0
+var _memory_log_timer: float = 0.0
 var _player_controllers: Dictionary = {}  # peer_id -> PlayerController
 
 func _ready() -> void:
@@ -27,7 +28,9 @@ func _ready() -> void:
 	var gen := SegmentedMineGenerator.new()
 	
 	# Generate level data using shared seed
+	print("Level_Mine: Memory before gen: %d MB" % (OS.get_static_memory_usage() / 1024 / 1024))
 	var result := gen.generate(RunManager.current_seed)
+	print("Level_Mine: Memory after gen: %d MB" % (OS.get_static_memory_usage() / 1024 / 1024))
 	
 	# Convert to level_data format expected by _apply_tiles
 	var level_data := _convert_segmented_to_level_data(result)
@@ -81,6 +84,22 @@ func _process(delta: float) -> void:
 	while _spawn_timer >= spawn_interval:
 		_spawn_timer -= spawn_interval
 		_spawn_enemy()
+	
+	# Log memory usage every 5 seconds
+	_memory_log_timer += delta
+	if _memory_log_timer >= 5.0:
+		_memory_log_timer = 0.0
+		var mem = OS.get_static_memory_usage() / 1024.0 / 1024.0
+		var peak = OS.get_static_memory_peak_usage() / 1024.0 / 1024.0
+		var fps = Engine.get_frames_per_second()
+		var process_time = Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0
+		var physics_time = Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0
+		var objects = Performance.get_monitor(Performance.OBJECT_COUNT)
+		var draw_calls = Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)
+		var video_mem = Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1024.0 / 1024.0
+		
+		print("[Perf] FPS: %d | Mem: %.1f/%.1f MB | VMem: %.1f MB | CPU: %.2f ms | Phys: %.2f ms | Obj: %d | Draw: %d" % 
+			[fps, mem, peak, video_mem, process_time, physics_time, objects, draw_calls])
 
 func _spawn_player_controllers() -> void:
 	if not multiplayer.is_server():
@@ -208,7 +227,9 @@ func _delete_tile_on_clients(cell: Vector2i) -> void:
 
 ## Convert SegmentedMineGenerator result to level_data format
 func _convert_segmented_to_level_data(result: Dictionary) -> Dictionary:
-	var layout_map: Dictionary = result["layout_map"]
+	var layout_map: PackedInt32Array = result["layout_map"]
+	var layout_width: int = result["layout_width"]
+	var layout_height: int = result["layout_height"]
 	var segments: Array = result["segments"]
 	var bounds: Vector2i = result["bounds"]
 	
@@ -219,24 +240,26 @@ func _convert_segmented_to_level_data(result: Dictionary) -> Dictionary:
 	var feature_cells: Dictionary = {}
 	
 	# Convert layout_map to cell arrays
-	for pos in layout_map:
-		var tile_type = layout_map[pos]
-		match tile_type:
-			SegmentedMineGenerator.TileType.FLOOR:
-				floor_cells.append(pos)
-			SegmentedMineGenerator.TileType.WALL:
-				wall_cells.append(pos)
-			SegmentedMineGenerator.TileType.ORE:
-				ore_cells.append(pos)
-				wall_cells.append(pos)  # Ore is also collidable
-			SegmentedMineGenerator.TileType.LAVA:
-				lava_cells.append(pos)
-				floor_cells.append(pos)  # Lava is walkable hazard
-			SegmentedMineGenerator.TileType.SHRINE:
-				if not feature_cells.has("shrine"):
-					feature_cells["shrine"] = []
-				feature_cells["shrine"].append(pos)
-				floor_cells.append(pos)  # Shrines on floor
+	for y in range(layout_height):
+		for x in range(layout_width):
+			var pos = Vector2i(x, y)
+			var tile_type = layout_map[y * layout_width + x]
+			match tile_type:
+				SegmentedMineGenerator.TileType.FLOOR:
+					floor_cells.append(pos)
+				SegmentedMineGenerator.TileType.WALL:
+					wall_cells.append(pos)
+				SegmentedMineGenerator.TileType.ORE:
+					ore_cells.append(pos)
+					wall_cells.append(pos)  # Ore is also collidable
+				SegmentedMineGenerator.TileType.LAVA:
+					lava_cells.append(pos)
+					floor_cells.append(pos)  # Lava is walkable hazard
+				SegmentedMineGenerator.TileType.SHRINE:
+					if not feature_cells.has("shrine"):
+						feature_cells["shrine"] = []
+					feature_cells["shrine"].append(pos)
+					floor_cells.append(pos)  # Shrines on floor
 	
 	# Build sets for O(1) checks
 	var floor_set := {}

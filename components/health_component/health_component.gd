@@ -23,7 +23,7 @@ func _set_health(value: int) -> void:
 	health_changed.emit(current_health, max_health)
 	
 	if current_health == 0:
-		print("[HealthComponent] ", get_parent().name, " DIED! Emitting died signal with attacker_id: ", last_attacker_id)
+		# print("[HealthComponent] ", get_parent().name, " DIED! Emitting died signal with attacker_id: ", last_attacker_id)
 		died.emit(last_attacker_id)
 
 func apply_damage(amount: int, is_crit: bool = false, is_megacrit: bool = false, attacker_id: int = -1) -> void:
@@ -39,7 +39,7 @@ func apply_damage(amount: int, is_crit: bool = false, is_megacrit: bool = false,
 	damaged.emit(amount, is_crit, is_megacrit, attacker_id)
 	
 	var new_health = current_health - amount
-	print("[HealthComponent] ", get_parent().name, " taking ", amount, " damage. Health: ", current_health, " -> ", max(0, new_health))
+	# print("[HealthComponent] ", get_parent().name, " taking ", amount, " damage. Health: ", current_health, " -> ", max(0, new_health))
 	_set_health(new_health)
 
 func take_damage(amount: float, is_crit: bool = false, is_megacrit: bool = false, attacker_id: int = -1) -> void:
